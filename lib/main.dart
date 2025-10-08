@@ -1,8 +1,14 @@
+import 'package:e_commerce_app/core/providers/provider_setup.dart';
+import 'package:e_commerce_app/presentation/providers/theme_provider.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: AppProvider.all,
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -10,9 +16,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    final themeProvider = context.watch<ThemeProvider>();
+
+    return MaterialApp(
+      title: "E-Commerce-App",
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      theme: themeProvider.currentTheme,
+      home: const HomeScreen(),
     );
   }
 }
