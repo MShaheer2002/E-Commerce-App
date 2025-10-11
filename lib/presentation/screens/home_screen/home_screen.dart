@@ -15,13 +15,50 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Home'),
         actions: [
           IconButton(
-            onPressed: () => auth.logout(),
+            onPressed: () async {
+              if (await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Are you sure you want to logout?'),
+                  content: const Text('This action cannot be undone.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+                    ElevatedButton(
+                      child: const Text('Yes, Logout'),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                    ),
+                  ],
+                ),
+              )) {
+                auth.logout();
+              }
+            },
             icon: const Icon(Icons.logout),
           )
         ],
       ),
       body: Center(
-        child: Text('Welcome, ${user?.email ?? "User"}'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Home Screen',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Welcome, ${user?.email ?? "User"}',
+              style: Theme.of(context).textTheme.bodyText2,
+            ),
+          ],
+        ),
       ),
     );
   }
