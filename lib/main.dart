@@ -1,6 +1,6 @@
-import 'package:e_commerce_app/core/providers/auth_notifier.dart';
 import 'package:e_commerce_app/core/providers/provider_setup.dart';
 import 'package:e_commerce_app/firebase_options.dart';
+import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/providers/theme_provider.dart';
 import 'package:e_commerce_app/routes/GoRoute_routing.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -37,12 +37,12 @@ class MyApp extends StatelessWidget {
     return Builder(
       builder: (cnx) {
         final themeProvider = context.watch<ThemeProvider>();
-        final authNotifier = context.watch<AuthNotifier>();
+        final authProvider = context.watch<AuthProvider >();
 
         return MaterialApp.router(
           title: "E-Commerce App",
           debugShowCheckedModeBanner: false,
-          routerConfig: createRouter(authNotifier),
+          routerConfig: createRouter(authProvider),
           theme: themeProvider.currentTheme,
         );
       },

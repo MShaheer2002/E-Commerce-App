@@ -1,3 +1,4 @@
+import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.read<AuthProvider>();
+    final auth = context.read<AuthProvider >();
     final user = auth.user;
 
     return Scaffold(
@@ -16,7 +17,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              if (await showDialog<bool>(
+              showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Are you sure you want to logout?'),
@@ -31,33 +32,34 @@ class HomeScreen extends StatelessWidget {
                     ElevatedButton(
                       child: const Text('Yes, Logout'),
                       onPressed: () {
+                        auth.logout();
                         Navigator.of(context).pop(true);
                       },
                     ),
                   ],
                 ),
-              )) {
-                auth.logout();
-              }
+              );
             },
             icon: const Icon(Icons.logout),
           )
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Home Screen',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Welcome, ${user?.email ?? "User"}',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-          ],
+      body: Background(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Home Screen',
+                // style: Theme.of(context).textTheme.headline4,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Welcome, ${user?.email ?? "User"}',
+                // style: Theme.of(context).textTheme.bodyText2,
+              ),
+            ],
+          ),
         ),
       ),
     );

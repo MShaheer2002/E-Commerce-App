@@ -6,80 +6,140 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 class AuthProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  User? _user;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
+  User? _user;
   User? get user => _user;
   bool get isLoggedIn => _user != null;
 
   AuthProvider() {
-    _auth.authStateChanges().listen((User? user) {
+    _auth.authStateChanges().listen((User? user) async {
       _user = user;
+      if (user == null) {
+        await signInWithGoogle(silent: true); // ✅ try restoring Google session
+      }
       notifyListeners();
     });
   }
 
-  // EMAIL & PASSWORD SIGN UP
+  void setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  // ✅ EMAIL & PASSWORD SIGN UP
   Future<void> signUpWithEmail(String email, String password) async {
-    await _auth.createUserWithEmailAndPassword(
-        email: email, password: password);
+    try {
+      setLoading(true);
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      debugPrint("Sign up error: ${e}");
+      rethrow;
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // EMAIL & PASSWORD LOGIN
+  // ✅ EMAIL & PASSWORD LOGIN
   Future<void> loginWithEmail(String email, String password) async {
-    await _auth.signInWithEmailAndPassword(email: email, password: password);
+    try {
+      setLoading(true);
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (e) {
+      debugPrint("Login error: $e");
+      rethrow;
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // GOOGLE SIGN-IN
-  Future<void> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) return; // User cancelled
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-    await _auth.signInWithCredential(credential);
+  // ✅ GOOGLE SIGN-IN
+  Future<void> signInWithGoogle({bool silent = false}) async {
+    try {
+      final googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = silent
+          ? await googleSignIn.signInSilently()
+          : await googleSignIn.signIn();
+
+      if (googleUser == null) return; // user cancelled
+
+      setLoading(true);
+      final googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+    } catch (e) {
+      debugPrint("Google Sign-In error: $e");
+      rethrow;
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // APPLE SIGN-IN
+  // ✅ APPLE SIGN-IN
   Future<void> signInWithApple() async {
-    final credential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName
-      ],
-    );
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
 
-    final oauthCredential = OAuthProvider('apple.com').credential(
-      idToken: credential.identityToken,
-      accessToken: credential.authorizationCode,
-    );
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
 
-    await _auth.signInWithCredential(oauthCredential);
+      await _auth.signInWithCredential(oauthCredential);
+    } catch (e) {
+      debugPrint("Apple Sign-In error: $e");
+      rethrow;
+    }
   }
 
+  // ✅ LOGOUT
   Future<void> logout() async {
     try {
-      // Attempt Google Sign-Out
+      setLoading(true);
+
       final googleSignIn = GoogleSignIn();
       if (await googleSignIn.isSignedIn()) {
         await googleSignIn.signOut();
       }
 
-      // Apple Sign-Out (optional cleanup)
-      // Apple doesn't provide a direct sign-out API.
-      // Just revoke credentials if you’re storing any refresh tokens manually.
-
-      // Firebase Sign-Out
       await _auth.signOut();
 
-      // Clear local user state immediately (no UI lag)
       _user = null;
       notifyListeners();
     } catch (e) {
       debugPrint('Logout failed: $e');
       rethrow;
+    } finally {
+      setLoading(false);
     }
+  }
+
+  // ✅ EMAIL VALIDATION
+  bool validateEmail(String email) {
+    final emailRegex =
+        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    return emailRegex.hasMatch(email.trim());
+  }
+
+  // ✅ PASSWORD VALIDATION
+  bool validatePassword(String password) {
+    return password.trim().length >= 8;
   }
 }

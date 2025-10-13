@@ -42,6 +42,7 @@ dependencies:
   sign_in_with_apple: ^7.0.1
   go_router: ^15.1.2
   flutter_svg: ^2.1.0
+  fluttertoast: ^8.2.6
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,7 @@ flutter:
   assets:
     - .env
     - assets/svgs/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
