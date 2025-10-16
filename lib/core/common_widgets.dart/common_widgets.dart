@@ -1,6 +1,3 @@
-// Background widget: reusable, responsive SVG background for Flutter
-// Requires: flutter_svg package
-
 import 'dart:developer';
 import 'dart:ui';
 
@@ -8,25 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-
-/// A flexible background widget that draws an SVG (asset or network) and
-/// places an optional child on top. Supports fit, alignment, optional
-/// overlay color/opacity and optional blur.
-///
-/// Usage (after adding flutter_svg to pubspec):
-/// Background(
-///   assetName: 'assets/bg.svg',
-///   fit: BoxFit.cover,
-///   overlayColor: Colors.black,
-///   overlayOpacity: 0.3,
-///   blurSigma: 4.0,
-///   child: YourPageContent(),
-/// )
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
 
 class Background extends StatelessWidget {
   /// Path to local asset (preferred) or network URL if [useNetwork] is true.
@@ -60,7 +39,7 @@ class Background extends StatelessWidget {
   final String? semanticsLabel;
 
   const Background({
-    Key? key,
+    super.key,
     this.assetName = "assets/images/background.png",
     this.child,
     this.showBackButton = false,
@@ -72,8 +51,7 @@ class Background extends StatelessWidget {
     this.useNetwork = false,
     this.semanticsLabel,
   })  : assert(overlayOpacity >= 0.0 && overlayOpacity <= 1.0),
-        assert(blurSigma >= 0.0),
-        super(key: key);
+        assert(blurSigma >= 0.0);
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +127,7 @@ class CustomButton extends StatelessWidget {
   final double verticalPadding;
 
   const CustomButton({
-    Key? key,
+    super.key,
     required this.child,
     required this.onPressed,
     this.backgroundColor = KprimaryColor, // purple
@@ -159,7 +137,7 @@ class CustomButton extends StatelessWidget {
     this.isDisabled = false,
     this.horizontalPadding = 20,
     this.verticalPadding = 0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -194,13 +172,13 @@ class CustomTextField extends StatefulWidget {
   final double horizontalPadding;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.hintText,
     this.controller,
     this.keyboardType = TextInputType.text,
     this.isPassword = false,
     this.horizontalPadding = 16,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -244,6 +222,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   }
 }
 
+// ignore: non_constant_identifier_names
 Widget SmallLoader({Color backgroundColor = Colors.white}) {
   return CircularProgressIndicator(
     color: backgroundColor,
@@ -251,60 +230,65 @@ Widget SmallLoader({Color backgroundColor = Colors.white}) {
   );
 }
 
-Widget ProductWidget(ProductModel product, double height, double width) {
+// ignore: non_constant_identifier_names
+Widget ProductWidget(
+    ProductModel product, double height, double width, BuildContext context) {
   return Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 🖼 Product Image with rounded corners
-        ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            height: height * 0.18,
-            width: width * 0.4,
-            color: Colors.grey[200], // optional background
-            child: product.imageUrls.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: product.imageUrls.first,
-                    fit: BoxFit.cover, // fill and crop if needed
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) => Center(
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                value: downloadProgress.progress)),
-                    errorWidget: (context, url, error) {
-                      return const Icon(Icons.error);
-                    },
-                  )
-                : const Center(child: Icon(Icons.image_not_supported)),
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    child: InkWell(
+      onTap: () => context.push('/single-product', extra: product),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🖼 Product Image with rounded corners
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              height: height * 0.16,
+              width: width * 0.4,
+              color: Colors.grey[200], // optional background
+              child: product.imageUrls.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: product.imageUrls.first,
+                      fit: BoxFit.cover, // fill and crop if needed
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) => Center(
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  value: downloadProgress.progress)),
+                      errorWidget: (context, url, error) {
+                        return const Icon(Icons.error);
+                      },
+                    )
+                  : const Center(child: Icon(Icons.image_not_supported)),
+            ),
           ),
-        ),
 
-        SizedBox(height: height * 0.008),
+          SizedBox(height: height * 0.008),
 
-        // 🏷 Product Name
-        Text(
-          product.name,
-          style: const TextStyle(
-            fontSize: 13,
-            color: KprimaryColor,
-            fontWeight: FontWeight.w600,
+          // 🏷 Product Name
+          Text(
+            product.name,
+            style: const TextStyle(
+              fontSize: 13,
+              color: KprimaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
 
-        // 💲 Price
-        Text(
-          "\$${product.price.toStringAsFixed(2)}",
-          style: const TextStyle(
-            fontSize: 14,
-            color: KprimaryColor,
-            fontWeight: FontWeight.bold,
+          // 💲 Price
+          Text(
+            "\$${product.price.toStringAsFixed(2)}",
+            style: const TextStyle(
+              fontSize: 14,
+              color: KprimaryColor,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }

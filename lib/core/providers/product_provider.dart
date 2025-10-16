@@ -18,6 +18,15 @@ class ProductProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  bool _initialized = false;
+
+  void init() {
+    if (_initialized) return;
+    listenToProducts();
+    listenToCategory();
+    _initialized = true;
+  }
+
   /// 🔄 Fetch products (real-time stream)
   void listenToProducts() {
     _db

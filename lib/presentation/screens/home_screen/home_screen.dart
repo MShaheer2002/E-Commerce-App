@@ -5,6 +5,7 @@ import 'package:e_commerce_app/core/providers/product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -31,9 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    final provider = Provider.of<ProductProvider>(context, listen: false);
-    provider.listenToCategory();
-    provider.listenToProducts();
+
+    // Schedule initialization after the first frame to avoid context issues
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<ProductProvider>(context, listen: false);
+      provider.init();
+    });
   }
 
   @override
@@ -133,7 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontWeight: FontWeight.w600,
                                             fontSize: 20),
                                       ),
-                                      
                                     ],
                                   ),
                                 ),
@@ -214,7 +217,9 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            titleWidget("Categories", () {}),
+            titleWidget("Categories", () {
+              context.push('/category-screen');
+            }),
             SizedBox(height: height * 0.02),
             SizedBox(
               height: height * 0.14,
@@ -229,7 +234,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
             ),
 
-            SizedBox(height: height * 0.03),
             titleWidget("Products", () {
               context.push('/products');
             }),
@@ -242,7 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: provider.products.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
-                  return ProductWidget(provider.products[index], height, width);
+                  return ProductWidget(
+                      provider.products[index], height, width, context);
                 },
               ),
             ),
@@ -253,34 +258,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget categoryWidget(CategoryModel category, double height) {
-    return Container(
-      margin: const EdgeInsets.only(right: 15),
-      width: 70,
-      child: Column(
-        children: [
-          ClipOval(
-            child: Container(
-              height: 70,
-              width: 70,
-              decoration: BoxDecoration(color: Colors.white),
-              child: cacheImage(
-                category.imageUrl,
+    return GestureDetector(
+      onTap: () => context.push('/product-by-category', extra: category),
+      child: Container(
+        margin: const EdgeInsets.only(right: 15),
+        width: 70,
+        child: Column(
+          children: [
+            ClipOval(
+              child: Container(
+                height: 70,
+                width: 70,
+                decoration: BoxDecoration(color: Colors.white),
+                child: cacheImage(
+                  category.imageUrl,
+                ),
               ),
             ),
-          ),
-          SizedBox(height: height * 0.01),
-          Text(
-            category.name,
-            style: const TextStyle(
-              color: KprimaryColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+            SizedBox(height: height * 0.01),
+            Text(
+              category.name,
+              style: const TextStyle(
+                color: KprimaryColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

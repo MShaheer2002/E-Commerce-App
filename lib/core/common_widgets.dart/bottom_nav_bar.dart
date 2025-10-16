@@ -17,7 +17,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List<Widget Function()> _screens = [
     () => const HomeScreen(),
     () => const SearchScreen(),
-    // () => const AddProductScreen(),
+    () => const AddProductScreen(),
     () => const NotificationScreen(),
     () => const ProfileScreen(),
   ];
@@ -25,7 +25,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List<dynamic> _icons = [
     Icons.home,
     Icons.search,
-    // "assets/images/appIcon.png",
+    "assets/images/appIcon.png",
     Icons.notifications_none,
     Container(
       height: 28,
@@ -74,7 +74,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Scaffold(
       body: _screens[_selectedIndex](),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/tabbar.png'),
             fit: BoxFit.cover,
