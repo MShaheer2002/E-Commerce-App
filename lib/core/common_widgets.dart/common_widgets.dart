@@ -1,9 +1,12 @@
 // Background widget: reusable, responsive SVG background for Flutter
 // Requires: flutter_svg package
 
+import 'dart:developer';
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -245,5 +248,128 @@ Widget SmallLoader({Color backgroundColor = Colors.white}) {
   return CircularProgressIndicator(
     color: backgroundColor,
     strokeWidth: 3,
+  );
+}
+
+Widget ProductWidget(ProductModel product, double height, double width) {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 🖼 Product Image with rounded corners
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: height * 0.18,
+            width: width * 0.4,
+            color: Colors.grey[200], // optional background
+            child: product.imageUrls.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: product.imageUrls.first,
+                    fit: BoxFit.cover, // fill and crop if needed
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Center(
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                value: downloadProgress.progress)),
+                    errorWidget: (context, url, error) {
+                      return const Icon(Icons.error);
+                    },
+                  )
+                : const Center(child: Icon(Icons.image_not_supported)),
+          ),
+        ),
+
+        SizedBox(height: height * 0.008),
+
+        // 🏷 Product Name
+        Text(
+          product.name,
+          style: const TextStyle(
+            fontSize: 13,
+            color: KprimaryColor,
+            fontWeight: FontWeight.w600,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+
+        // 💲 Price
+        Text(
+          "\$${product.price.toStringAsFixed(2)}",
+          style: const TextStyle(
+            fontSize: 14,
+            color: KprimaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+PreferredSizeWidget customAppBar({
+  required BuildContext context,
+  required String title,
+  bool showBackButton = true,
+  List<Widget>? actions,
+  Color titleColor = Colors.white,
+  String? backgroundImagePath = "assets/images/background.png",
+}) {
+  double width = MediaQuery.of(context).size.width;
+
+  return PreferredSize(
+    preferredSize: Size(width, kToolbarHeight),
+    child: Container(
+      decoration: BoxDecoration(
+        image: backgroundImagePath != null
+            ? DecorationImage(
+                image: AssetImage(backgroundImagePath),
+                fit: BoxFit.fitWidth,
+              )
+            : null,
+        color: backgroundImagePath == null
+            ? Colors.black // fallback background
+            : null,
+      ),
+      child: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          title,
+          style: TextStyle(
+            color: titleColor,
+            fontSize: 20,
+            fontFamily: "Urbanist",
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        leading: showBackButton
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+        actions: actions,
+      ),
+    ),
+  );
+}
+
+CachedNetworkImage cacheImage(String imageUrl, {bool showLoader = false}) {
+  return CachedNetworkImage(
+    fit: BoxFit.cover,
+    imageUrl: imageUrl,
+    progressIndicatorBuilder: (context, url, downloadProgress) => showLoader
+        ? Center(
+            child: CircularProgressIndicator(
+                strokeWidth: 2, value: downloadProgress.progress))
+        : const SizedBox.shrink(),
+    errorWidget: (context, url, error) {
+      log("[Image not Loading] $error");
+      return Icon(Icons.error);
+    },
   );
 }

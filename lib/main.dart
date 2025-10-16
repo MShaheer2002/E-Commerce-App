@@ -6,6 +6,7 @@ import 'package:e_commerce_app/routes/GoRoute_routing.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -28,24 +29,32 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Using Builder ensures we get a context under the MultiProvider tree
-    return Builder(
-      builder: (cnx) {
-        final themeProvider = context.watch<ThemeProvider>();
-        final authProvider = context.watch<AuthProvider >();
+  State<MyApp> createState() => _MyAppState();
+}
 
-        return MaterialApp.router(
-          title: "E-Commerce App",
-          debugShowCheckedModeBanner: false,
-          routerConfig: createRouter(authProvider),
-          theme: themeProvider.currentTheme,
-        );
-      },
+class _MyAppState extends State<MyApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    final authProvider = context.read<AuthProvider>();
+    _router = createRouter(authProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
+    return MaterialApp.router(
+      title: "E-Commerce App",
+      debugShowCheckedModeBanner: false,
+      routerConfig: _router,
+      theme: themeProvider.currentTheme,
     );
   }
 }

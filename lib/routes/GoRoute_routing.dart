@@ -2,6 +2,7 @@ import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_tab/home_tab.dart';
 import 'package:e_commerce_app/presentation/screens/login_screen/login_screen.dart';
+import 'package:e_commerce_app/presentation/screens/products_screen/product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,10 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: '/products',
+        builder: (context, state) => const ProductScreen(),
       ),
     ],
   );

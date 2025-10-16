@@ -1,7 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/providers/product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    final provider = Provider.of<ProductProvider>(context, listen: false);
+    provider.listenToCategory();
+    provider.listenToProducts();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
@@ -33,9 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SingleChildScrollView(
           child: SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: width * 0.06,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.06),
               child: Column(
                 children: [
                   // 🔍 Search + Favorite row
@@ -107,9 +118,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                Container(color: _carouselColors[index]),
-
-                                // optional gradient overlay for better text/dot contrast
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: _carouselColors[index]),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: width * 0.06),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        '50% \nDiscount!',
+                                        style: TextStyle(
+                                            fontFamily: "Urbanist",
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 20),
+                                      ),
+                                      
+                                    ],
+                                  ),
+                                ),
                                 Align(
                                   alignment: Alignment.bottomCenter,
                                   child: Container(
@@ -132,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
 
-                      // ⚪ Dots Indicator (inside the container)
+                      // ⚪ Dots Indicator
                       Positioned(
                         bottom: 8,
                         left: 0,
@@ -164,7 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  homeWidet(height, width),
+
+                  homeWidget(height, width),
                 ],
               ),
             ),
@@ -174,7 +202,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget homeWidet(double height, double width) {
+  Widget homeWidget(double height, double width) {
+    final provider = Provider.of<ProductProvider>(context);
+    final categories = provider.categories;
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: height * 0.02),
       child: Align(
@@ -187,23 +218,31 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: height * 0.02),
             SizedBox(
               height: height * 0.14,
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return categoryWidget(height);
-                },
-                scrollDirection: Axis.horizontal,
-              ),
+              child: categories.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: categories.length,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        return categoryWidget(categories[index], height);
+                      },
+                    ),
             ),
-            titleWidget("Products", () {}),
+
+            SizedBox(height: height * 0.03),
+            titleWidget("Products", () {
+              context.push('/products');
+            }),
+
+            // You can implement product UI similarly by mapping provider.products
             SizedBox(height: height * 0.02),
             SizedBox(
               height: height * 0.3,
               child: ListView.builder(
-                itemCount: 10,
+                itemCount: provider.products.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
-                  return productWidget(height, width);
+                  return ProductWidget(provider.products[index], height, width);
                 },
               ),
             ),
@@ -213,82 +252,33 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget categoryWidget(double height) {
+  Widget categoryWidget(CategoryModel category, double height) {
     return Container(
       margin: const EdgeInsets.only(right: 15),
       width: 70,
       child: Column(
         children: [
-          Container(
-            height: 70,
-            width: 70,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.orange,
+          ClipOval(
+            child: Container(
+              height: 70,
+              width: 70,
+              decoration: BoxDecoration(color: Colors.white),
+              child: cacheImage(
+                category.imageUrl,
+              ),
             ),
           ),
           SizedBox(height: height * 0.01),
-          const Text(
-            "Title",
-            style: TextStyle(
+          Text(
+            category.name,
+            style: const TextStyle(
               color: KprimaryColor,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
-            textAlign: TextAlign.center, // ensure center inside available width
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget productWidget(double height, double width) {
-    return Container(
-      width: width * 0.35, // responsive card width
-      margin: const EdgeInsets.only(right: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 🖼 Product Image
-          Container(
-            height: height * 0.18,
-            width: width * 0.35,
-            decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(16)),
-          ),
-
-          SizedBox(height: height * 0.008),
-
-          // 🏷 Brand
-          const Text(
-            "Brand",
-            style: TextStyle(
-              fontSize: 12,
-              color: KprimaryColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-
-          // 📦 Product Name
-          const Text(
-            "Product name",
-            style: TextStyle(
-              fontSize: 13,
-              color: KprimaryColor,
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             maxLines: 1,
-          ),
-
-          // 💲 Price
-          const Text(
-            "\$10.99",
-            style: TextStyle(
-              fontSize: 14,
-              color: KprimaryColor,
-              fontWeight: FontWeight.bold,
-            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -296,20 +286,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget titleWidget(String title, VoidCallback ontap) {
-    return Row(
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-              color: KprimaryColor, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(width: 10),
-        Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: KprimaryColor,
-        )
-      ],
+    return GestureDetector(
+      onTap: ontap,
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: KprimaryColor,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: KprimaryColor,
+          )
+        ],
+      ),
     );
   }
 }

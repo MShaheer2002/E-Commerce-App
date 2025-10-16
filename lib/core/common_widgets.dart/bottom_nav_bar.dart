@@ -5,7 +5,6 @@ import 'package:e_commerce_app/presentation/screens/notification_screen/notifica
 import 'package:e_commerce_app/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:e_commerce_app/presentation/screens/search_screen/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 class BottomNavBar extends StatefulWidget {
   @override
@@ -18,7 +17,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List<Widget Function()> _screens = [
     () => const HomeScreen(),
     () => const SearchScreen(),
-    () => const AddProductScreen(),
+    // () => const AddProductScreen(),
     () => const NotificationScreen(),
     () => const ProfileScreen(),
   ];
@@ -26,9 +25,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List<dynamic> _icons = [
     Icons.home,
     Icons.search,
-    "assets/images/appIcon.png",
+    // "assets/images/appIcon.png",
     Icons.notifications_none,
-    Icons.person_outline,
+    Container(
+      height: 28,
+      width: 28,
+      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+      child: Icon(Icons.person),
+    )
   ];
 
   void _onItemTapped(int index) {
@@ -56,7 +60,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         ),
       );
     } else {
-      iconWidget = SizedBox.shrink();
+      iconWidget = iconData;
     }
 
     return BottomNavigationBarItem(
