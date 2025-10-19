@@ -1,7 +1,9 @@
+import 'package:e_commerce_app/presentation/models/cart_model.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/screens/category_screen/category_screen.dart';
+import 'package:e_commerce_app/presentation/screens/checkout_screen/checkout_screen.dart';
 import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_tab/home_tab.dart';
@@ -85,6 +87,15 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/search-screen',
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/checkout-screen',
+        builder: (context, state) {
+          final items = state.extra as List<CartModel>;
+          return CheckoutScreen(
+            selectedItems: items,
+          );
+        },
       ),
     ],
   );

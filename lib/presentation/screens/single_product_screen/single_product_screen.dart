@@ -1,11 +1,15 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:e_commerce_app/core/providers/single_product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/cart_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class SingleProductScreen extends StatefulWidget {
@@ -182,8 +186,30 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
 
         // Add to Cart Button
         Consumer<SingleProductProvider>(
-          builder: (context, value, child) =>
-              _buildAddToBasketButton(width, height, provider.quantity),
+          builder: (context, value, child) => buildAddToBasketButton(
+            width,
+            height,
+            'Add to Cart - ${(widget.productModel.price * provider.quantity).toStringAsFixed(2)} USD',
+            () {
+              final cartService = context.read<CartProvider>();
+              cartService.setUser();
+
+              final cartItem = CartModel(
+                  id: widget.productModel.id ?? "",
+                  name: widget.productModel.name,
+                  imageUrl: widget.productModel.imageUrls,
+                  price: widget.productModel.price,
+                  quantity: provider.quantity);
+
+              cartService.addToCart(cartItem);
+
+              context.pop();
+              Fluttertoast.showToast(
+                  msg: "Saved in Cart",
+                  textColor: Colors.white,
+                  backgroundColor: Colors.green);
+            },
+          ),
         ),
         SizedBox(height: verticalPadding * 2),
       ],
@@ -210,34 +236,6 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
               contentPadding: EdgeInsets.zero,
             ),
             style: TextStyle(fontSize: fontSize),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- Add to Basket Button ---
-  Widget _buildAddToBasketButton(double width, double height, int quantity) {
-    return SizedBox(
-      width: double.infinity,
-      height: height * 0.07,
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: Add to cart logic here
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: KprimaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          elevation: 0,
-        ),
-        child: Text(
-          'Add to Cart - ${(widget.productModel.price * quantity).toStringAsFixed(2)} USD',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: width * 0.045,
-            fontWeight: FontWeight.w600,
           ),
         ),
       ),

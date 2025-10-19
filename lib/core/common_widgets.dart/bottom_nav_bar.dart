@@ -1,5 +1,6 @@
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/screens/add_product_screen/add_product_screen.dart';
+import 'package:e_commerce_app/presentation/screens/cart_screen/cart_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/notification_screen/notification_screen.dart';
 import 'package:e_commerce_app/presentation/screens/profile_screen/profile_screen.dart';
@@ -17,7 +18,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List<Widget Function()> _screens = [
     () => const HomeScreen(),
     () => const SearchScreen(),
-    () => const AddProductScreen(),
+    () => const CartScreen(),
     () => const NotificationScreen(),
     () => const ProfileScreen(),
   ];

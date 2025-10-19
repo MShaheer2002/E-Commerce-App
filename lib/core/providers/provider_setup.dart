@@ -1,4 +1,5 @@
 // lib/core/providers/provider_setup.dart
+import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/category_provider.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:e_commerce_app/core/providers/handle_unautharized_access_provider.dart';
@@ -27,5 +28,7 @@ class AppProvider {
           previous ?? FavoriteService(authGuard),
     ),
     ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider()),
+    ChangeNotifierProvider<CartProvider>(
+        create: (_) => CartProvider()..setUser()),
   ];
 }
