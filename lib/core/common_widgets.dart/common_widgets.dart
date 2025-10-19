@@ -223,7 +223,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 }
 
 // ignore: non_constant_identifier_names
-Widget SmallLoader({Color backgroundColor = Colors.white}) {
+Widget SmallLoader({Color backgroundColor = KprimaryColor}) {
   return CircularProgressIndicator(
     color: backgroundColor,
     strokeWidth: 3,
@@ -355,5 +355,103 @@ CachedNetworkImage cacheImage(String imageUrl, {bool showLoader = false}) {
       log("[Image not Loading] $error");
       return Icon(Icons.error);
     },
+  );
+}
+
+Widget FavProductWidget({
+  required ProductModel product,
+  VoidCallback? onTap,
+  VoidCallback? onRemove,
+  required double width,
+  required double height,
+}) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16),
+    child: Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // 🖼 Product image with circle border
+          SizedBox(
+            width: width * 0.22,
+            height: width * 0.22,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: CachedNetworkImage(
+                imageUrl:
+                    product.imageUrls.isNotEmpty ? product.imageUrls.first : '',
+                fit: BoxFit.cover,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                errorWidget: (context, url, error) =>
+                    const Icon(Icons.error, color: Colors.red),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // 📝 Product details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name
+                Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: KprimaryColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 4),
+
+                // Description
+                Text(
+                  product.description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 6),
+
+                // Price
+                Text(
+                  "\$${product.price.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: KprimaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 }

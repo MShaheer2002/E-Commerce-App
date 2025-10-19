@@ -1,11 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final CarouselSliderController _carouselController =
       CarouselSliderController();
+
   int _currentIndex = 0;
 
   final List<Color> _carouselColors = [
@@ -38,6 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final provider = Provider.of<ProductProvider>(context, listen: false);
       provider.init();
     });
+
+    // context.read<FavoriteService>().loadUserFavorites();
   }
 
   @override
@@ -46,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Background(
         child: SingleChildScrollView(
           child: SafeArea(
@@ -58,35 +60,42 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          height: 55,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.white.withOpacity(0.7),
-                          ),
-                          child: const Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15),
-                                child: Icon(
-                                  Icons.search,
-                                  size: 28,
-                                  color: KprimaryColor,
+                        child: GestureDetector(
+                          onTap: () {
+                            context.push('/search-screen');
+                          },
+                          child: Container(
+                            height: 55,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white.withOpacity(0.7),
+                            ),
+                            child: const Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 15),
+                                  child: Icon(
+                                    Icons.search,
+                                    size: 28,
+                                    color: KprimaryColor,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                "Search...",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16,
-                                ),
-                              )
-                            ],
+                                Text(
+                                  "Search...",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 16,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          context.push('/favorite-screen');
+                        },
                         icon: const Icon(
                           Icons.favorite,
                           color: KprimaryColor,

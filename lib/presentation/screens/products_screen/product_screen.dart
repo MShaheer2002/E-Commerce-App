@@ -23,11 +23,11 @@ class ProductScreen extends StatelessWidget {
             itemCount: 10,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              // childAspectRatio: 0.9,
+             
             ),
             itemBuilder: (context, index) {
               return Center(
-                  child:
+                child:
                       ProductWidget(products[index], height, width, context));
             },
           )),

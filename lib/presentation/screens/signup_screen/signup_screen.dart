@@ -37,8 +37,9 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SizedBox(height: height * 0.04),
                 // App Logo
-                Image.asset("assets/images/applogo.png"),
+                Image.asset("assets/images/productPlug_logo.png"),
 
                 const Text(
                   "Create an account",
@@ -67,6 +68,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   hintText: "email@domain.com",
                   controller: emailCtrl,
                   horizontalPadding: width * 0.06,
+                  keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: height * 0.02),
 
@@ -93,6 +95,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   builder: (context, value, child) => CustomButton(
                     horizontalPadding: width * 0.06,
                     onPressed: () async {
+                      log("[Email] ${emailCtrl.text}");
                       if (auth.isLoading) {
                         return;
                       }
@@ -103,7 +106,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             msg: "All fields must be field",
                             backgroundColor: Colors.red);
                         return;
-                      } else if (!auth.validateEmail(emailCtrl.text)) {
+                      } else if (auth.validateEmail(emailCtrl.text) == false) {
                         Fluttertoast.showToast(
                             msg: "Incorrect Email",
                             backgroundColor: Colors.red);

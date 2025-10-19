@@ -2,11 +2,13 @@ import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/screens/category_screen/category_screen.dart';
+import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_tab/home_tab.dart';
 import 'package:e_commerce_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:e_commerce_app/presentation/screens/product_by_category_screen/product_by_category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/products_screen/product_screen.dart';
+import 'package:e_commerce_app/presentation/screens/search_screen/search_screen.dart';
 import 'package:e_commerce_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:e_commerce_app/presentation/screens/single_product_screen/single_product_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -75,6 +77,14 @@ GoRouter createRouter(AuthProvider authProvider) {
           final category = state.extra as CategoryModel;
           return ProductByCategoryScreen(categoryModel: category);
         },
+      ),
+      GoRoute(
+        path: '/favorite-screen',
+        builder: (context, state) => const FavScreen(),
+      ),
+      GoRoute(
+        path: '/search-screen',
+        builder: (context, state) => const SearchScreen(),
       ),
     ],
   );

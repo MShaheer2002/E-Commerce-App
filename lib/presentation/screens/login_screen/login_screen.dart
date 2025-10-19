@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
@@ -36,7 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   bottom: MediaQuery.of(context).viewInsets.bottom),
               child: Column(
                 children: [
-                  Image.asset("assets/images/applogo.png"),
+                  SizedBox(height: height * 0.04),
+                  Image.asset("assets/images/productPlug_logo.png"),
                   const Text(
                     "Enter your email to sign up for this app",
                     style: TextStyle(
@@ -196,7 +198,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   CustomButton(
                     onPressed: () async {
                       try {
-                        await auth.signInWithApple();
+                        if (Platform.isAndroid) {
+                          Fluttertoast.showToast(
+                              msg: "This is not avaible for Android",
+                              backgroundColor: Colors.black,
+                              textColor: Colors.white);
+                        } else {
+                          await auth.signInWithApple();
+                        }
                       } on firebase.FirebaseAuthException catch (e) {
                         Fluttertoast.showToast(
                             msg: e.message ?? "Something went wrong");

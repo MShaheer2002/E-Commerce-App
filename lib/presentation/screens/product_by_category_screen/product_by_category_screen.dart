@@ -42,11 +42,7 @@ class _ProductByCategoryScreenState extends State<ProductByCategoryScreen> {
       body: Background(
         showBackButton: false,
         child: categoryProvider.isloading
-            ? const Center(
-                child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: KprimaryColor,
-              ))
+            ? Center(child: SmallLoader())
             : categoryProvider.productsByCategory.isEmpty
                 ? const Center(
                     child: Text(

@@ -1,26 +1,47 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:e_commerce_app/core/providers/single_product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SingleProductScreen extends StatelessWidget {
+class SingleProductScreen extends StatefulWidget {
   final ProductModel productModel;
 
   const SingleProductScreen({super.key, required this.productModel});
 
   @override
+  State<SingleProductScreen> createState() => _SingleProductScreenState();
+}
+
+class _SingleProductScreenState extends State<SingleProductScreen> {
+  bool isFav = false;
+
+  @override
+  void initState() {
+    final favoriteService = context.read<FavoriteService>();
+
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      favoriteService.loadFavoritesForUser();
+    });
+
+    isFav = favoriteService.isProductFavorite(widget.productModel.id ?? "0");
+  }
+
+  @override
   Widget build(BuildContext context) {
-    log("[Product] ${productModel.imageUrls}");
+    final favoriteProvider = context.read<FavoriteService>();
+
+    log("[Product] ${widget.productModel.imageUrls}");
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset:
-          false, // 🚫 prevents background from moving when keyboard opens
+      resizeToAvoidBottomInset: false,
       body: Background(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -29,7 +50,8 @@ class SingleProductScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildImageAndAppBarSection(context, height * 0.5),
+                _buildImageAndAppBarSection(
+                    context, isFav, height * 0.5, favoriteProvider),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: width * 0.05),
                   child: _buildDetailsAndActionSection(context, width, height),
@@ -43,8 +65,8 @@ class SingleProductScreen extends StatelessWidget {
   }
 
   // --- Top Image + AppBar ---
-  Widget _buildImageAndAppBarSection(
-      BuildContext context, double sectionHeight) {
+  Widget _buildImageAndAppBarSection(BuildContext context, bool isFav,
+      double sectionHeight, FavoriteService favoriteProvider) {
     return ClipRRect(
       borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
@@ -55,7 +77,7 @@ class SingleProductScreen extends StatelessWidget {
         child: Stack(
           children: [
             _ProductImageSlider(
-              imageUrls: productModel.imageUrls,
+              imageUrls: widget.productModel.imageUrls,
               height: sectionHeight,
             ),
             Padding(
@@ -68,13 +90,22 @@ class SingleProductScreen extends StatelessWidget {
                         const Icon(Icons.arrow_back_ios, color: KprimaryColor),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.favorite_border,
-                      color: KprimaryColor,
-                      size: 30,
-                    ),
-                    onPressed: () {},
+                  Consumer<FavoriteService>(
+                    builder: (context, favoriteService, _) {
+                      final isFav = favoriteService
+                          .isProductFavorite(widget.productModel.id ?? "");
+                      return IconButton(
+                        icon: Icon(
+                          isFav ? Icons.favorite : Icons.favorite_border,
+                          color: KprimaryColor,
+                          size: 30,
+                        ),
+                        onPressed: () {
+                          favoriteService
+                              .toggleFavorite(widget.productModel.id ?? "");
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
@@ -97,7 +128,7 @@ class SingleProductScreen extends StatelessWidget {
         SizedBox(height: verticalPadding),
         // Product Name
         Text(
-          productModel.name,
+          widget.productModel.name,
           style: TextStyle(
             fontSize: width * 0.06,
             fontWeight: FontWeight.bold,
@@ -108,7 +139,7 @@ class SingleProductScreen extends StatelessWidget {
 
         // Product Description
         Text(
-          productModel.description,
+          widget.productModel.description,
           style: TextStyle(
             fontSize: width * 0.038,
             color: Colors.white,
@@ -202,7 +233,7 @@ class SingleProductScreen extends StatelessWidget {
           elevation: 0,
         ),
         child: Text(
-          'Add to Cart - ${(productModel.price * quantity).toStringAsFixed(2)} USD',
+          'Add to Cart - ${(widget.productModel.price * quantity).toStringAsFixed(2)} USD',
           style: TextStyle(
             color: Colors.white,
             fontSize: width * 0.045,
