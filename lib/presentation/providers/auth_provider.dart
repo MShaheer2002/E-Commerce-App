@@ -32,10 +32,14 @@ class AuthProvider with ChangeNotifier {
   Future<void> signUpWithEmail(String email, String password) async {
     try {
       setLoading(true);
-      await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+
+      final user = userCredential.user;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        await _auth.signOut(); // 👈 log out right after signup
+      }
     } catch (e) {
       debugPrint("Sign up error: ${e}");
       rethrow;
@@ -48,10 +52,17 @@ class AuthProvider with ChangeNotifier {
   Future<void> loginWithEmail(String email, String password) async {
     try {
       setLoading(true);
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final userCredential = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+
+      final user = userCredential.user;
+      if (user != null && !user.emailVerified) {
+        await FirebaseAuth.instance.signOut();
+        throw FirebaseAuthException(
+          code: 'email-not-verified',
+          message: 'Please verify your email before logging in.',
+        );
+      }
     } catch (e) {
       debugPrint("Login error: $e");
       rethrow;

@@ -4,8 +4,10 @@ import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -25,6 +27,12 @@ class _SignupScreenState extends State<SignupScreen> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     final auth = context.read<AuthProvider>();
+
+    if (kDebugMode) {
+      emailCtrl.text = "m.shaheershahid12@gmail.com";
+      passCtrl.text = "12345678";
+      confirmPassCtrl.text = "12345678";
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false, // prevents background squeeze
@@ -96,47 +104,56 @@ class _SignupScreenState extends State<SignupScreen> {
                     horizontalPadding: width * 0.06,
                     onPressed: () async {
                       log("[Email] ${emailCtrl.text}");
-                      if (auth.isLoading) {
-                        return;
-                      }
+                      if (auth.isLoading) return;
+
                       if (passCtrl.text.isEmpty ||
                           emailCtrl.text.isEmpty ||
                           confirmPassCtrl.text.isEmpty) {
                         Fluttertoast.showToast(
-                            msg: "All fields must be field",
+                            msg: "All fields must be filled",
                             backgroundColor: Colors.red);
                         return;
-                      } else if (auth.validateEmail(emailCtrl.text) == false) {
+                      } else if (!auth.validateEmail(emailCtrl.text)) {
                         Fluttertoast.showToast(
                             msg: "Incorrect Email",
                             backgroundColor: Colors.red);
                         return;
                       } else if (!auth.validatePassword(passCtrl.text)) {
                         Fluttertoast.showToast(
-                            msg: "Password must be 8 character long",
+                            msg: "Password must be at least 8 characters",
                             backgroundColor: Colors.red);
                         return;
                       } else if (passCtrl.text != confirmPassCtrl.text) {
                         Fluttertoast.showToast(
-                            msg: "Password Mismatch",
+                            msg: "Passwords do not match",
                             backgroundColor: Colors.red);
                         return;
-                      } else {
-                        try {
-                          await auth.signUpWithEmail(
-                            emailCtrl.text.trim(),
-                            passCtrl.text.trim(),
-                          );
-                        } on firebase.FirebaseAuthException catch (e) {
-                          Fluttertoast.showToast(
-                              msg: e.message ?? "something went wrong",
-                              backgroundColor: Colors.red);
-                        } catch (e) {
-                          Fluttertoast.showToast(
-                              msg: "somwthing went Wrong",
-                              backgroundColor: Colors.red);
-                          log("[Sign up Error] $e");
-                        }
+                      }
+
+                      try {
+                        await auth.signUpWithEmail(
+                            emailCtrl.text.trim(), passCtrl.text.trim());
+
+                        // ✅ If sign-up was successful:
+                        Fluttertoast.showToast(
+                          msg:
+                              "Account created! Please check your email for verification.",
+                          backgroundColor: Colors.green,
+                        );
+
+                        // ✅ Navigate to login
+                        if (mounted) context.go('/login');
+                      } on firebase.FirebaseAuthException catch (e) {
+                        Fluttertoast.showToast(
+                          msg: e.message ?? "Something went wrong",
+                          backgroundColor: Colors.red,
+                        );
+                      } catch (e) {
+                        Fluttertoast.showToast(
+                          msg: "Something went wrong",
+                          backgroundColor: Colors.red,
+                        );
+                        log("[Sign up Error] $e");
                       }
                     },
                     child: auth.isLoading == true
