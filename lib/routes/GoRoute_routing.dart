@@ -24,17 +24,35 @@ GoRouter createRouter(AuthProvider authProvider) {
     refreshListenable: authProvider,
     initialLocation: '/splash',
     redirect: (context, state) {
+      // final auth = context.read<AuthProvider>();
+      // final isLoggedIn = auth.isLoggedIn;
+
+      // // Skip redirect during splash
+      // if (state.matchedLocation == '/splash') return null;
+
+      // final goingToLogin = state.matchedLocation == '/login';
+      // final goingToSignup = state.matchedLocation == '/signup';
+
+      // if (!isLoggedIn && !(goingToLogin || goingToSignup)) return '/login';
+      // if (isLoggedIn && (goingToLogin || goingToSignup)) return '/';
+      // return null;
+
       final auth = context.read<AuthProvider>();
+
+      // Wait until provider has seen the first authStateChanges event
+      if (!auth.isInitialized) return '/splash';
+
       final isLoggedIn = auth.isLoggedIn;
-
-      // Skip redirect during splash
-      if (state.matchedLocation == '/splash') return null;
-
       final goingToLogin = state.matchedLocation == '/login';
       final goingToSignup = state.matchedLocation == '/signup';
+      final goingToSplash = state.matchedLocation == '/splash';
 
-      if (!isLoggedIn && !(goingToLogin || goingToSignup)) return '/login';
-      if (isLoggedIn && (goingToLogin || goingToSignup)) return '/';
+      if (!isLoggedIn && !(goingToLogin || goingToSignup || goingToSplash)) {
+        return '/login';
+      }
+      if (isLoggedIn && (goingToLogin || goingToSignup || goingToSplash)) {
+        return '/';
+      }
       return null;
     },
     routes: [

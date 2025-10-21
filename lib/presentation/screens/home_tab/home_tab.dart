@@ -10,7 +10,7 @@ class HomeTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider>();
-    final user = auth.user;
+    // final user = auth.user;
 
     return Scaffold(
       body: Background(

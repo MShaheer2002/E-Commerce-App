@@ -64,32 +64,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     builder: (context, value, child) => CustomButton(
                       horizontalPadding: width * 0.06,
                       onPressed: () async {
-                        if (auth.isLoading) {
-                          return;
-                        }
-                        if (emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
-                          Fluttertoast.showToast(
-                              msg: "All fields must be field",
-                              backgroundColor: Colors.red);
-                          return;
-                        } else if (!auth.validateEmail(emailCtrl.text)) {
-                          Fluttertoast.showToast(
-                              msg: "Invalid Email",
-                              backgroundColor: Colors.red);
-                          return;
-                        }
+                        final auth = context.read<AuthProvider>();
+                        if (auth.isLoading) return;
+
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) =>
+                              const Center(child: CircularProgressIndicator()),
+                        );
+
                         try {
                           await auth.loginWithEmail(
-                              emailCtrl.text, passCtrl.text);
+                              emailCtrl.text.trim(), passCtrl.text.trim());
+                          // loginWithEmail throws if not verified, so if we reach here user is verified and signed in
+                          Navigator.of(context).pop();
+                          context.go('/'); // go to home
                         } on firebase.FirebaseAuthException catch (e) {
+                          Navigator.of(context).pop();
                           Fluttertoast.showToast(
-                              msg: e.message ?? "something went wrong",
+                              msg: e.message ?? 'Login failed',
                               backgroundColor: Colors.red);
                         } catch (e) {
+                          Navigator.of(context).pop();
                           Fluttertoast.showToast(
-                              msg: "somwthing went Wrong",
+                              msg: 'Unexpected error',
                               backgroundColor: Colors.red);
-                          log("[Sign In with Email Error] $e");
                         }
                       },
                       child: auth.isLoading == true

@@ -13,7 +13,7 @@ class ProfileScreen extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
 
     final auth = context.read<AuthProvider>();
-    final user = auth.user;
+    // final user = auth.user;
 
     return Scaffold(
       appBar: customAppBar(
