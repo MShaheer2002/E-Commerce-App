@@ -165,12 +165,16 @@ class CustomButton extends StatelessWidget {
 
 /// A dynamic, reusable text field widget.
 
+
+
+
 class CustomTextField extends StatefulWidget {
   final String hintText;
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final bool isPassword;
   final double horizontalPadding;
+  final IconData? icon; // ✅ Nullable prefix icon
 
   const CustomTextField({
     super.key,
@@ -179,6 +183,7 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType = TextInputType.text,
     this.isPassword = false,
     this.horizontalPadding = 16,
+    this.icon,
   });
 
   @override
@@ -208,6 +213,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
+          // ✅ Moved the icon to prefixIcon
+          prefixIcon: widget.icon != null
+              ? Icon(
+                  widget.icon,
+                  color: Colors.grey,
+                )
+              : null,
+          // ✅ Keep the password toggle on the suffix if needed
           suffixIcon: widget.isPassword
               ? IconButton(
                   icon: Icon(
