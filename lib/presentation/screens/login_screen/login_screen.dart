@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
+import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -23,13 +25,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final passCtrl = TextEditingController();
 
   @override
+  void initState() {
+    // TODO: implement initStates
+    super.initState();
+    if (kDebugMode) {
+      emailCtrl.text = "unknowusers420@gmail.com";
+      passCtrl.text = "12345678";
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     final auth = context.read<AuthProvider>();
-
-    emailCtrl.text = "m.shaheershahid12@gmail.com";
-    passCtrl.text = "12345678";
+    final profile = context.read<ProfileSetupProvider>();
 
     return Scaffold(
         resizeToAvoidBottomInset: false,
@@ -78,8 +88,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
 
                         try {
-                          await auth.loginWithEmail(
-                              emailCtrl.text.trim(), passCtrl.text.trim());
+                          await auth.loginWithEmail(emailCtrl.text.trim(),
+                              passCtrl.text.trim(), profile);
                           // loginWithEmail throws if not verified, so if we reach here user is verified and signed in
                           context.go('/'); // go to home
                         } on firebase.FirebaseAuthException catch (e) {
@@ -169,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (auth.isLoading == true) {
                           return;
                         }
-                        await auth.signInWithGoogle();
+                        await auth.signInWithGoogle(profile);
                       } on firebase.FirebaseAuthException catch (e) {
                         Fluttertoast.showToast(
                             msg: e.message ?? "Something went wrong");

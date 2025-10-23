@@ -174,7 +174,8 @@ class CustomTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final bool isPassword;
   final double horizontalPadding;
-  final IconData? icon; // ✅ Nullable prefix icon
+  final IconData? icon;
+  final bool readOnly; // ✅ New field for non-editable input (e.g. email)
 
   const CustomTextField({
     super.key,
@@ -184,6 +185,7 @@ class CustomTextField extends StatefulWidget {
     this.isPassword = false,
     this.horizontalPadding = 16,
     this.icon,
+    this.readOnly = false, // ✅ Default editable
   });
 
   @override
@@ -201,7 +203,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
         controller: widget.controller,
         keyboardType: widget.keyboardType,
         obscureText: widget.isPassword ? _obscure : false,
-        style: const TextStyle(color: Colors.black),
+        readOnly: widget.readOnly, // ✅ disables input if true
+        style: TextStyle(
+          color: widget.readOnly ? Colors.grey[700] : Colors.black,
+        ),
         decoration: InputDecoration(
           hintText: widget.hintText,
           hintStyle: const TextStyle(color: Colors.grey),
@@ -213,14 +218,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
-          // ✅ Moved the icon to prefixIcon
           prefixIcon: widget.icon != null
               ? Icon(
                   widget.icon,
                   color: Colors.grey,
                 )
               : null,
-          // ✅ Keep the password toggle on the suffix if needed
           suffixIcon: widget.isPassword
               ? IconButton(
                   icon: Icon(

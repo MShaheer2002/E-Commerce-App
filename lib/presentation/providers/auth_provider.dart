@@ -1,3 +1,4 @@
+import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -65,7 +66,8 @@ class AuthProvider with ChangeNotifier {
 
   // ✅ EMAIL & PASSWORD LOGIN
   // LOGIN: signIn + require verification. If not verified, sign out and throw.
-  Future<void> loginWithEmail(String email, String password) async {
+  Future<void> loginWithEmail(String email, String password,
+      ProfileSetupProvider profileProvider) async {
     setLoading(true);
     try {
       final cred = await _auth.signInWithEmailAndPassword(
@@ -88,13 +90,15 @@ class AuthProvider with ChangeNotifier {
       }
 
       // If verified, _auth.authStateChanges will update _rawUser and route will allow home.
+      await profileProvider.saveUserFromAuth(freshUser!);
     } finally {
       setLoading(false);
     }
   }
 
   // ✅ GOOGLE SIGN-IN
-  Future<void> signInWithGoogle({bool silent = false}) async {
+  Future<void> signInWithGoogle(ProfileSetupProvider profileProvider,
+      {bool silent = false}) async {
     try {
       final googleSignIn = GoogleSignIn();
       final GoogleSignInAccount? googleUser = silent
@@ -112,6 +116,11 @@ class AuthProvider with ChangeNotifier {
       );
 
       await _auth.signInWithCredential(credential);
+
+      if (firebaseUser != null) {
+        // ✅ Create Firestore profile if not exists
+        await profileProvider.saveUserFromAuth(firebaseUser!);
+      }
     } catch (e) {
       debugPrint("Google Sign-In error: $e");
       rethrow;

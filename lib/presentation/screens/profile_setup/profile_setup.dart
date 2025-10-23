@@ -6,21 +6,22 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 
-// Profile Setup Screen
-class ProfileSetup extends StatelessWidget {
-  const ProfileSetup({super.key});
+class ProfileSetupView extends StatefulWidget {
+  const ProfileSetupView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ProfileSetupProvider(),
-      child: const ProfileSetupView(),
-    );
-  }
+  State<ProfileSetupView> createState() => _ProfileSetupViewState();
 }
 
-class ProfileSetupView extends StatelessWidget {
-  const ProfileSetupView({super.key});
+class _ProfileSetupViewState extends State<ProfileSetupView> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final provider = context.read<ProfileSetupProvider>();
+      provider.loadUserProfile();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +31,10 @@ class ProfileSetupView extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false, // Prevents background from moving
       body: GestureDetector(
-        onTap: () =>
-            FocusScope.of(context).unfocus(), // Dismiss keyboard on tap outside
+        onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard
         child: Stack(
           children: [
-            // Background that doesn't move
+            // Background
             const Positioned.fill(
               child: Background(),
             ),
@@ -43,7 +43,8 @@ class ProfileSetupView extends StatelessWidget {
             SafeArea(
               child: SingleChildScrollView(
                 padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
                 physics: const ClampingScrollPhysics(),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -51,23 +52,19 @@ class ProfileSetupView extends StatelessWidget {
                   ),
                   child: IntrinsicHeight(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: height * 0.03,
-                      ),
+                      padding: EdgeInsets.symmetric(vertical: height * 0.03),
                       child: Column(
                         children: [
                           SizedBox(height: height * 0.02),
 
-                          // Profile Image Section
+                          // Profile Image
                           const ProfileImagePicker(),
-
                           SizedBox(height: height * 0.04),
 
                           // Form Fields
                           const ProfileForm(),
 
                           const Spacer(),
-
                           SizedBox(height: height * 0.02),
 
                           // Update Button
@@ -76,11 +73,12 @@ class ProfileSetupView extends StatelessWidget {
                               return CustomButton(
                                 onPressed: () {
                                   if (provider.validateForm()) {
-                                    provider.updateProfile();
+                                    provider.saveUserProfile();
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                            'Profile updated successfully!'),
+                                          'Profile updated successfully!',
+                                        ),
                                         backgroundColor: Colors.green,
                                       ),
                                     );
@@ -88,7 +86,8 @@ class ProfileSetupView extends StatelessWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                            'Please fill all required fields'),
+                                          'Please fill all required fields',
+                                        ),
                                         backgroundColor: Colors.red,
                                       ),
                                     );
@@ -99,6 +98,7 @@ class ProfileSetupView extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
+                                    color: Colors.white,
                                   ),
                                 ),
                               );
@@ -120,7 +120,7 @@ class ProfileSetupView extends StatelessWidget {
   }
 }
 
-// Profile Image Picker Widget
+// --------------------------- Profile Image Picker ---------------------------
 class ProfileImagePicker extends StatelessWidget {
   const ProfileImagePicker({super.key});
 
@@ -135,10 +135,7 @@ class ProfileImagePicker extends StatelessWidget {
               height: 130,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 4,
-                ),
+                border: Border.all(color: Colors.white, width: 2),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
@@ -173,10 +170,7 @@ class ProfileImagePicker extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: KprimaryColor,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 3,
-                    ),
+                    border: Border.all(color: Colors.white, width: 2),
                   ),
                   child: const Icon(
                     Icons.camera_alt,
@@ -193,7 +187,9 @@ class ProfileImagePicker extends StatelessWidget {
   }
 
   void _showImageSourceDialog(
-      BuildContext context, ProfileSetupProvider provider) {
+    BuildContext context,
+    ProfileSetupProvider provider,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -229,7 +225,6 @@ class ProfileImagePicker extends StatelessWidget {
   }
 }
 
-// Profile Form Widget
 class ProfileForm extends StatelessWidget {
   const ProfileForm({super.key});
 
@@ -251,6 +246,7 @@ class ProfileForm extends StatelessWidget {
           hintText: 'Email',
           keyboardType: TextInputType.emailAddress,
           icon: Icons.email_outlined,
+          readOnly: true,
         ),
         const SizedBox(height: 16),
 
@@ -296,7 +292,7 @@ class ProfileForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // Phone Number Field with Country Code
+        // Phone Field
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
@@ -313,7 +309,7 @@ class ProfileForm extends StatelessWidget {
             ),
             initialCountryCode: 'PK',
             onChanged: (phone) {
-              provider.setPhoneNumber(phone.completeNumber);
+              // provider.phoneController.text = phone.completeNumber;
             },
           ),
         ),
@@ -329,19 +325,18 @@ class ProfileForm extends StatelessWidget {
   }
 
   Future<void> _selectDate(
-      BuildContext context, ProfileSetupProvider provider) async {
+    BuildContext context,
+    ProfileSetupProvider provider,
+  ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate:
-          DateTime.now().subtract(const Duration(days: 6570)), // 18 years ago
+      initialDate: DateTime.now().subtract(const Duration(days: 6570)),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: KprimaryColor,
-            ),
+            colorScheme: const ColorScheme.light(primary: KprimaryColor),
           ),
           child: child!,
         );

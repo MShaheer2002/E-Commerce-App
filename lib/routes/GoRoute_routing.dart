@@ -116,10 +116,9 @@ GoRouter createRouter(AuthProvider authProvider) {
           );
         },
       ),
-
-        GoRoute(
+      GoRoute(
         path: '/profile-setup',
-        builder: (context, state) => const ProfileSetup(),
+        builder: (context, state) => const ProfileSetupView(),
       ),
     ],
   );

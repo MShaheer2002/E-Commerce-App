@@ -23,16 +23,22 @@ class _SignupScreenState extends State<SignupScreen> {
   final confirmPassCtrl = TextEditingController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    if (kDebugMode) {
+      emailCtrl.text = "unknowusers420@gmail.com";
+      passCtrl.text = "12345678";
+      confirmPassCtrl.text = "12345678";
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
     final auth = context.read<AuthProvider>();
-
-    if (kDebugMode) {
-      emailCtrl.text = "m.shaheershahid12@gmail.com";
-      passCtrl.text = "12345678";
-      confirmPassCtrl.text = "12345678";
-    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false, // prevents background squeeze
