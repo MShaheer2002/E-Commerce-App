@@ -10,6 +10,7 @@ import 'package:e_commerce_app/presentation/screens/home_tab/home_tab.dart';
 import 'package:e_commerce_app/presentation/screens/login_screen/login_screen.dart';
 import 'package:e_commerce_app/presentation/screens/product_by_category_screen/product_by_category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/products_screen/product_screen.dart';
+import 'package:e_commerce_app/presentation/screens/profile_setup/profile_setup.dart';
 import 'package:e_commerce_app/presentation/screens/search_screen/search_screen.dart';
 import 'package:e_commerce_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:e_commerce_app/presentation/screens/single_product_screen/single_product_screen.dart';
@@ -114,6 +115,11 @@ GoRouter createRouter(AuthProvider authProvider) {
             selectedItems: items,
           );
         },
+      ),
+
+        GoRoute(
+        path: '/profile-setup',
+        builder: (context, state) => const ProfileSetup(),
       ),
     ],
   );

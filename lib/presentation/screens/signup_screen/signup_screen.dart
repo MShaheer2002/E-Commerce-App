@@ -156,7 +156,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       //   log("[Sign up Error] $e");
                       // }
 
-                      onPressed:
                       () async {
                         final auth = context.read<AuthProvider>();
 
