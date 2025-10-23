@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/providers/handle_unautharized_access_provider.dart';
-import 'package:e_commerce_app/presentation/models/favorite_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -118,7 +115,12 @@ class FavoriteService extends ChangeNotifier {
           .where('userId', isEqualTo: userId)
           .get();
 
-      if (favSnapshot.docs.isEmpty) return [];
+      if (favSnapshot.docs.isEmpty) {
+        _isLoading = false;
+        notifyListeners();
+        return [];
+      }
+      ;
 
       final productIds =
           favSnapshot.docs.map((doc) => doc['productId'] as String).toList();

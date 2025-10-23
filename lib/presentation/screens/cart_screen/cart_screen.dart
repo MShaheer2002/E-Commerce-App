@@ -44,6 +44,21 @@ class _CartScreenState extends State<CartScreen> {
         .fold(0.0, (sum, item) => sum + item.totalPrice);
   }
 
+  void navigateToCheckout(List cartItems) {
+    if (selectedItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select items to checkout')),
+      );
+      return;
+    }
+
+    final selected =
+        cartItems.where((item) => selectedItems.contains(item.id)).toList();
+
+    // Navigate to checkout screen with selected items
+    context.push("/checkout-screen", extra: selected);
+  }
+
   @override
   Widget build(BuildContext context) {
     final cartService = context.watch<CartProvider>();
@@ -183,105 +198,13 @@ class _CartScreenState extends State<CartScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: cartItems.isEmpty
           ? null
-          // : Container(
-          //     padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-          //     child: Column(
-          //       mainAxisSize: MainAxisSize.min,
-          //       children: [
-          //         // Total Summary Card
-          //         Container(
-          //           padding: EdgeInsets.all(width * 0.04),
-          //           decoration: BoxDecoration(
-          //             color: Colors.white,
-          //             borderRadius: BorderRadius.circular(16),
-          //             boxShadow: [
-          //               BoxShadow(
-          //                 color: Colors.black.withOpacity(0.08),
-          //                 blurRadius: 16,
-          //                 offset: const Offset(0, -4),
-          //               ),
-          //             ],
-          //           ),
-          //           child: Row(
-          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //             children: [
-          //               Column(
-          //                 crossAxisAlignment: CrossAxisAlignment.start,
-          //                 children: [
-          //                   Text(
-          //                     'Total',
-          //                     style: TextStyle(
-          //                       fontSize: width * 0.035,
-          //                       color: Colors.grey[600],
-          //                     ),
-          //                   ),
-          //                   SizedBox(height: height * 0.005),
-          //                   Text(
-          //                     'Rs. ${selectedItems.isEmpty ? 0 : calculateSelectedTotal(cartItems).toStringAsFixed(2)}',
-          //                     style: TextStyle(
-          //                       fontSize: width * 0.055,
-          //                       fontWeight: FontWeight.bold,
-          //                       color: Colors.black87,
-          //                     ),
-          //                   ),
-          //                 ],
-          //               ),
-          //               ElevatedButton(
-          //                 onPressed: selectedItems.isEmpty
-          //                     ? null
-          //                     : () {
-          //                         final selected = cartItems
-          //                             .where((item) =>
-          //                                 selectedItems.contains(item.id))
-          //                             .toList();
-          //                         // Pass selected items to checkout
-          //                         print('Checkout items: $selected');
-          //                       },
-          //                 style: ElevatedButton.styleFrom(
-          //                   backgroundColor: selectedItems.isEmpty
-          //                       ? Colors.grey[300]
-          //                       : Colors.blue[600],
-          //                   foregroundColor: Colors.white,
-          //                   padding: EdgeInsets.symmetric(
-          //                     horizontal: width * 0.1,
-          //                     vertical: height * 0.02,
-          //                   ),
-          //                   shape: RoundedRectangleBorder(
-          //                     borderRadius: BorderRadius.circular(12),
-          //                   ),
-          //                   elevation: 0,
-          //                 ),
-          //                 child: Text(
-          //                   'Checkout (${selectedItems.length})',
-          //                   style: TextStyle(
-          //                     fontSize: width * 0.04,
-          //                     fontWeight: FontWeight.w600,
-          //                   ),
-          //                 ),
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
           : Padding(
               padding: EdgeInsets.only(left: width * 0.06, right: width * 0.06),
               child: buildAddToBasketButton(
                 width,
                 height,
-                'Total ${selectedItems.isEmpty ? 0 : calculateSelectedTotal(cartItems).toStringAsFixed(2)} Checkout (${selectedItems.length})',
-                () {
-                  final selected = cartItems
-                      .where((item) => selectedItems.contains(item.id))
-                      .toList();
-
-                  if (selected.isEmpty) {
-                    return;
-                  } else {
-                    context.push("/checkout-screen", extra: selected);
-                  }
-                },
+                'Total \$${selectedItems.isEmpty ? 0 : calculateSelectedTotal(cartItems).toStringAsFixed(2)} Checkout (${selectedItems.length})',
+                () => navigateToCheckout(cartItems),
               ),
             ),
     );
@@ -373,36 +296,33 @@ Widget buildCartItem({
               children: [
                 Row(
                   children: [
-                    Text(
-                      cartItem.name,
-                      style: TextStyle(
-                        fontSize: width * 0.04,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Spacer(),
-                    // Delete Button
-                    Container(
-                      child: Container(
-                        child: InkWell(
-                          onTap: onDelete,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Icon(
-                            Icons.delete_outline_rounded,
-                            color: Colors.white,
-                            size: width * 0.06,
-                          ),
+                    Expanded(
+                      child: Text(
+                        cartItem.name,
+                        style: TextStyle(
+                          fontSize: width * 0.04,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    // Delete Button
+                    InkWell(
+                      onTap: onDelete,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.white,
+                        size: width * 0.06,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: height * 0.006),
                 Text(
-                  '${cartItem.price.toStringAsFixed(2)}',
+                  '\$${cartItem.price.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: width * 0.038,
                     fontWeight: FontWeight.w500,
@@ -471,7 +391,7 @@ Widget buildCartItem({
                     ),
                     const Spacer(),
                     Text(
-                      '${cartItem.totalPrice.toStringAsFixed(2)}',
+                      '\$${cartItem.totalPrice.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: width * 0.045,
                         fontWeight: FontWeight.bold,

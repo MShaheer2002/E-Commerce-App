@@ -636,7 +636,7 @@ Widget buildCartItem({
 
 // --- Add to Basket Button ---
 Widget buildAddToBasketButton(
-    double width, double height, String title,VoidCallback ontap) {
+    double width, double height, String title, VoidCallback ontap) {
   return SizedBox(
     width: double.infinity,
     height: height * 0.07,

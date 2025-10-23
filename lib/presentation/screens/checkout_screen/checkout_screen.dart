@@ -1,8 +1,9 @@
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/cart_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/payment_intent.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartModel> selectedItems;
@@ -18,10 +19,11 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   String selectedDelivery = 'standard';
-  String selectedPayment = 'visa';
+  String selectedPayment = 'card'; // Changed default to card
   TextEditingController promoController = TextEditingController();
   bool promoApplied = false;
   double promoDiscount = 0.0;
+  bool isProcessingPayment = false; // Add loading state
 
   double calculateSubtotal() {
     return widget.selectedItems.fold(0.0, (sum, item) => sum + item.totalPrice);
@@ -51,12 +53,61 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         promoDiscount = 5.0; // Example discount
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Promo code applied successfully!'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 2),
         ),
       );
+    }
+  }
+
+  Future<void> handlePlaceOrder() async {
+    // Validate shipping address (you can add your own validation)
+    // For now, we'll skip this check
+
+    final total = calculateTotal();
+
+    if (selectedPayment == 'card') {
+      // Show Stripe payment sheet for card payment
+      setState(() {
+        isProcessingPayment = true;
+      });
+
+      try {
+        // This will show the Stripe payment UI
+        // await showPaymentSheet(total);
+        await showPaymentSheet(total);
+
+        // Payment successful
+        if (mounted) {
+          _showOrderConfirmation(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          String errorMessage = 'Payment failed';
+          if (e.toString().contains('cancelled')) {
+            errorMessage = 'Payment cancelled';
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            isProcessingPayment = false;
+          });
+        }
+      }
+    } else {
+      // Cash on Delivery - no payment processing needed
+      _showOrderConfirmation(context);
     }
   }
 
@@ -66,11 +117,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: customAppBar(
-        context: context,
-        title: "Checkout",
-        showBackButton: true,
-      ),
+      // appBar: customAppBar(
+      //   context: context,
+      //   title: "Checkout",
+      //   showBackButton: true,
+      // ),
       body: Background(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
@@ -78,6 +129,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(height: height * 0.1),
+                  // Centered Image
+                  Center(
+                    child: Image.asset(
+                      "assets/images/titles/re_up_cleaned.png",
+                      height: 40,
+                    ),
+                  ),
+                  // Left Arrow
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: KprimaryColor,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               // Shipping Section
               _buildSectionHeader(context, 'SHIPPING', width),
               SizedBox(height: height * 0.015),
@@ -126,15 +204,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
         padding: EdgeInsets.symmetric(horizontal: width * 0.06),
-        child: buildAddToBasketButton(
-          width,
-          height,
-          'Place order',
-          () {
-            // Handle order placement
-            _showOrderConfirmation(context);
-          },
-        ),
+        child: isProcessingPayment
+            ? Container(
+                padding: EdgeInsets.all(width * 0.04),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    SizedBox(width: width * 0.04),
+                    const Text(
+                      'Processing...',
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : buildAddToBasketButton(
+                width,
+                height,
+                selectedPayment == 'card'
+                    ? 'Pay \$${calculateTotal().toStringAsFixed(2)}'
+                    : 'Place Order',
+                handlePlaceOrder,
+              ),
       ),
     );
   }
@@ -326,16 +425,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Column(
       children: [
         _buildPaymentOption(
-          'Visa *1234',
-          'visa',
-          Icons.credit_card,
-          width,
-          height,
-        ),
-        SizedBox(height: height * 0.012),
-        _buildPaymentOption(
-          'Mastercard *5678',
-          'mastercard',
+          'Credit/Debit Card',
+          'card',
           Icons.credit_card,
           width,
           height,
@@ -500,7 +591,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.only(
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
             ),
@@ -551,7 +642,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
               borderRadius: isLast
-                  ? BorderRadius.only(
+                  ? const BorderRadius.only(
                       bottomLeft: Radius.circular(12),
                       bottomRight: Radius.circular(12),
                     )
@@ -774,7 +865,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ],
         ),
         content: Text(
-          'Your order has been placed successfully.',
+          selectedPayment == 'card'
+              ? 'Your payment was successful and order has been placed.'
+              : 'Your order has been placed successfully.',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white.withOpacity(0.7),

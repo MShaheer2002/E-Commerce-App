@@ -28,6 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
     double width = MediaQuery.of(context).size.width;
     final auth = context.read<AuthProvider>();
 
+    emailCtrl.text = "m.shaheershahid12@gmail.com";
+    passCtrl.text = "12345678";
+
     return Scaffold(
         resizeToAvoidBottomInset: false,
         body: Background(
@@ -71,14 +74,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           context: context,
                           barrierDismissible: false,
                           builder: (_) =>
-                              const Center(child: CircularProgressIndicator()),
+                              Center(child: Center(child: SmallLoader())),
                         );
 
                         try {
                           await auth.loginWithEmail(
                               emailCtrl.text.trim(), passCtrl.text.trim());
                           // loginWithEmail throws if not verified, so if we reach here user is verified and signed in
-                          Navigator.of(context).pop();
                           context.go('/'); // go to home
                         } on firebase.FirebaseAuthException catch (e) {
                           Navigator.of(context).pop();

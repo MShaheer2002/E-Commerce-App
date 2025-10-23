@@ -103,128 +103,71 @@ class _SignupScreenState extends State<SignupScreen> {
                   builder: (context, value, child) => CustomButton(
                     horizontalPadding: width * 0.06,
                     onPressed: () async {
-                      // log("[Email] ${emailCtrl.text}");
-                      // if (auth.isLoading) return;
+                      final auth = context.read<AuthProvider>();
 
-                      // if (passCtrl.text.isEmpty ||
-                      //     emailCtrl.text.isEmpty ||
-                      //     confirmPassCtrl.text.isEmpty) {
-                      //   Fluttertoast.showToast(
-                      //       msg: "All fields must be filled",
-                      //       backgroundColor: Colors.red);
-                      //   return;
-                      // } else if (!auth.validateEmail(emailCtrl.text)) {
-                      //   Fluttertoast.showToast(
-                      //       msg: "Incorrect Email",
-                      //       backgroundColor: Colors.red);
-                      //   return;
-                      // } else if (!auth.validatePassword(passCtrl.text)) {
-                      //   Fluttertoast.showToast(
-                      //       msg: "Password must be at least 8 characters",
-                      //       backgroundColor: Colors.red);
-                      //   return;
-                      // } else if (passCtrl.text != confirmPassCtrl.text) {
-                      //   Fluttertoast.showToast(
-                      //       msg: "Passwords do not match",
-                      //       backgroundColor: Colors.red);
-                      //   return;
-                      // }
+                      if (auth.isLoading) return;
 
-                      // try {
-                      //   await auth.signUpWithEmail(
-                      //       emailCtrl.text.trim(), passCtrl.text.trim());
+                      // validate inputs...
+                      if (passCtrl.text.isEmpty ||
+                          emailCtrl.text.isEmpty ||
+                          confirmPassCtrl.text.isEmpty) {
+                        Fluttertoast.showToast(
+                            msg: "All fields must be filled",
+                            backgroundColor: Colors.red);
+                        return;
+                      }
+                      if (!auth.validateEmail(emailCtrl.text)) {
+                        Fluttertoast.showToast(
+                            msg: "Incorrect Email",
+                            backgroundColor: Colors.red);
+                        return;
+                      }
+                      if (!auth.validatePassword(passCtrl.text)) {
+                        Fluttertoast.showToast(
+                            msg: "Password must be at least 8 characters",
+                            backgroundColor: Colors.red);
+                        return;
+                      }
+                      if (passCtrl.text != confirmPassCtrl.text) {
+                        Fluttertoast.showToast(
+                            msg: "Passwords do not match",
+                            backgroundColor: Colors.red);
+                        return;
+                      }
 
-                      //   // ✅ If sign-up was successful:
-                      //   Fluttertoast.showToast(
-                      //     msg:
-                      //         "Account created! Please check your email for verification.",
-                      //     backgroundColor: Colors.green,
-                      //   );
+                      // Show a blocking loader dialog
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => Center(child: SmallLoader()),
+                      );
 
-                      //   // ✅ Navigate to login
-                      //   if (mounted) context.go('/login');
-                      // } on firebase.FirebaseAuthException catch (e) {
-                      //   Fluttertoast.showToast(
-                      //     msg: e.message ?? "Something went wrong",
-                      //     backgroundColor: Colors.red,
-                      //   );
-                      // } catch (e) {
-                      //   Fluttertoast.showToast(
-                      //     msg: "Something went wrong",
-                      //     backgroundColor: Colors.red,
-                      //   );
-                      //   log("[Sign up Error] $e");
-                      // }
+                      try {
+                        await auth.signUpWithEmail(
+                            emailCtrl.text.trim(), passCtrl.text.trim());
 
-                      onPressed:
-                      () async {
-                        final auth = context.read<AuthProvider>();
+                        // Sign-up succeeded: verification email has been sent and user is signed out.
+                        Navigator.of(context).pop(); // dismiss loader
 
-                        if (auth.isLoading) return;
-
-                        // validate inputs...
-                        if (passCtrl.text.isEmpty ||
-                            emailCtrl.text.isEmpty ||
-                            confirmPassCtrl.text.isEmpty) {
-                          Fluttertoast.showToast(
-                              msg: "All fields must be filled",
-                              backgroundColor: Colors.red);
-                          return;
-                        }
-                        if (!auth.validateEmail(emailCtrl.text)) {
-                          Fluttertoast.showToast(
-                              msg: "Incorrect Email",
-                              backgroundColor: Colors.red);
-                          return;
-                        }
-                        if (!auth.validatePassword(passCtrl.text)) {
-                          Fluttertoast.showToast(
-                              msg: "Password must be at least 8 characters",
-                              backgroundColor: Colors.red);
-                          return;
-                        }
-                        if (passCtrl.text != confirmPassCtrl.text) {
-                          Fluttertoast.showToast(
-                              msg: "Passwords do not match",
-                              backgroundColor: Colors.red);
-                          return;
-                        }
-
-                        // Show a blocking loader dialog
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) =>
-                              const Center(child: CircularProgressIndicator()),
+                        Fluttertoast.showToast(
+                          msg:
+                              "Account created! Verification email sent — check your inbox (or spam).",
+                          backgroundColor: Colors.green,
                         );
 
-                        try {
-                          await auth.signUpWithEmail(
-                              emailCtrl.text.trim(), passCtrl.text.trim());
-
-                          // Sign-up succeeded: verification email has been sent and user is signed out.
-                          Navigator.of(context).pop(); // dismiss loader
-
-                          Fluttertoast.showToast(
-                            msg:
-                                "Account created! Verification email sent — check your inbox (or spam).",
-                            backgroundColor: Colors.green,
-                          );
-
-                          // Navigate explicitly to login
-                          if (mounted) context.go('/login');
-                        } on firebase.FirebaseAuthException catch (e) {
-                          Navigator.of(context).pop(); // dismiss loader
-                          Fluttertoast.showToast(
-                              msg: e.message ?? 'Signup failed',
-                              backgroundColor: Colors.red);
-                        } catch (e) {
-                          Navigator.of(context).pop();
-                          Fluttertoast.showToast(
-                              msg: 'Unexpected error',
-                              backgroundColor: Colors.red);
-                        }
-                      };
+                        // Navigate explicitly to login
+                        if (mounted) context.go('/login');
+                      } on firebase.FirebaseAuthException catch (e) {
+                        Navigator.of(context).pop(); // dismiss loader
+                        Fluttertoast.showToast(
+                            msg: e.message ?? 'Signup failed',
+                            backgroundColor: Colors.red);
+                      } catch (e) {
+                        Navigator.of(context).pop();
+                        Fluttertoast.showToast(
+                            msg: 'Unexpected error',
+                            backgroundColor: Colors.red);
+                      }
                     },
                     child: auth.isLoading == true
                         ? Center(child: SmallLoader())

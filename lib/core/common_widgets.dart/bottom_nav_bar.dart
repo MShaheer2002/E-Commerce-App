@@ -1,11 +1,13 @@
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/screens/add_product_screen/add_product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/cart_screen/cart_screen.dart';
+import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/notification_screen/notification_screen.dart';
 import 'package:e_commerce_app/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:e_commerce_app/presentation/screens/search_screen/search_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class BottomNavBar extends StatefulWidget {
   @override
@@ -17,7 +19,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   final List<Widget Function()> _screens = [
     () => const HomeScreen(),
-    () => const SearchScreen(),
+    () => const FavScreen(),
     () => const CartScreen(),
     () => const NotificationScreen(),
     () => const ProfileScreen(),
@@ -25,7 +27,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   final List<dynamic> _icons = [
     Icons.home,
-    Icons.search,
+    "assets/svgs/favorite.svg",
     "assets/images/appIcon.png",
     Icons.notifications_none,
     Container(
@@ -53,12 +55,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
         color: isSelected ? KprimaryColor : Colors.grey,
         size: 28,
       );
-    } else if (iconData is String) {
+    } else if (iconData is String && iconData.contains(".png")) {
       iconWidget = Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
         child: Image.asset(
           iconData,
         ),
+      );
+    } else if (iconData is String && iconData.contains(".svg")) {
+      iconWidget = SvgPicture.asset(
+        isSelected ? iconData : "assets/svgs/favorite-unselected.svg",
       );
     } else {
       iconWidget = iconData;
@@ -81,20 +87,27 @@ class _BottomNavBarState extends State<BottomNavBar> {
             fit: BoxFit.cover,
           ),
         ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          items: List.generate(
-            _icons.length,
-            (index) => _buildNavItem(_icons[index], index),
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            splashFactory: NoSplash.splashFactory,
           ),
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          selectedFontSize: 0,
-          unselectedFontSize: 0,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            items: List.generate(
+              _icons.length,
+              (index) => _buildNavItem(_icons[index], index),
+            ),
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            selectedFontSize: 0,
+            unselectedFontSize: 0,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+          ),
         ),
       ),
     );

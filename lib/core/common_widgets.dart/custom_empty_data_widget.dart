@@ -20,29 +20,29 @@ class CustomEmptyDataWidget extends StatelessWidget {
   String get getPlaceHolder {
     switch (imageType) {
       case 1:
-        return 'assets/icons/comIcon.svg';
+        return 'assets/empty_data_icons/comIcon.svg';
       case 2:
-        return 'assets/icons/no_result_found.svg';
+        return 'assets/empty_data_icons/no_result_found.svg';
       case 3:
-        return 'assets/icons/blockIcon.svg';
+        return 'assets/empty_data_icons/blockIcon.svg';
       case 4:
-        return 'assets/icons/Nogift.svg';
+        return 'assets/empty_data/Nogift.svg';
       case 5:
-        return 'assets/icons/Nolive.svg';
+        return 'assets/empty_data_icons/Nolive.svg';
       case 6:
-        return 'assets/icons/NoPosts.svg';
+        return 'assets/empty_data_icons/NoPosts.svg';
       case 7:
-        return 'assets/icons/seek_search.svg';
+        return 'assets/empty_data_icons/seek_search.svg';
       case 8:
-        return 'assets/icons/NoMsg.svg';
+        return 'assets/empty_data_icons/NoMsg.svg';
       case 9:
-        return 'assets/icons/NoNotification.svg';
+        return 'assets/empty_data_icons/NoNotification.svg';
       case 10:
-        return 'assets/icons/followers.svg';
+        return 'assets/empty_data_icons/followers.svg';
       case 11:
-        return 'assets/icons/NoView.svg';
+        return 'assets/empty_data_icons/NoView.svg';
       default:
-        return 'assets/icons/noList.svg';
+        return 'assets/empty_data_icons/noList.svg';
     }
   }
 

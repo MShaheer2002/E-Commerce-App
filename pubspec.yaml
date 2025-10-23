@@ -25,6 +25,7 @@ dependencies:
   cloud_firestore: ^6.0.3
   flutter_native_splash: ^2.4.4
   shared_preferences: ^2.5.3
+  flutter_stripe: ^12.0.2
 
 dev_dependencies:
   flutter_test:
@@ -38,6 +39,8 @@ flutter:
     - .env
     - assets/svgs/
     - assets/images/
+    - assets/images/titles/
+    - assets/empty_data_icons/
   fonts:
     - family: Urbanist
       fonts:

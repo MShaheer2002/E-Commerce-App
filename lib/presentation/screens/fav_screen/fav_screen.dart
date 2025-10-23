@@ -1,4 +1,5 @@
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/common_widgets.dart/custom_empty_data_widget.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,13 +28,7 @@ class _FavScreenState extends State<FavScreen> {
 
   Future<void> _loadFavorites() async {
     final favService = context.read<FavoriteService>();
-    final fetchedProducts = await favService.fetchFavoriteProducts();
-
-    if (mounted) {
-      setState(() {
-        products = fetchedProducts;
-      });
-    }
+    products = await favService.fetchFavoriteProducts();
   }
 
   @override
@@ -48,14 +43,9 @@ class _FavScreenState extends State<FavScreen> {
         child: favService.isloading
             ? Center(child: SmallLoader())
             : products.isEmpty
-                ? Center(
-                    child: Text(
-                      "No favorite products yet",
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: width * 0.045,
-                        fontWeight: FontWeight.w500,
-                      ),
+                ? const Center(
+                    child: CustomEmptyDataWidget(
+                      title: "No favorite products yet",
                     ),
                   )
                 : ListView.builder(

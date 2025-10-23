@@ -4,6 +4,7 @@ import 'package:e_commerce_app/core/providers/product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -55,6 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: width * 0.06),
               child: Column(
                 children: [
+                  SizedBox(height: height * 0.02),
+                  Image.asset(
+                    "assets/images/titles/exclusive_cleaned.png",
+                    height: 40,
+                  ),
                   // 🔍 Search + Favorite row
                   SizedBox(height: height * 0.02),
                   Row(
@@ -92,16 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          context.push('/favorite-screen');
-                        },
-                        icon: const Icon(
-                          Icons.favorite,
-                          color: KprimaryColor,
-                          size: 30,
-                        ),
-                      )
+                      // GestureDetector(
+                      // onTap: () => context.push('/favorite-screen'),
+                      //   child: Padding(
+                      //     padding: const EdgeInsets.only(left: 10.0),
+                      //     child: SvgPicture.asset("assets/svgs/favorite.svg"),
+                      //   ),
+                      // ),
                     ],
                   ),
 
@@ -136,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: _carouselColors[index]),
                                   padding: EdgeInsets.symmetric(
                                       horizontal: width * 0.06),
-                                  child: Row(
+                                  child: const Row(
                                     children: [
                                       Text(
                                         '50% \nDiscount!',
