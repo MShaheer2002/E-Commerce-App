@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -76,9 +79,10 @@ class AuthProvider with ChangeNotifier {
       if (user == null) {
         throw FirebaseAuthException(code: 'no-user', message: 'Login failed.');
       }
-
+      await profileProvider.loadUserProfile();
       // Ensure latest data
       await user.reload();
+
       final freshUser = _auth.currentUser;
 
       if (freshUser == null || !freshUser.emailVerified) {
@@ -90,7 +94,9 @@ class AuthProvider with ChangeNotifier {
       }
 
       // If verified, _auth.authStateChanges will update _rawUser and route will allow home.
-      await profileProvider.saveUserFromAuth(freshUser!);
+      await profileProvider.saveUserFromAuth(freshUser);
+
+      log("Login In!!");
     } finally {
       setLoading(false);
     }
@@ -120,6 +126,7 @@ class AuthProvider with ChangeNotifier {
       if (firebaseUser != null) {
         // ✅ Create Firestore profile if not exists
         await profileProvider.saveUserFromAuth(firebaseUser!);
+        await profileProvider.loadUserProfile(); // ✅ add this line
       }
     } catch (e) {
       debugPrint("Google Sign-In error: $e");
@@ -152,7 +159,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   // ✅ LOGOUT
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     try {
       setLoading(true);
 
@@ -164,6 +171,7 @@ class AuthProvider with ChangeNotifier {
       await _auth.signOut();
 
       _rawUser = null;
+      context.go("/login");
       notifyListeners();
     } catch (e) {
       debugPrint('Logout failed: $e');

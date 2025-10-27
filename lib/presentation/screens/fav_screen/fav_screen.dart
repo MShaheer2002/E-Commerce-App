@@ -19,8 +19,6 @@ class _FavScreenState extends State<FavScreen> {
   @override
   void initState() {
     super.initState();
-
-    // ✅ Safe: run after first frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadFavorites();
     });
@@ -29,40 +27,59 @@ class _FavScreenState extends State<FavScreen> {
   Future<void> _loadFavorites() async {
     final favService = context.read<FavoriteService>();
     products = await favService.fetchFavoriteProducts();
+    setState(() {}); // ✅ trigger rebuild once products are fetched
   }
 
   @override
   Widget build(BuildContext context) {
-    final favService = context.watch<FavoriteService>(); // ✅ use watch here
-    double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
+    final favService = context.watch<FavoriteService>();
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: customAppBar(context: context, title: "Favorites"),
       body: Background(
-        child: favService.isloading
-            ? Center(child: SmallLoader())
-            : products.isEmpty
-                ? const Center(
-                    child: CustomEmptyDataWidget(
-                      title: "No favorite products yet",
-                    ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.only(bottom: height * 0.05),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return FavProductWidget(
-                        width: width,
-                        height: height,
-                        product: product,
-                        onTap: () {
-                          context.push('/single-product', extra: product);
-                        },
-                      );
-                    },
-                  ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: height * 0.015),
+              // ✅ Image always visible (even during loading)
+              Image.asset(
+                "assets/images/titles/my_smash_cleaned.png",
+                height: 70,
+              ),
+              const SizedBox(height: 10),
+              // ✅ Loader only overlays below the title
+              Expanded(
+                child: favService.isloading
+                    ? Center(child: SmallLoader())
+                    : products.isEmpty
+                        ? const Center(
+                            child: CustomEmptyDataWidget(
+                              title: "No favorite products yet",
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: EdgeInsets.only(bottom: height * 0.05),
+                            itemCount: products.length,
+                            itemBuilder: (context, index) {
+                              final product = products[index];
+                              return FavProductWidget(
+                                width: width,
+                                height: height,
+                                product: product,
+                                onTap: () {
+                                  context.push(
+                                    '/single-product',
+                                    extra: product,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

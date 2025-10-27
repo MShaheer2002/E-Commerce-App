@@ -1,7 +1,12 @@
+import 'dart:developer';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
@@ -74,6 +79,7 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
                                 onPressed: () {
                                   if (provider.validateForm()) {
                                     provider.saveUserProfile();
+                                    context.pop();
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
@@ -128,6 +134,8 @@ class ProfileImagePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ProfileSetupProvider>(
       builder: (context, provider, _) {
+        log("[Profile Setup Provider] ${provider.imageUrl}");
+
         return Stack(
           children: [
             Container(
@@ -150,14 +158,19 @@ class ProfileImagePicker extends StatelessWidget {
                         provider.profileImage!,
                         fit: BoxFit.cover,
                       )
-                    : Container(
-                        color: Colors.grey[300],
-                        child: Icon(
-                          Icons.person,
-                          size: 60,
-                          color: Colors.grey[600],
-                        ),
-                      ),
+                    : provider.imageUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: provider.imageUrl!,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            color: Colors.grey[300],
+                            child: Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.grey[600],
+                            ),
+                          ),
               ),
             ),
             Positioned(

@@ -83,32 +83,43 @@ class _LoginScreenState extends State<LoginScreen> {
                         showDialog(
                           context: context,
                           barrierDismissible: false,
-                          builder: (_) =>
-                              Center(child: Center(child: SmallLoader())),
+                          builder: (_) => Center(
+                              child: Center(
+                                  child: SmallLoader(
+                                      backgroundColor: Colors.white))),
                         );
 
                         try {
-                          await auth.loginWithEmail(emailCtrl.text.trim(),
-                              passCtrl.text.trim(), profile);
-                          // loginWithEmail throws if not verified, so if we reach here user is verified and signed in
+                          await auth.loginWithEmail(
+                            emailCtrl.text.trim(),
+                            passCtrl.text.trim(),
+                            profile,
+                          );
+
+                          if (!mounted) return; // ✅ check before using context
+                          Navigator.of(context).pop(); // close loader safely
                           context.go('/'); // go to home
                         } on firebase.FirebaseAuthException catch (e) {
-                          Navigator.of(context).pop();
+                          if (!mounted) return; // ✅ safe again
+                          Navigator.of(context).pop(); // close loader
                           Fluttertoast.showToast(
-                              msg: e.message ?? 'Login failed',
-                              backgroundColor: Colors.red);
+                            msg: e.message ?? 'Login failed',
+                            backgroundColor: Colors.red,
+                          );
                         } catch (e) {
+                          if (!mounted) return;
                           Navigator.of(context).pop();
                           Fluttertoast.showToast(
-                              msg: 'Unexpected error',
-                              backgroundColor: Colors.red);
+                            msg: 'Unexpected error occurred',
+                            backgroundColor: Colors.red,
+                          );
                         }
                       },
                       child: auth.isLoading == true
                           ? Center(
                               child: SmallLoader(),
                             )
-                          : Text(
+                          : const Text(
                               "Continue",
                               style: TextStyle(
                                 color: Colors.white,

@@ -3,10 +3,12 @@ import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/category_provider.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:e_commerce_app/core/providers/handle_unautharized_access_provider.dart';
+import 'package:e_commerce_app/core/providers/notification_provider.dart';
 import 'package:e_commerce_app/core/providers/product_provider.dart';
 import 'package:e_commerce_app/core/providers/search_provider.dart';
 import 'package:e_commerce_app/core/providers/single_product_provider.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
+import 'package:e_commerce_app/presentation/providers/cache_provider.dart';
 import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:e_commerce_app/presentation/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -33,5 +35,8 @@ class AppProvider {
         create: (_) => CartProvider()..setUser()),
     ChangeNotifierProvider<ProfileSetupProvider>(
         create: (context) => ProfileSetupProvider()),
+    ChangeNotifierProvider<CacheProvider>(create: (_) => CacheProvider()),
+    ChangeNotifierProvider<NotificationProvider>(
+        create: (context) => NotificationProvider())
   ];
 }

@@ -25,6 +25,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double promoDiscount = 0.0;
   bool isProcessingPayment = false; // Add loading state
 
+  // Address fields
+  Map<String, dynamic>? selectedAddress;
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController addressLine1Controller = TextEditingController();
+  TextEditingController addressLine2Controller = TextEditingController();
+  TextEditingController cityController = TextEditingController();
+  TextEditingController stateController = TextEditingController();
+  TextEditingController zipController = TextEditingController();
+  TextEditingController countryController = TextEditingController();
+
   double calculateSubtotal() {
     return widget.selectedItems.fold(0.0, (sum, item) => sum + item.totalPrice);
   }
@@ -62,9 +73,199 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
+  void _showAddAddressDialog() {
+    // Clear previous values
+    nameController.clear();
+    phoneController.clear();
+    addressLine1Controller.clear();
+    addressLine2Controller.clear();
+    cityController.clear();
+    stateController.clear();
+    zipController.clear();
+    countryController.clear();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'Add Shipping Address',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildAddressTextField('Full Name', nameController),
+              SizedBox(height: 12),
+              _buildAddressTextField('Phone Number', phoneController),
+              SizedBox(height: 12),
+              _buildAddressTextField('Address Line 1', addressLine1Controller),
+              SizedBox(height: 12),
+              _buildAddressTextField(
+                  'Address Line 2 (Optional)', addressLine2Controller),
+              SizedBox(height: 12),
+              _buildAddressTextField('City', cityController),
+              SizedBox(height: 12),
+              _buildAddressTextField('State/Province', stateController),
+              SizedBox(height: 12),
+              _buildAddressTextField('ZIP/Postal Code', zipController),
+              SizedBox(height: 12),
+              _buildAddressTextField('Country', countryController),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_validateAddress()) {
+                setState(() {
+                  selectedAddress = {
+                    'name': nameController.text,
+                    'phone': phoneController.text,
+                    'addressLine1': addressLine1Controller.text,
+                    'addressLine2': addressLine2Controller.text,
+                    'city': cityController.text,
+                    'state': stateController.text,
+                    'zip': zipController.text,
+                    'country': countryController.text,
+                  };
+                });
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Address added successfully!'),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            child: Text(
+              'Save',
+              style: TextStyle(color: KprimaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddressTextField(
+      String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: KprimaryColor),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      ),
+    );
+  }
+
+  bool _validateAddress() {
+    if (nameController.text.isEmpty ||
+        phoneController.text.isEmpty ||
+        addressLine1Controller.text.isEmpty ||
+        cityController.text.isEmpty ||
+        stateController.text.isEmpty ||
+        zipController.text.isEmpty ||
+        countryController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill all required fields'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  String _getAddressPreview() {
+    if (selectedAddress == null) return 'Add shipping address';
+    return '${selectedAddress!['name']}, ${selectedAddress!['addressLine1']}, ${selectedAddress!['city']}, ${selectedAddress!['state']} ${selectedAddress!['zip']}';
+  }
+
+  void _printOrderDetails() {
+    print('========================================');
+    print('ORDER CONFIRMATION');
+    print('========================================');
+    print('Order Date: ${DateTime.now()}');
+    print('');
+    print('--- SHIPPING ADDRESS ---');
+    if (selectedAddress != null) {
+      print('Name: ${selectedAddress!['name']}');
+      print('Phone: ${selectedAddress!['phone']}');
+      print('Address: ${selectedAddress!['addressLine1']}');
+      if (selectedAddress!['addressLine2'].isNotEmpty) {
+        print('         ${selectedAddress!['addressLine2']}');
+      }
+      print('City: ${selectedAddress!['city']}');
+      print('State: ${selectedAddress!['state']}');
+      print('ZIP: ${selectedAddress!['zip']}');
+      print('Country: ${selectedAddress!['country']}');
+    }
+    print('');
+    print('--- ORDER ITEMS ---');
+    for (var item in widget.selectedItems) {
+      print('Product: ${item.name}');
+      print('Quantity: ${item.quantity}');
+      print('Price: \$${item.totalPrice.toStringAsFixed(2)}');
+      print('---');
+    }
+    print('');
+    print('--- PAYMENT DETAILS ---');
+    print('Subtotal: \$${calculateSubtotal().toStringAsFixed(2)}');
+    print(
+        'Shipping: ${calculateShipping() == 0 ? 'Free' : '\$${calculateShipping().toStringAsFixed(2)}'}');
+    print('Taxes: \$${calculateTaxes().toStringAsFixed(2)}');
+    if (promoApplied) {
+      print('Discount: -\$${promoDiscount.toStringAsFixed(2)}');
+    }
+    print('TOTAL: \$${calculateTotal().toStringAsFixed(2)}');
+    print('');
+    print(
+        'Payment Method: ${selectedPayment == 'card' ? 'Credit/Debit Card' : 'Cash on Delivery'}');
+    print('Delivery Method: $selectedDelivery');
+    print('========================================');
+  }
+
   Future<void> handlePlaceOrder() async {
-    // Validate shipping address (you can add your own validation)
-    // For now, we'll skip this check
+    // Validate shipping address
+    if (selectedAddress == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add a shipping address'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
 
     final total = calculateTotal();
 
@@ -79,7 +280,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         // await showPaymentSheet(total);
         await showPaymentSheet(total);
 
-        // Payment successful
+        // Payment successful - Print order details
+        _printOrderDetails();
+
         if (mounted) {
           _showOrderConfirmation(context);
         }
@@ -107,6 +310,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     } else {
       // Cash on Delivery - no payment processing needed
+      _printOrderDetails();
       _showOrderConfirmation(context);
     }
   }
@@ -117,6 +321,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       // appBar: customAppBar(
       //   context: context,
       //   title: "Checkout",
@@ -161,33 +366,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               SizedBox(height: height * 0.015),
               _buildInfoCard(
                 context: context,
-                title: 'Add shipping address',
-                icon: Icons.arrow_forward_ios,
-                onTap: () {
-                  // Navigate to address selection
-                },
+                title: selectedAddress == null
+                    ? 'Add shipping address'
+                    : _getAddressPreview(),
+                subtitle: selectedAddress != null ? 'Tap to change' : null,
+                icon: selectedAddress == null ? Icons.add : Icons.edit,
+                onTap: _showAddAddressDialog,
                 width: width,
                 height: height,
               ),
               SizedBox(height: height * 0.025),
 
-              // Delivery Section
-              _buildSectionHeader(context, 'DELIVERY', width),
-              SizedBox(height: height * 0.015),
-              _buildDeliveryOptions(width, height),
-              SizedBox(height: height * 0.025),
+              // // Delivery Section
+              // _buildSectionHeader(context, 'DELIVERY', width),
+              // SizedBox(height: height * 0.015),
+              // _buildDeliveryOptions(width, height),
+              // SizedBox(height: height * 0.025),
 
-              // Payment Section
-              _buildSectionHeader(context, 'PAYMENT', width),
-              SizedBox(height: height * 0.015),
-              _buildPaymentOptions(width, height),
-              SizedBox(height: height * 0.025),
+              // // Payment Section
+              // _buildSectionHeader(context, 'PAYMENT', width),
+              // SizedBox(height: height * 0.015),
+              // _buildPaymentOptions(width, height),
+              // SizedBox(height: height * 0.025),
 
-              // Promo Code Section
-              _buildSectionHeader(context, 'PROMOS', width),
-              SizedBox(height: height * 0.015),
-              _buildPromoCodeField(width, height),
-              SizedBox(height: height * 0.025),
+              // // Promo Code Section
+              // _buildSectionHeader(context, 'PROMOS', width),
+              // SizedBox(height: height * 0.015),
+              // _buildPromoCodeField(width, height),
+              // SizedBox(height: height * 0.025),
 
               // Items Section
               _buildSectionHeader(context, 'ITEMS', width),
@@ -689,6 +895,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         'Brand',
                         style: TextStyle(
                           fontSize: width * 0.032,
+                          // ignore: deprecated_member_use
                           color: Colors.white.withOpacity(0.5),
                         ),
                       ),
@@ -770,14 +977,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           SizedBox(height: height * 0.015),
           _buildSummaryRow(
             'Shipping total',
-            shipping == 0 ? 'Free' : '\$${shipping.toStringAsFixed(2)}',
+            shipping == 0 ? 'Free' : '\${shipping.toStringAsFixed(2)}',
             width,
             false,
           ),
           SizedBox(height: height * 0.015),
           _buildSummaryRow(
             'Taxes',
-            '\$${taxes.toStringAsFixed(2)}',
+            '\${taxes.toStringAsFixed(2)}',
             width,
             false,
           ),
@@ -785,7 +992,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(height: height * 0.015),
             _buildSummaryRow(
               'Promo Discount',
-              '-\$${promoDiscount.toStringAsFixed(2)}',
+              '\$${promoDiscount.toStringAsFixed(2)}',
               width,
               false,
               color: Colors.green,
@@ -892,6 +1099,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void dispose() {
     promoController.dispose();
+    nameController.dispose();
+    phoneController.dispose();
+    addressLine1Controller.dispose();
+    addressLine2Controller.dispose();
+    cityController.dispose();
+    stateController.dispose();
+    zipController.dispose();
+    countryController.dispose();
     super.dispose();
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:e_commerce_app/core/cache.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class ProfileSetupProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
+  final cache = CacheService();
 
   // Controllers
   final TextEditingController nameController = TextEditingController();
@@ -133,6 +135,7 @@ class ProfileSetupProvider extends ChangeNotifier {
 
   /// Load profile from Firestore
   Future<void> loadUserProfile() async {
+    log("[Profile Setup Provider] in load Profile");
     final user = _auth.currentUser;
     if (user == null) {
       Fluttertoast.showToast(msg: "No user logged in");
@@ -163,6 +166,14 @@ class ProfileSetupProvider extends ChangeNotifier {
             );
           }
         }
+        log("[Profile Setup Provider] in profile loaded");
+        log("[Profile Setup Provider] ${_imageUrl}");
+
+        await cache.cacheProfile(
+          name: data['name'] ?? '',
+          imageUrl: data['imageUrl'] ?? '',
+          email: data['email'] ?? user.email ?? '',
+        );
       } else {
         nameController.text = user.displayName ?? '';
         emailController.text = user.email ?? '';
@@ -233,6 +244,12 @@ class ProfileSetupProvider extends ChangeNotifier {
           .collection('users')
           .doc(user.uid)
           .set(profileData, SetOptions(merge: true));
+
+      await cache.cacheProfile(
+        name: nameController.text.trim(),
+        imageUrl: downloadUrl ?? '',
+        email: emailController.text.trim(),
+      );
 
       Fluttertoast.showToast(msg: "Profile updated successfully!");
     } catch (e, stack) {

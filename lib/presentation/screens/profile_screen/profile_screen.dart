@@ -1,6 +1,8 @@
+import 'package:e_commerce_app/core/cache.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
+import 'package:e_commerce_app/presentation/providers/cache_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -13,13 +15,35 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String? _name;
+  String? _email;
+  String? _imageUrl;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => context.read<CacheProvider>().loadCachedProfile());
+  }
+
+  Future<void> _loadProfile() async {
+    final cache = CacheService();
+    final data =
+        await cache.loadCachedProfile(); // return a Map<String, String>
+    setState(() {
+      _name = data['name'];
+      _email = data['email'];
+      _imageUrl = data['imageUrl'];
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
     final auth = context.read<AuthProvider>();
-    // final user = auth.user;
 
     return Scaffold(
       appBar: customAppBar(
@@ -34,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: height * 0.03),
 
                 // Profile Header Section
-                _buildProfileHeader(context, height, width),
+                _buildProfileHeader(),
 
                 SizedBox(height: height * 0.03),
 
@@ -45,15 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icons.edit,
                   title: "Edit Profile",
                   onTap: () {
-                    // Navigate to edit profile
                     context.push("/profile-setup");
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.notifications_outlined,
-                  title: "Notification",
-                  onTap: () {
-                    // Navigate to notifications
                   },
                 ),
                 _buildMenuItem(
@@ -74,8 +90,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           ElevatedButton(
                             child: const Text('Yes, Logout'),
-                            onPressed: () {
-                              auth.logout();
+                            onPressed: () async {
+                              await auth.logout(context);
+
+                              // Optionally clear cache on logout
+                              final cache = CacheService();
+                              await cache.clearCache();
                             },
                           ),
                         ],
@@ -90,25 +110,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildSectionTitle("General"),
                 SizedBox(height: height * 0.01),
                 _buildMenuItem(
-                  icon: Icons.settings_outlined,
-                  title: "Settings",
-                  onTap: () {
-                    // Navigate to settings
-                  },
-                ),
-                _buildMenuItem(
                   icon: Icons.security_outlined,
                   title: "Security",
-                  onTap: () {
-                    // Navigate to security
-                  },
+                  onTap: () {},
                 ),
                 _buildMenuItem(
                   icon: Icons.privacy_tip_outlined,
                   title: "Privacy Policy",
-                  onTap: () {
-                    // Navigate to privacy policy
-                  },
+                  onTap: () {},
                 ),
 
                 SizedBox(height: height * 0.02),
@@ -120,76 +129,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(
-      BuildContext context, double height, double width) {
-    return Container(
-      padding: EdgeInsets.all(width * 0.04),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          // Profile Avatar
-          Container(
-            height: 60,
-            width: 60,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [Color(0xFF00D4FF), Color(0xFF00FFB9)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+  Widget _buildProfileHeader() {
+    final profileCache = context.watch<CacheProvider>();
+
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 30,
+          backgroundImage:
+              profileCache.imageUrl != null && profileCache.imageUrl!.isNotEmpty
+                  ? NetworkImage(profileCache.imageUrl!)
+                  : null,
+          child: profileCache.imageUrl == null || profileCache.imageUrl!.isEmpty
+              ? const Icon(Icons.person, size: 30, color: Colors.white)
+              : null,
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              profileCache.name ?? "Guest User",
+              style: const TextStyle(
+                color: KprimaryColor,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            child: const Center(
-              child: Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 30,
-              ),
+            Text(
+              profileCache.email ?? "No email found",
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
-          ),
-
-          SizedBox(width: width * 0.04),
-
-          // User Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "HS1 Matty",
-                  style: TextStyle(
-                    color: KprimaryColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  "hs1matty@gmail.com",
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Edit Icon
-          IconButton(
-            onPressed: () {
-              // Navigate to edit profile
-            },
-            icon: const Icon(
-              Icons.edit_outlined,
-              color: Colors.grey,
-              size: 24,
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 

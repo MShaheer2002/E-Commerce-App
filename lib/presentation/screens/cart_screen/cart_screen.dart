@@ -67,11 +67,6 @@ class _CartScreenState extends State<CartScreen> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: customAppBar(
-        context: context,
-        title: "Shopping Cart (${cartItems.length})",
-        showBackButton: false,
-      ),
       body: Background(
         child: cartItems.isEmpty
             ? Center(
@@ -97,6 +92,15 @@ class _CartScreenState extends State<CartScreen> {
               )
             : Column(
                 children: [
+                  SizedBox(height: height * 0.02),
+                  SafeArea(
+                    child: Center(
+                      child: Image.asset(
+                        "assets/images/titles/re_up_cleaned.png",
+                        height: 40,
+                      ),
+                    ),
+                  ),
                   // Select All Bar
                   Container(
                     margin: EdgeInsets.symmetric(

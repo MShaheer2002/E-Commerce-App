@@ -1,13 +1,15 @@
+import 'dart:developer';
+
+import 'package:e_commerce_app/core/cache.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/screens/add_product_screen/add_product_screen.dart';
+import 'package:e_commerce_app/presentation/providers/cache_provider.dart';
 import 'package:e_commerce_app/presentation/screens/cart_screen/cart_screen.dart';
 import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/notification_screen/notification_screen.dart';
 import 'package:e_commerce_app/presentation/screens/profile_screen/profile_screen.dart';
-import 'package:e_commerce_app/presentation/screens/search_screen/search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavBar extends StatefulWidget {
   @override
@@ -15,7 +17,22 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
+  Map<String, String?>? profileData;
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final cache = CacheService();
+    final data = await cache.loadCachedProfile();
+    setState(() {
+      profileData = data;
+    });
+  }
 
   final List<Widget Function()> _screens = [
     () => const HomeScreen(),
@@ -25,59 +42,72 @@ class _BottomNavBarState extends State<BottomNavBar> {
     () => const ProfileScreen(),
   ];
 
-  final List<dynamic> _icons = [
-    Icons.home,
-    "assets/svgs/favorite.svg",
-    "assets/images/appIcon.png",
-    Icons.notifications_none,
-    Container(
-      height: 28,
-      width: 28,
-      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-      child: Icon(Icons.person),
-    )
-  ];
-
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
   }
 
   BottomNavigationBarItem _buildNavItem(dynamic iconData, int index) {
     final isSelected = _selectedIndex == index;
-
     Widget iconWidget;
+
     if (iconData is IconData) {
       iconWidget = Icon(
         iconData,
         color: isSelected ? KprimaryColor : Colors.grey,
         size: 28,
       );
-    } else if (iconData is String && iconData.contains(".png")) {
+    } else if (iconData is String && iconData.endsWith(".png")) {
       iconWidget = Padding(
         padding: const EdgeInsets.only(bottom: 8.0),
-        child: Image.asset(
-          iconData,
-        ),
+        child: Image.asset(iconData),
       );
-    } else if (iconData is String && iconData.contains(".svg")) {
-      iconWidget = SvgPicture.asset(
-        isSelected ? iconData : "assets/svgs/favorite-unselected.svg",
-      );
-    } else {
+    } else if (iconData is Widget) {
       iconWidget = iconData;
+    } else {
+      iconWidget = const Icon(Icons.circle); // fallback
     }
 
-    return BottomNavigationBarItem(
-      label: '',
-      icon: iconWidget,
-    );
+    return BottomNavigationBarItem(label: '', icon: iconWidget);
   }
 
   @override
   Widget build(BuildContext context) {
+    final cache = context.watch<CacheProvider>();
+    final profileImageUrl = cache.imageUrl;
+    log('[Profile Setup Provider] from nav bar ${profileData?['imageUrl']}');
+    final List<dynamic> icons = [
+      Icons.home,
+      Icons.favorite_border_outlined,
+      "assets/images/appIcon.png",
+      Icons.notifications_none,
+      Container(
+        height: 28,
+        width: 28,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
+        child: profileImageUrl != null && profileImageUrl.isNotEmpty
+            ? ClipOval(
+                child: Image.network(
+                  profileImageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.person),
+                ),
+              )
+            : profileData?['imageUrl'] != null
+                ? ClipOval(
+                    child: Image.network(
+                      profileData?['imageUrl'] ?? "",
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.person),
+                    ),
+                  )
+                : const Icon(Icons.person),
+      ),
+    ];
+
     return Scaffold(
       body: _screens[_selectedIndex](),
       bottomNavigationBar: Container(
@@ -98,8 +128,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             items: List.generate(
-              _icons.length,
-              (index) => _buildNavItem(_icons[index], index),
+              icons.length,
+              (index) => _buildNavItem(icons[index], index),
             ),
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,

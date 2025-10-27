@@ -1,3 +1,4 @@
+import 'package:e_commerce_app/core/providers/notification_provider.dart';
 import 'package:e_commerce_app/core/providers/provider_setup.dart';
 import 'package:e_commerce_app/firebase_options.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
@@ -47,6 +48,10 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     final authProvider = context.read<AuthProvider>();
     _router = createRouter(authProvider);
+
+       // Initialize notifications here
+    final notificationProvider = context.read<NotificationProvider>();
+    notificationProvider.initNotifications();
   }
 
   @override
