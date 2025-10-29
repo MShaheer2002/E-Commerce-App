@@ -2,7 +2,11 @@ import 'package:e_commerce_app/presentation/models/cart_model.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_add_product/admin_add_product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_dashboard/admin_dashboard.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_edit_product/admin_edit_product_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_products_mangement/admin_products_mangement_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_user_management/admin_user_management_screen.dart';
 import 'package:e_commerce_app/presentation/screens/category_screen/category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/checkout_screen/checkout_screen.dart';
 import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
@@ -122,6 +126,28 @@ GoRouter createRouter(AuthProvider authProvider) {
         path: '/adminDashboard',
         builder: (context, state) => const AdminDashboard(),
       ),
+
+      // ---------------------ADMIN SIDE--------------------------
+
+      GoRoute(
+        path: "/admin/customers",
+        builder: (context, state) => const AdminUserManagementScreen(),
+      ),
+
+      GoRoute(
+        path: "/admin/products",
+        builder: (context, state) => const AdminProductsMangementScreen(),
+      ),
+      GoRoute(
+        path: "/admin/add-product",
+        builder: (context, state) => const AdminAddProductScreen(),
+      ),
+      GoRoute(
+          path: "/admin/edit-product",
+          builder: (context, state) {
+            final product = state.extra as ProductModel;
+            return AdminEditProductScreen(product: product);
+          }),
     ],
   );
 }

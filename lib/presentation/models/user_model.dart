@@ -11,6 +11,7 @@ class UserModel {
   final String? address;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool isBlocked; 
 
   UserModel({
     required this.uid,
@@ -23,6 +24,7 @@ class UserModel {
     this.address,
     this.createdAt,
     this.updatedAt,
+    this.isBlocked = false,
   });
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
@@ -38,6 +40,7 @@ class UserModel {
       address: data['address'],
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      isBlocked: data['isBlocked'] ?? false, 
     );
   }
 
@@ -50,6 +53,7 @@ class UserModel {
       'dob': dob,
       'phone': phone,
       'address': address,
+      'isBlocked': isBlocked, // 👈 include this
       'createdAt': createdAt ?? FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
@@ -65,6 +69,7 @@ class UserModel {
     String? address,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isBlocked,
   }) {
     return UserModel(
       uid: uid,
@@ -77,6 +82,7 @@ class UserModel {
       address: address ?? this.address,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      isBlocked: isBlocked ?? this.isBlocked,
     );
   }
 }

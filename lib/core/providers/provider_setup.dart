@@ -1,4 +1,6 @@
 // lib/core/providers/provider_setup.dart
+import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
+import 'package:e_commerce_app/core/providers/admin/userManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/category_provider.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
@@ -37,6 +39,12 @@ class AppProvider {
         create: (context) => ProfileSetupProvider()),
     ChangeNotifierProvider<CacheProvider>(create: (_) => CacheProvider()),
     ChangeNotifierProvider<NotificationProvider>(
-        create: (context) => NotificationProvider())
+        create: (context) => NotificationProvider()),
+
+    // -----------------------Admin------------------------
+    ChangeNotifierProvider<UserManagementProvider>(
+        create: (context) => UserManagementProvider()),
+    ChangeNotifierProvider<ProductmanagementProvider>(
+        create: (context) => ProductmanagementProvider()),
   ];
 }
