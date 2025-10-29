@@ -29,8 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
     // TODO: implement initStates
     super.initState();
     if (kDebugMode) {
-      emailCtrl.text = "unknowusers420@gmail.com";
-      passCtrl.text = "12345678";
+      emailCtrl.text = "admin@admin.com";
+      passCtrl.text = "abc12345678";
+      // emailCtrl.text = "unknowusers420@gmail.com";
+      // passCtrl.text = "12345678";
     }
   }
 
@@ -88,17 +90,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: SmallLoader(
                                       backgroundColor: Colors.white))),
                         );
-
                         try {
                           await auth.loginWithEmail(
                             emailCtrl.text.trim(),
                             passCtrl.text.trim(),
                             profile,
                           );
+                          final role = await auth.getUserRole();
 
                           if (!mounted) return; // ✅ check before using context
                           Navigator.of(context).pop(); // close loader safely
-                          context.go('/'); // go to home
+                          if (role == 'admin') {
+                            Fluttertoast.showToast(msg: "Welcome, Admin!");
+                            Future.microtask(
+                                () => context.go('/adminDashboard'));
+                          } else {
+                            Fluttertoast.showToast(msg: "Welcome back!");
+                            context.go('/');
+                          } // go to home
                         } on firebase.FirebaseAuthException catch (e) {
                           if (!mounted) return; // ✅ safe again
                           Navigator.of(context).pop(); // close loader
@@ -133,13 +142,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         "Don’t have an account?",
                         style: TextStyle(color: Colors.white),
                       ),
                       GestureDetector(
                         onTap: () => context.push('/signup'),
-                        child: Text(
+                        child: const Text(
                           " Sign up",
                           style: TextStyle(
                               color: KprimaryColor,

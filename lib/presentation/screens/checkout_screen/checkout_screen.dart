@@ -91,7 +91,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: Text(
+        title: const Text(
           'Add Shipping Address',
           style: TextStyle(
             color: Colors.white,
@@ -103,20 +103,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildAddressTextField('Full Name', nameController),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildAddressTextField('Phone Number', phoneController),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildAddressTextField('Address Line 1', addressLine1Controller),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildAddressTextField(
                   'Address Line 2 (Optional)', addressLine2Controller),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildAddressTextField('City', cityController),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildAddressTextField('State/Province', stateController),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildAddressTextField('ZIP/Postal Code', zipController),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildAddressTextField('Country', countryController),
             ],
           ),
@@ -154,7 +154,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 );
               }
             },
-            child: Text(
+            child: const Text(
               'Save',
               style: TextStyle(color: KprimaryColor),
             ),
@@ -168,7 +168,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       String label, TextEditingController controller) {
     return TextField(
       controller: controller,
-      style: TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
@@ -177,10 +177,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: KprimaryColor),
+          borderSide: const BorderSide(color: KprimaryColor),
           borderRadius: BorderRadius.circular(8),
         ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
     );
   }
@@ -352,7 +352,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       onPressed: () {
                         context.pop();
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.arrow_back_ios,
                         color: KprimaryColor,
                         size: 20,
@@ -1054,7 +1054,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: Column(
+        title: const Column(
           children: [
             Icon(
               Icons.check_circle,
@@ -1086,7 +1086,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text(
+            child: const Text(
               'OK',
               style: TextStyle(color: KprimaryColor),
             ),

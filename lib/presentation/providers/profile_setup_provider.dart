@@ -46,6 +46,7 @@ class ProfileSetupProvider extends ChangeNotifier {
         'uid': firebaseUser.uid,
         'email': firebaseUser.email,
         'name': firebaseUser.displayName ?? '',
+        'role': 'user', // default role
         'photoUrl': firebaseUser.photoURL ?? '',
         'createdAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),

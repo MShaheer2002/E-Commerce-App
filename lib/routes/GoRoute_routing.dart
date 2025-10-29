@@ -2,6 +2,7 @@ import 'package:e_commerce_app/presentation/models/cart_model.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_dashboard/admin_dashboard.dart';
 import 'package:e_commerce_app/presentation/screens/category_screen/category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/checkout_screen/checkout_screen.dart';
 import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
@@ -14,47 +15,46 @@ import 'package:e_commerce_app/presentation/screens/profile_setup/profile_setup.
 import 'package:e_commerce_app/presentation/screens/search_screen/search_screen.dart';
 import 'package:e_commerce_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:e_commerce_app/presentation/screens/single_product_screen/single_product_screen.dart';
+import 'package:e_commerce_app/presentation/screens/splash_screen/splash_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:e_commerce_app/presentation/screens/splash_screen/splash_screen.dart';
 
-// Inside createRouter()
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
     debugLogDiagnostics: true,
     refreshListenable: authProvider,
     initialLocation: '/splash',
     redirect: (context, state) {
-      // final auth = context.read<AuthProvider>();
-      // final isLoggedIn = auth.isLoggedIn;
-
-      // // Skip redirect during splash
-      // if (state.matchedLocation == '/splash') return null;
-
-      // final goingToLogin = state.matchedLocation == '/login';
-      // final goingToSignup = state.matchedLocation == '/signup';
-
-      // if (!isLoggedIn && !(goingToLogin || goingToSignup)) return '/login';
-      // if (isLoggedIn && (goingToLogin || goingToSignup)) return '/';
-      // return null;
-
       final auth = context.read<AuthProvider>();
 
-      // Wait until provider has seen the first authStateChanges event
+      // Wait until Firebase auth is initialized
       if (!auth.isInitialized) return '/splash';
 
       final isLoggedIn = auth.isLoggedIn;
+      final isAdmin = auth.currentRole == "admin";
+
       final goingToLogin = state.matchedLocation == '/login';
       final goingToSignup = state.matchedLocation == '/signup';
       final goingToSplash = state.matchedLocation == '/splash';
 
+      // 1️⃣ If user is NOT logged in — only allow splash, login, signup
       if (!isLoggedIn && !(goingToLogin || goingToSignup || goingToSplash)) {
         return '/login';
       }
+
+      // 2️⃣ If user IS logged in — block login/signup/splash
       if (isLoggedIn && (goingToLogin || goingToSignup || goingToSplash)) {
+        if (isAdmin) return '/adminDashboard';
+
         return '/';
       }
-      return null;
+
+      // 3️⃣ Protect adminDashboard — only admins can access it
+      if (state.matchedLocation == '/adminDashboard' && !isAdmin) {
+        return '/'; // redirect non-admin users to home
+      }
+
+      return null; // allow navigation
     },
     routes: [
       GoRoute(
@@ -111,14 +111,16 @@ GoRouter createRouter(AuthProvider authProvider) {
         path: '/checkout-screen',
         builder: (context, state) {
           final items = state.extra as List<CartModel>;
-          return CheckoutScreen(
-            selectedItems: items,
-          );
+          return CheckoutScreen(selectedItems: items);
         },
       ),
       GoRoute(
         path: '/profile-setup',
         builder: (context, state) => const ProfileSetupView(),
+      ),
+      GoRoute(
+        path: '/adminDashboard',
+        builder: (context, state) => const AdminDashboard(),
       ),
     ],
   );

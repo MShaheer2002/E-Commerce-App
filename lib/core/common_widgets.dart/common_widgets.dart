@@ -165,9 +165,6 @@ class CustomButton extends StatelessWidget {
 
 /// A dynamic, reusable text field widget.
 
-
-
-
 class CustomTextField extends StatefulWidget {
   final String hintText;
   final TextEditingController? controller;
@@ -672,6 +669,53 @@ Widget buildAddToBasketButton(
           fontSize: width * 0.045,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    ),
+  );
+}
+
+PreferredSizeWidget adminCustomAppBar({
+  required BuildContext context,
+  required String title,
+  bool showBackButton = true,
+  List<Widget>? actions,
+  Color titleColor = Colors.black,
+}) {
+  double width = MediaQuery.of(context).size.width;
+
+  return PreferredSize(
+    preferredSize: Size(width, kToolbarHeight),
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1), // subtle shadow
+            blurRadius: 6,
+            offset: const Offset(0, 3), // downward shadow
+          ),
+        ],
+      ),
+      child: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0, // keep it 0 since shadow is from container
+        centerTitle: true,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontFamily: "Urbanist",
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        leading: showBackButton
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+        actions: actions,
       ),
     ),
   );

@@ -1,8 +1,10 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -16,20 +18,28 @@ class AuthProvider with ChangeNotifier {
 
   bool get isInitialized => _isInitialized;
   bool get isLoading => _isLoading;
+  String? _cachedRole;
+  String? get currentRole => _cachedRole;
 
-  // For routing, only consider user logged-in if emailVerified == true
+  // For routing, only consider user logged-in if emailVerified == trues
   User? get firebaseUser => _rawUser;
-  bool get isLoggedIn => _rawUser != null && _rawUser!.emailVerified;
+  bool get isLoggedIn {
+    if (_rawUser == null) return false;
+    // Allow admins to skip email verification
+    if (_cachedRole == "admin") return true;
+    return _rawUser!.emailVerified;
+  }
 
   AuthProvider() {
-    // One listener to maintain a stable initialized state and normalized user
     _auth.authStateChanges().listen((User? user) async {
-      // Set raw user immediately
       _rawUser = user;
+      if (user != null) {
+        // ✅ Fetch role from Firestore on startup
+        await getUserRole();
+      } else {
+        _cachedRole = null;
+      }
 
-      // If a user exists but not verified, don't let them be considered logged in:
-      // We won't proactively sign them out here (UI handles sign-out after signup/login attempt),
-      // but route decisions use isLoggedIn which checks emailVerified.
       _isInitialized = true;
       notifyListeners();
     });
@@ -84,17 +94,24 @@ class AuthProvider with ChangeNotifier {
       await user.reload();
 
       final freshUser = _auth.currentUser;
+      final role = await getUserRole();
 
-      if (freshUser == null || !freshUser.emailVerified) {
+      if (role != "admin" && (freshUser == null || !freshUser.emailVerified)) {
         await _auth.signOut();
+
         throw FirebaseAuthException(
           code: 'email-not-verified',
           message: 'Please verify your email before logging in.',
         );
       }
-
+      if (role != "admin") {
+        await profileProvider.saveUserFromAuth(freshUser!);
+      } else if (role == "admin") {
+        _rawUser = freshUser;
+        _cachedRole = role;
+        notifyListeners();
+      }
       // If verified, _auth.authStateChanges will update _rawUser and route will allow home.
-      await profileProvider.saveUserFromAuth(freshUser);
 
       log("Login In!!");
     } finally {
@@ -207,5 +224,14 @@ class AuthProvider with ChangeNotifier {
   // ✅ PASSWORD VALIDATION
   bool validatePassword(String password) {
     return password.trim().length >= 8;
+  }
+
+  Future<String?> getUserRole() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return null;
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    _cachedRole = doc.data()?['role'];
+    return _cachedRole;
   }
 }
