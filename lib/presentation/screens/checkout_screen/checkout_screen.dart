@@ -1,12 +1,20 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/providers/checkout_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/cart_model.dart';
+import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
+import 'package:e_commerce_app/presentation/models/order_model.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../../../core/payment_intent.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final List<CartModel> selectedItems;
+  final List<CartItemModel> selectedItems;
 
   const CheckoutScreen({
     super.key,
@@ -37,7 +45,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   TextEditingController countryController = TextEditingController();
 
   double calculateSubtotal() {
-    return widget.selectedItems.fold(0.0, (sum, item) => sum + item.totalPrice);
+    return widget.selectedItems
+        .fold(0.0, (sum, item) => sum + (item.quantity * item.product.price));
   }
 
   double calculateShipping() {
@@ -180,7 +189,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           borderSide: const BorderSide(color: KprimaryColor),
           borderRadius: BorderRadius.circular(8),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
     );
   }
@@ -210,51 +220,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return '${selectedAddress!['name']}, ${selectedAddress!['addressLine1']}, ${selectedAddress!['city']}, ${selectedAddress!['state']} ${selectedAddress!['zip']}';
   }
 
-  void _printOrderDetails() {
-    print('========================================');
-    print('ORDER CONFIRMATION');
-    print('========================================');
-    print('Order Date: ${DateTime.now()}');
-    print('');
-    print('--- SHIPPING ADDRESS ---');
-    if (selectedAddress != null) {
-      print('Name: ${selectedAddress!['name']}');
-      print('Phone: ${selectedAddress!['phone']}');
-      print('Address: ${selectedAddress!['addressLine1']}');
-      if (selectedAddress!['addressLine2'].isNotEmpty) {
-        print('         ${selectedAddress!['addressLine2']}');
-      }
-      print('City: ${selectedAddress!['city']}');
-      print('State: ${selectedAddress!['state']}');
-      print('ZIP: ${selectedAddress!['zip']}');
-      print('Country: ${selectedAddress!['country']}');
-    }
-    print('');
-    print('--- ORDER ITEMS ---');
-    for (var item in widget.selectedItems) {
-      print('Product: ${item.name}');
-      print('Quantity: ${item.quantity}');
-      print('Price: \$${item.totalPrice.toStringAsFixed(2)}');
-      print('---');
-    }
-    print('');
-    print('--- PAYMENT DETAILS ---');
-    print('Subtotal: \$${calculateSubtotal().toStringAsFixed(2)}');
-    print(
-        'Shipping: ${calculateShipping() == 0 ? 'Free' : '\$${calculateShipping().toStringAsFixed(2)}'}');
-    print('Taxes: \$${calculateTaxes().toStringAsFixed(2)}');
-    if (promoApplied) {
-      print('Discount: -\$${promoDiscount.toStringAsFixed(2)}');
-    }
-    print('TOTAL: \$${calculateTotal().toStringAsFixed(2)}');
-    print('');
-    print(
-        'Payment Method: ${selectedPayment == 'card' ? 'Credit/Debit Card' : 'Cash on Delivery'}');
-    print('Delivery Method: $selectedDelivery');
-    print('========================================');
+  void _printOrderDetails(CheckoutProvider provider, String paymentIndentId) {
+    final OrderModel order = OrderModel(
+        userId: provider.userId,
+        cartItems: widget.selectedItems,
+        totalAmount: double.parse(calculateTotal().toStringAsFixed(2)),
+        orderDate: Timestamp.now(),
+        paymentIntentId: paymentIndentId,
+        paymentMethod: 'card',
+        address: _getAddressPreview(),
+        orderStatus: '');
+
+    log('========================================');
+    log('ORDER CONFIRMATION');
+    log('========================================');
+    log('Order Date: ${DateTime.now()}');
+    log('');
+    log("[checkout] ${order.toJson().toString()}");
+
+    context.read<CheckoutProvider>().handlePurchase(order);
   }
 
-  Future<void> handlePlaceOrder() async {
+  Future<void> handlePlaceOrder(CheckoutProvider checkoutprovider) async {
     // Validate shipping address
     if (selectedAddress == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -278,10 +265,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       try {
         // This will show the Stripe payment UI
         // await showPaymentSheet(total);
-        await showPaymentSheet(total);
+        final paymentindentId = await showPaymentSheet(total);
 
         // Payment successful - Print order details
-        _printOrderDetails();
+        _printOrderDetails(checkoutprovider, paymentindentId);
 
         if (mounted) {
           _showOrderConfirmation(context);
@@ -293,13 +280,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             errorMessage = 'Payment cancelled';
           }
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          Fluttertoast.showToast(
+              msg: errorMessage, backgroundColor: Colors.red);
         }
       } finally {
         if (mounted) {
@@ -308,10 +290,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           });
         }
       }
-    } else {
-      // Cash on Delivery - no payment processing needed
-      _printOrderDetails();
-      _showOrderConfirmation(context);
     }
   }
 
@@ -319,6 +297,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    // final checkoutProvider = Provider.of<CheckoutProvider>(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -438,7 +417,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 selectedPayment == 'card'
                     ? 'Pay \$${calculateTotal().toStringAsFixed(2)}'
                     : 'Place Order',
-                handlePlaceOrder,
+                () => handlePlaceOrder,
               ),
       ),
     );
@@ -832,7 +811,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         // Items
         ...widget.selectedItems.asMap().entries.map((entry) {
           int index = entry.key;
-          CartModel item = entry.value;
+          CartItemModel item = entry.value;
           bool isLast = index == widget.selectedItems.length - 1;
 
           return Container(
@@ -867,9 +846,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: item.imageUrl.isNotEmpty
+                    child: item.product.imageUrls.isNotEmpty
                         ? Image.network(
-                            item.imageUrl[0],
+                            item.product.imageUrls[0],
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => Icon(
                               Icons.image_not_supported_outlined,
@@ -901,7 +880,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                       SizedBox(height: height * 0.003),
                       Text(
-                        item.name,
+                        item.product.name,
                         style: TextStyle(
                           fontSize: width * 0.038,
                           fontWeight: FontWeight.w600,
@@ -933,7 +912,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 // Price
                 Expanded(
                   child: Text(
-                    '\$${item.totalPrice.toStringAsFixed(2)}',
+                    '\$${(item.product.price * item.quantity).toStringAsFixed(2)}',
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: width * 0.04,

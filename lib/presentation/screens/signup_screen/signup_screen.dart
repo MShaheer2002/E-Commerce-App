@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';

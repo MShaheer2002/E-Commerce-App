@@ -1,13 +1,13 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// ⚠️ WARNING: This approach exposes your secret key in the app.
-/// In production, you should create payment intents from your backend server.
-/// This is only for testing/development purposes.
-Future<String> createPaymentIntent(double amount) async {
+/// ⚠️ NOTE: This approach exposes your Stripe Secret Key.
+/// In production, always create payment intents on your backend server.
+Future<Map<String, String>> createPaymentIntent(double amount) async {
   final url = Uri.parse('https://api.stripe.com/v1/payment_intents');
   final secretKey = dotenv.env['STRIPE_SECRET_KEY'];
 
@@ -23,7 +23,7 @@ Future<String> createPaymentIntent(double amount) async {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: {
-        'amount': (amount * 100).toInt().toString(), // Convert to cents
+        'amount': (amount * 100).toInt().toString(), // Convert dollars → cents
         'currency': 'usd',
         'payment_method_types[]': 'card',
       },
@@ -33,141 +33,77 @@ Future<String> createPaymentIntent(double amount) async {
 
     if (response.statusCode != 200) {
       throw Exception(
-          "Failed to create payment intent: ${body['error']?['message'] ?? 'Unknown error'}");
+        "Failed to create payment intent: ${body['error']?['message'] ?? 'Unknown error'}",
+      );
     }
 
-    return body['client_secret'];
+    final clientSecret = body['client_secret'];
+    final paymentIntentId = body['id'];
+
+    if (clientSecret == null || paymentIntentId == null) {
+      throw Exception(
+          'Invalid response from Stripe when creating PaymentIntent.');
+    }
+
+    log('[Stripe] PaymentIntent created: $paymentIntentId');
+    return {
+      'clientSecret': clientSecret,
+      'paymentIntentId': paymentIntentId,
+    };
   } catch (e) {
-    print('Error creating payment intent: $e');
+    log('❌ Error creating payment intent: $e');
     rethrow;
   }
 }
 
-/// Shows Stripe's payment sheet UI for card entry
-Future<void> showPaymentSheet(double amount) async {
+/// 💳 Shows Stripe's Payment Sheet UI
+Future<String> showPaymentSheet(double amount) async {
   try {
-    print('Creating payment intent for amount: \$$amount');
+    log('[Checkout] Creating PaymentIntent for \$${amount.toStringAsFixed(2)}');
 
-    // 1. Create payment intent
-    final clientSecret = await createPaymentIntent(amount);
-    print('Payment intent created successfully');
+    // 1️⃣ Create the payment intent
+    final intentData = await createPaymentIntent(amount);
+    final clientSecret = intentData['clientSecret']!;
+    final paymentIntentId = intentData['paymentIntentId']!;
+    log('[Checkout] PaymentIntent ID: $paymentIntentId');
 
-    // 2. Initialize payment sheet with card details form
+    // 2️⃣ Initialize the payment sheet
     await Stripe.instance.initPaymentSheet(
       paymentSheetParameters: SetupPaymentSheetParameters(
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: 'My E-Commerce Store',
-        style: ThemeMode.system, // Matches your app theme
-        appearance: const PaymentSheetAppearance(
-          colors: PaymentSheetAppearanceColors(
-            primary: Color(0xFF6C63FF), // Your KprimaryColor
-            background: Color(0xFF1E1E1E),
-            componentBackground: Color(0xFF2D2D2D),
-          ),
-        ),
-        // Enable customer to save card for future use (optional)
-        allowsDelayedPaymentMethods: true,
-      ),
-    );
-    print('Payment sheet initialized');
-
-    // 3. Present payment sheet with card entry form
-    await Stripe.instance.presentPaymentSheet();
-    print("Payment successful!");
-  } on StripeException catch (e) {
-    print("Stripe error: ${e.error.message}");
-
-    // Handle user cancellation
-    if (e.error.code == FailureCode.Canceled) {
-      throw Exception('Payment cancelled by user');
-    }
-
-    // Handle other Stripe errors
-    throw Exception(e.error.message ?? 'Payment failed');
-  } catch (e) {
-    print("Payment error: $e");
-    rethrow;
-  }
-}
-
-/// Alternative: Show payment sheet with customization
-Future<void> showCustomPaymentSheet(
-  double amount, {
-  String? customerEmail,
-  String? customerName,
-}) async {
-  try {
-    print('Creating payment intent for amount: \$$amount');
-
-    final clientSecret = await createPaymentIntent(amount);
-    print('Payment intent created successfully');
-
-    await Stripe.instance.initPaymentSheet(
-      paymentSheetParameters: SetupPaymentSheetParameters(
-        paymentIntentClientSecret: clientSecret,
-        merchantDisplayName: 'My E-Commerce Store',
-        customerId: null, // Add if you have customer IDs
-        customerEphemeralKeySecret: null, // Add if you have ephemeral keys
-        style: ThemeMode.dark,
+        style: ThemeMode.system,
         appearance: const PaymentSheetAppearance(
           colors: PaymentSheetAppearanceColors(
             primary: Color(0xFF6C63FF),
             background: Color(0xFF1E1E1E),
             componentBackground: Color(0xFF2D2D2D),
-            componentBorder: Color(0xFF3D3D3D),
-            primaryText: Color(0xFFFFFFFF),
-            secondaryText: Color(0xFFB0B0B0),
-            componentText: Color(0xFFFFFFFF),
-            placeholderText: Color(0xFF808080),
-          ),
-          shapes: PaymentSheetShape(
-            borderRadius: 12,
-            borderWidth: 1,
-          ),
-          primaryButton: PaymentSheetPrimaryButtonAppearance(
-            colors: PaymentSheetPrimaryButtonTheme(
-              light: PaymentSheetPrimaryButtonThemeColors(
-                background: Color(0xFF6C63FF),
-                text: Color(0xFFFFFFFF),
-                border: Color(0xFF6C63FF),
-              ),
-              dark: PaymentSheetPrimaryButtonThemeColors(
-                background: Color(0xFF6C63FF),
-                text: Color(0xFFFFFFFF),
-                border: Color(0xFF6C63FF),
-              ),
-            ),
-            shapes: PaymentSheetPrimaryButtonShape(borderWidth: 12),
           ),
         ),
-        billingDetailsCollectionConfiguration:
-            const BillingDetailsCollectionConfiguration(
-          name: CollectionMode.always,
-          email: CollectionMode.always,
-          phone: CollectionMode.automatic,
-          address: AddressCollectionMode.automatic,
-        ),
-        // applePay: const PaymentSheetApplePay(
-        //   merchantCountryCode: 'US',
-        // ),
-        googlePay: const PaymentSheetGooglePay(
-          merchantCountryCode: 'US',
-          testEnv: true,
-          currencyCode: 'USD',
-        ),
+        allowsDelayedPaymentMethods: true,
       ),
     );
 
+    log('[Checkout] Payment sheet initialized');
+
+    // 3️⃣ Show the payment sheet
     await Stripe.instance.presentPaymentSheet();
-    print("Payment successful!");
+    log('[Checkout] ✅ Payment successful for intent: $paymentIntentId');
+
+    // You can store the paymentIntentId in Firestore if you want to verify later
+    // Example:
+
+    // await FirebaseFirestore.instance.collection('orders').doc(paymentIntentId).set({...});
+
+    return paymentIntentId;
   } on StripeException catch (e) {
-    print("Stripe error: ${e.error.message}");
+    log('⚠️ Stripe error: ${e.error.message}');
     if (e.error.code == FailureCode.Canceled) {
       throw Exception('Payment cancelled by user');
     }
     throw Exception(e.error.message ?? 'Payment failed');
   } catch (e) {
-    print("Payment error: $e");
+    log('❌ Payment error: $e');
     rethrow;
   }
 }

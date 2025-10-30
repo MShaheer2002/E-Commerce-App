@@ -112,7 +112,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildMenuItem(
                   icon: Icons.security_outlined,
                   title: "Security",
-                  onTap: () {},
+                  onTap: () {
+                    
+                  },
                 ),
                 _buildMenuItem(
                   icon: Icons.privacy_tip_outlined,

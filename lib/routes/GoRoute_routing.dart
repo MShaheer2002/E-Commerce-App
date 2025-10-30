@@ -1,4 +1,4 @@
-import 'package:e_commerce_app/presentation/models/cart_model.dart';
+import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
@@ -114,7 +114,7 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/checkout-screen',
         builder: (context, state) {
-          final items = state.extra as List<CartModel>;
+          final items = state.extra as List<CartItemModel>;
           return CheckoutScreen(selectedItems: items);
         },
       ),
@@ -127,6 +127,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         builder: (context, state) => const AdminDashboard(),
       ),
 
+      
       // ---------------------ADMIN SIDE--------------------------
 
       GoRoute(

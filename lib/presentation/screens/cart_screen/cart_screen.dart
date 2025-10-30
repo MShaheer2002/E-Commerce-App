@@ -1,6 +1,7 @@
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -38,13 +39,13 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  double calculateSelectedTotal(List cartItems) {
+  double calculateSelectedTotal(List<CartItemModel> cartItems) {
     return cartItems
-        .where((item) => selectedItems.contains(item.id))
-        .fold(0.0, (sum, item) => sum + item.totalPrice);
+        .where((item) => selectedItems.contains(item.product.id))
+        .fold(0.0, (sum, item) => sum + item.product.price);
   }
 
-  void navigateToCheckout(List cartItems) {
+  void navigateToCheckout(List<CartItemModel> cartItems) {
     if (selectedItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select items to checkout')),
@@ -53,7 +54,7 @@ class _CartScreenState extends State<CartScreen> {
     }
 
     final selected =
-        cartItems.where((item) => selectedItems.contains(item.id)).toList();
+        cartItems.where((item) => selectedItems.contains(item.product.id)).toList();
 
     // Navigate to checkout screen with selected items
     context.push("/checkout-screen", extra: selected);
@@ -183,13 +184,17 @@ class _CartScreenState extends State<CartScreen> {
                           context: context,
                           cartItem: item,
                           isSelected: isSelected,
-                          onSelectToggle: () => toggleItemSelection(item.id),
-                          onDelete: () => cartService.removeFromCart(item.id),
+                          onSelectToggle: () =>
+                              toggleItemSelection(item.product.id ?? ''),
+                          onDelete: () =>
+                              cartService.removeFromCart(item.product.id ?? ''),
                           onQuantityChanged: (newQuantity) {
                             if (newQuantity > item.quantity) {
-                              cartService.increaseQuantity(item.id);
+                              cartService
+                                  .increaseQuantity(item.product.id ?? '');
                             } else {
-                              cartService.decreaseQuantity(item.id);
+                              cartService
+                                  .decreaseQuantity(item.product.id ?? '');
                             }
                           },
                         );
@@ -217,7 +222,7 @@ class _CartScreenState extends State<CartScreen> {
 
 Widget buildCartItem({
   required BuildContext context,
-  required cartItem,
+  required CartItemModel cartItem,
   required bool isSelected,
   required VoidCallback onSelectToggle,
   required VoidCallback onDelete,
@@ -272,9 +277,9 @@ Widget buildCartItem({
               color: Colors.grey[100],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: cartItem.imageUrl.isNotEmpty
+            child: cartItem.product.imageUrls.isNotEmpty
                 ? Image.network(
-                    cartItem.imageUrl[0],
+                    cartItem.product.imageUrls[0],
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Icon(
                       Icons.image_not_supported_outlined,
@@ -302,7 +307,7 @@ Widget buildCartItem({
                   children: [
                     Expanded(
                       child: Text(
-                        cartItem.name,
+                        cartItem.product.name,
                         style: TextStyle(
                           fontSize: width * 0.04,
                           fontWeight: FontWeight.w600,
@@ -326,7 +331,7 @@ Widget buildCartItem({
                 ),
                 SizedBox(height: height * 0.006),
                 Text(
-                  '\$${cartItem.price.toStringAsFixed(2)}',
+                  '\$${cartItem.product.price.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: width * 0.038,
                     fontWeight: FontWeight.w500,
@@ -395,7 +400,7 @@ Widget buildCartItem({
                     ),
                     const Spacer(),
                     Text(
-                      '\$${cartItem.totalPrice.toStringAsFixed(2)}',
+                      '\$${(cartItem.quantity * cartItem.product.price).toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: width * 0.045,
                         fontWeight: FontWeight.bold,

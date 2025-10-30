@@ -1,6 +1,5 @@
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/category_provider.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

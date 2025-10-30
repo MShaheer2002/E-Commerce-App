@@ -1,10 +1,10 @@
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
-import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -250,7 +250,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: KprimaryColor, width: 2),
+          borderSide: const BorderSide(color: KprimaryColor, width: 2),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -338,15 +338,15 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: KprimaryColor.withOpacity(0.3), width: 2),
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.add_photo_alternate_outlined,
                 color: KprimaryColor, size: 32),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
               "Add",
-              style: TextStyle(
+              style: const TextStyle(
                   color: KprimaryColor,
                   fontSize: 12,
                   fontWeight: FontWeight.w500),
@@ -393,7 +393,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: KprimaryColor, width: 2),
+              borderSide: const BorderSide(color: KprimaryColor, width: 2),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

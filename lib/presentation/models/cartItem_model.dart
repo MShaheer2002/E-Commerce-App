@@ -1,16 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:e_commerce_app/presentation/models/product_model.dart';
 
 class CartItemModel {
-  final String id; // cart item id
-  final String productId;
+  String? id;
+  final ProductModel product;
   final String userId;
-  final int quantity;
+  int quantity;
   final double priceAtPurchase;
   final Timestamp addedAt;
 
-  const CartItemModel({
-    required this.id,
-    required this.productId,
+  CartItemModel({
+    this.id,
+    required this.product,
     required this.userId,
     required this.quantity,
     required this.priceAtPurchase,
@@ -20,22 +21,38 @@ class CartItemModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'productId': productId,
+      'product': product.toMap(),
       'userId': userId,
       'quantity': quantity,
       'priceAtPurchase': priceAtPurchase,
-      'addedAt': addedAt,
+      // Convert Timestamp → ISO string for JSON safety
+      'addedAt': addedAt.toDate().toIso8601String(),
     };
   }
 
   factory CartItemModel.fromMap(Map<String, dynamic> map) {
+    Timestamp timestamp;
+
+    // Handle multiple possible formats (Timestamp, DateTime, String)
+    final addedAtValue = map['addedAt'];
+    if (addedAtValue is Timestamp) {
+      timestamp = addedAtValue;
+    } else if (addedAtValue is String) {
+      timestamp = Timestamp.fromDate(DateTime.parse(addedAtValue));
+    } else if (addedAtValue is DateTime) {
+      timestamp = Timestamp.fromDate(addedAtValue);
+    } else {
+      timestamp = Timestamp.now();
+    }
+
     return CartItemModel(
-      id: map['id'] ?? '',
-      productId: map['productId'] ?? '',
+      id: map['id'],
+      product:
+          ProductModel.fromMap(Map<String, dynamic>.from(map['product'] ?? {})),
       userId: map['userId'] ?? '',
       quantity: map['quantity'] ?? 1,
       priceAtPurchase: (map['priceAtPurchase'] ?? 0).toDouble(),
-      addedAt: map['addedAt'] ?? Timestamp.now(),
+      addedAt: timestamp,
     );
   }
 }

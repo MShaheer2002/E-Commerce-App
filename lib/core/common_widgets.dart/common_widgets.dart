@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/cart_model.dart';
+import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -472,7 +472,7 @@ Widget FavProductWidget({
 
 Widget buildCartItem({
   required BuildContext context,
-  required CartModel cartItem,
+  required CartItemModel cartItem,
   required VoidCallback onDelete,
   required Function(int) onQuantityChanged,
 }) {
@@ -509,9 +509,9 @@ Widget buildCartItem({
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(12),
             ),
-            child: cartItem.imageUrl.isNotEmpty
+            child: cartItem.product.imageUrls.isNotEmpty
                 ? Image.network(
-                    cartItem.imageUrl[0],
+                    cartItem.product.imageUrls[0],
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Icon(
                       Icons.image_not_supported,
@@ -536,7 +536,7 @@ Widget buildCartItem({
             children: [
               // Title
               Text(
-                cartItem.name,
+                cartItem.product.name,
                 style: TextStyle(
                   fontSize: width * 0.04,
                   fontWeight: FontWeight.w600,
@@ -549,7 +549,7 @@ Widget buildCartItem({
 
               // Price
               Text(
-                '\$${cartItem.price.toStringAsFixed(2)}',
+                '\$${cartItem.product.price.toStringAsFixed(2)}',
                 style: TextStyle(
                   fontSize: width * 0.038,
                   fontWeight: FontWeight.w500,
@@ -617,7 +617,7 @@ Widget buildCartItem({
 
                   // Total Price
                   Text(
-                    '\$${cartItem.totalPrice.toStringAsFixed(2)}',
+                    '\$${(cartItem.product.price * cartItem.quantity).toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: width * 0.042,
                       fontWeight: FontWeight.bold,

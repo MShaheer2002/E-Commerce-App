@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/presentation/models/cart_model.dart';
+import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,15 +10,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CartProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseAuth _auth = FirebaseAuth.instance;
-  final Map<String, CartModel> _items = {};
+  final Map<String, CartItemModel> _items = {};
   String? _userId;
   bool _isLoading = false;
 
+  String get userId => _userId ?? '';
   bool get isLoading => _isLoading;
-  Map<String, CartModel> get items => {..._items};
+  Map<String, CartItemModel> get items => {..._items};
 
-  double get totalAmount =>
-      _items.values.fold(0, (sum, item) => sum + item.totalPrice);
+  double get totalAmount => _items.values
+      .fold(0, (sum, item) => sum + (item.quantity * item.product.price));
 
   void setUser() {
     // _userId = userId;
@@ -41,7 +43,7 @@ class CartProvider extends ChangeNotifier {
       final cartItems = Map<String, dynamic>.from(data['items']);
       _items.clear();
       cartItems.forEach((key, value) {
-        _items[key] = CartModel.fromMap(Map<String, dynamic>.from(value));
+        _items[key] = CartItemModel.fromMap(value);
       });
     } else {
       // Load from SharedPreferences fallback
@@ -50,7 +52,7 @@ class CartProvider extends ChangeNotifier {
       if (cartData != null) {
         final decoded = json.decode(cartData) as Map<String, dynamic>;
         decoded.forEach((key, value) {
-          _items[key] = CartModel.fromMap(value);
+          _items[key] = CartItemModel.fromMap(value);
         });
       }
     }
@@ -73,19 +75,32 @@ class CartProvider extends ChangeNotifier {
       await _firestore.collection('carts').doc(_userId).set({
         'items': _items.map((key, value) => MapEntry(key, value.toMap())),
         'total': totalAmount,
-        'updatedAt': FieldValue.serverTimestamp(),
+        'updatedAt': Timestamp.now(),
       }, SetOptions(merge: true));
     } catch (e) {
       log("[Cart error] $e");
     }
   }
 
-  void addToCart(CartModel item) {
-    if (_items.containsKey(item.id)) {
-      _items[item.id]!.quantity += item.quantity;
+  void addToCart(CartItemModel item) {
+    final productId = item.product.id!; // ✅ product id inside ProductModel
+
+    if (_items.containsKey(productId)) {
+      final existingItem = _items[productId]!;
+
+      // create new item with updated quantity
+      _items[productId] = CartItemModel(
+        id: existingItem.id,
+        product: existingItem.product,
+        userId: existingItem.userId,
+        quantity: existingItem.quantity + item.quantity,
+        priceAtPurchase: existingItem.priceAtPurchase,
+        addedAt: existingItem.addedAt,
+      );
     } else {
-      _items[item.id] = item;
+      _items[productId] = item;
     }
+
     _saveCart();
     notifyListeners();
   }
@@ -104,7 +119,7 @@ class CartProvider extends ChangeNotifier {
 
   void increaseQuantity(String productId) {
     if (_items.containsKey(productId)) {
-      _items[productId]!.quantity++;
+      _items[productId]?.quantity++;
       _saveCart();
       notifyListeners();
     }

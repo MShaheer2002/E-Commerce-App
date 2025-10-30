@@ -1,10 +1,12 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:e_commerce_app/core/providers/single_product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/cart_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
@@ -194,11 +196,11 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
               final cartService = context.read<CartProvider>();
               cartService.setUser();
 
-              final cartItem = CartModel(
-                  id: widget.productModel.id ?? "",
-                  name: widget.productModel.name,
-                  imageUrl: widget.productModel.imageUrls,
-                  price: widget.productModel.price,
+              final cartItem = CartItemModel(
+                  userId: provider.userId,
+                  addedAt: Timestamp.now(),
+                  priceAtPurchase: widget.productModel.price,
+                  product: widget.productModel,
                   quantity: provider.quantity);
 
               cartService.addToCart(cartItem);

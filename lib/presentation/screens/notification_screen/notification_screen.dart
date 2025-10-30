@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
-import 'package:e_commerce_app/core/common_widgets.dart/custom_background.dart';
 import 'package:e_commerce_app/core/providers/notification_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class NotificationScreen extends StatelessWidget {
@@ -13,7 +11,6 @@ class NotificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
 
     final provider = context.watch<NotificationProvider>();
 
