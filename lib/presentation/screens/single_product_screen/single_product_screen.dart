@@ -193,6 +193,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
             height,
             'Add to Cart - ${(widget.productModel.price * provider.quantity).toStringAsFixed(2)} USD',
             () {
+              log("[cart] ${provider.quantity}");
               final cartService = context.read<CartProvider>();
               cartService.setUser();
 

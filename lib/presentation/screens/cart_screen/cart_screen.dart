@@ -17,11 +17,12 @@ class _CartScreenState extends State<CartScreen> {
   Set<String> selectedItems = {};
   bool selectAll = false;
 
-  void toggleSelectAll(List cartItems) {
+  void toggleSelectAll(List<CartItemModel> cartItems) {
     setState(() {
       selectAll = !selectAll;
       if (selectAll) {
-        selectedItems = cartItems.map((item) => item.id as String).toSet();
+        selectedItems =
+            cartItems.map((item) => item.product.id as String).toSet();
       } else {
         selectedItems.clear();
       }
@@ -42,7 +43,7 @@ class _CartScreenState extends State<CartScreen> {
   double calculateSelectedTotal(List<CartItemModel> cartItems) {
     return cartItems
         .where((item) => selectedItems.contains(item.product.id))
-        .fold(0.0, (sum, item) => sum + item.product.price);
+        .fold(0.0, (sum, item) => sum + (item.product.price * item.quantity));
   }
 
   void navigateToCheckout(List<CartItemModel> cartItems) {
@@ -53,8 +54,9 @@ class _CartScreenState extends State<CartScreen> {
       return;
     }
 
-    final selected =
-        cartItems.where((item) => selectedItems.contains(item.product.id)).toList();
+    final selected = cartItems
+        .where((item) => selectedItems.contains(item.product.id))
+        .toList();
 
     // Navigate to checkout screen with selected items
     context.push("/checkout-screen", extra: selected);
@@ -178,7 +180,8 @@ class _CartScreenState extends State<CartScreen> {
                       itemCount: cartItems.length,
                       itemBuilder: (context, index) {
                         final item = cartItems[index];
-                        final isSelected = selectedItems.contains(item.id);
+                        final isSelected =
+                            selectedItems.contains(item.product.id);
 
                         return buildCartItem(
                           context: context,

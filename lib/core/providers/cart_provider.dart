@@ -64,14 +64,19 @@ class CartProvider extends ChangeNotifier {
   Future<void> _saveCart() async {
     if (_userId == null) return;
 
-    // Local save
     final prefs = await SharedPreferences.getInstance();
-    final encoded = json.encode(
-      _items.map((key, item) => MapEntry(key, item.toMap())),
-    );
+
+    // ✅ Convert to JSON-safe map
+    final jsonSafeItems = _items.map((key, item) {
+      final itemMap = item.toMap();
+      return MapEntry(key, _convertTimestamps(itemMap));
+    });
+
+    final encoded = json.encode(jsonSafeItems);
+
     await prefs.setString('cartItems_${_userId!}', encoded);
+
     try {
-      // Firestore sync (✅ merged to avoid overwriting)
       await _firestore.collection('carts').doc(_userId).set({
         'items': _items.map((key, value) => MapEntry(key, value.toMap())),
         'total': totalAmount,
@@ -82,18 +87,32 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
+// 🔧 Helper function to recursively handle Timestamp → String
+  dynamic _convertTimestamps(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate().toIso8601String();
+    } else if (value is Map) {
+      return value.map((k, v) => MapEntry(k, _convertTimestamps(v)));
+    } else if (value is List) {
+      return value.map((e) => _convertTimestamps(e)).toList();
+    } else {
+      return value;
+    }
+  }
+
   void addToCart(CartItemModel item) {
     final productId = item.product.id!; // ✅ product id inside ProductModel
 
     if (_items.containsKey(productId)) {
       final existingItem = _items[productId]!;
-
+      final qnt = existingItem.quantity + item.quantity;
+      log("[Cart] quantity $qnt");
       // create new item with updated quantity
       _items[productId] = CartItemModel(
         id: existingItem.id,
         product: existingItem.product,
         userId: existingItem.userId,
-        quantity: existingItem.quantity + item.quantity,
+        quantity: qnt,
         priceAtPurchase: existingItem.priceAtPurchase,
         addedAt: existingItem.addedAt,
       );

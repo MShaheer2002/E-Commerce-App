@@ -3,6 +3,7 @@ import 'package:e_commerce_app/core/providers/admin/productManagement_provider.d
 import 'package:e_commerce_app/core/providers/admin/userManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/category_provider.dart';
+import 'package:e_commerce_app/core/providers/checkout_provider.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:e_commerce_app/core/providers/handle_unautharized_access_provider.dart';
 import 'package:e_commerce_app/core/providers/notification_provider.dart';
@@ -25,6 +26,7 @@ class AppProvider {
     ChangeNotifierProvider<SingleProductProvider>(
         create: (_) => SingleProductProvider()),
     ChangeNotifierProvider(create: (_) => HandleUnauthorizedAccessProvider()),
+
     ChangeNotifierProxyProvider<HandleUnauthorizedAccessProvider,
         FavoriteService>(
       create: (context) =>
@@ -32,6 +34,7 @@ class AppProvider {
       update: (context, authGuard, previous) =>
           previous ?? FavoriteService(authGuard),
     ),
+
     ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider()),
     ChangeNotifierProvider<CartProvider>(
         create: (_) => CartProvider()..setUser()),
@@ -46,5 +49,13 @@ class AppProvider {
         create: (context) => UserManagementProvider()),
     ChangeNotifierProvider<ProductmanagementProvider>(
         create: (context) => ProductmanagementProvider()),
+
+    ChangeNotifierProxyProvider<HandleUnauthorizedAccessProvider,
+        CheckoutProvider>(
+      create: (context) =>
+          CheckoutProvider(context.read<HandleUnauthorizedAccessProvider>()),
+      update: (context, authGuard, previous) =>
+          previous ?? CheckoutProvider(authGuard),
+    ),
   ];
 }

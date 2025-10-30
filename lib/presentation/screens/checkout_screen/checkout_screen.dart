@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/checkout_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/address_model.dart';
 import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/order_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -154,13 +156,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   };
                 });
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Address added successfully!'),
-                    backgroundColor: Colors.green,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                Fluttertoast.showToast(
+                    msg: 'Address added successfully!',
+                    backgroundColor: Colors.green);
               }
             },
             child: const Text(
@@ -221,15 +219,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _printOrderDetails(CheckoutProvider provider, String paymentIndentId) {
+    AddressModel addressModel = AddressModel.fromMap(selectedAddress!);
     final OrderModel order = OrderModel(
-        userId: provider.userId,
-        cartItems: widget.selectedItems,
-        totalAmount: double.parse(calculateTotal().toStringAsFixed(2)),
-        orderDate: Timestamp.now(),
-        paymentIntentId: paymentIndentId,
-        paymentMethod: 'card',
-        address: _getAddressPreview(),
-        orderStatus: '');
+      userId: provider.userId,
+      cartItems: widget.selectedItems,
+      totalAmount: double.parse(calculateTotal().toStringAsFixed(2)),
+      orderDate: Timestamp.now(),
+      paymentIntentId: paymentIndentId,
+      paymentMethod: 'card',
+      address: addressModel,
+      orderStatus: OrderStatus.placed,
+    );
 
     log('========================================');
     log('ORDER CONFIRMATION');
@@ -295,9 +295,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (kDebugMode) {
+      nameController.text = "Muhammad Shaheer";
+      phoneController.text = "+923113304672";
+      addressLine1Controller.text = "house no 907, airport road unit no 11";
+      cityController.text = "Hyderbad";
+      stateController.text = "Sindh";
+      zipController.text = "17000";
+      countryController.text = "Pakistan";
+    }
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
-    // final checkoutProvider = Provider.of<CheckoutProvider>(context);
+    final checkoutProvider = Provider.of<CheckoutProvider>(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -417,7 +426,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 selectedPayment == 'card'
                     ? 'Pay \$${calculateTotal().toStringAsFixed(2)}'
                     : 'Place Order',
-                () => handlePlaceOrder,
+                () => handlePlaceOrder(checkoutProvider),
               ),
       ),
     );
