@@ -5,6 +5,7 @@ import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -79,23 +80,15 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
                                   if (provider.validateForm()) {
                                     provider.saveUserProfile();
                                     context.pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Profile updated successfully!',
-                                        ),
+                                    Fluttertoast.showToast(
+                                        msg: 'Profile updated successfully!',
                                         backgroundColor: Colors.green,
-                                      ),
-                                    );
+                                        textColor: Colors.white);
                                   } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Please fill all required fields',
-                                        ),
+                                    Fluttertoast.showToast(
+                                        msg: 'Profile updated successfully!',
                                         backgroundColor: Colors.red,
-                                      ),
-                                    );
+                                        textColor: Colors.white);
                                   }
                                 },
                                 child: const Text(

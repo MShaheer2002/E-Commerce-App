@@ -31,14 +31,10 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
 
   Future<void> _pickImages() async {
     if (imageFiles.length >= 4) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Maximum 4 images allowed"),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      Fluttertoast.showToast(
+          msg: 'Maximum 4 images allowed',
+          textColor: Colors.white,
+          backgroundColor: Colors.black);
       return;
     }
 
@@ -48,14 +44,10 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
       final newImages = pickedFiles.map((x) => File(x.path)).toList();
 
       if (imageFiles.length + newImages.length > 4) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text("Maximum 4 images allowed total"),
-            behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+        Fluttertoast.showToast(
+            msg: "Maximum 4 images allowed total",
+            textColor: Colors.white,
+            backgroundColor: Colors.black);
       }
 
       final allowedImages = [...imageFiles, ...newImages].take(4).toList();

@@ -47,14 +47,10 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
   Future<void> _pickImages() async {
     final totalImages = imageFiles.length + existingImageUrls.length;
     if (totalImages >= 4) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Maximum 4 images allowed"),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      Fluttertoast.showToast(
+          msg: "Maximum 4 images allowed",
+          backgroundColor: Colors.black,
+          textColor: Colors.white);
       return;
     }
 
@@ -555,16 +551,11 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
 
       // 5️⃣ Show success message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text("Product updated successfully!"),
-            behavior: SnackBarBehavior.floating,
+        Fluttertoast.showToast(
+            msg: "Product updated successfully!",
             backgroundColor: Colors.green,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
+            textColor: Colors.white);
+
         Navigator.pop(context);
       }
     } catch (e) {

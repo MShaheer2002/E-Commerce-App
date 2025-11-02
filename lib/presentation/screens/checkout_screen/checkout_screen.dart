@@ -74,13 +74,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         promoApplied = true;
         promoDiscount = 5.0; // Example discount
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Promo code applied successfully!'),
+      Fluttertoast.showToast(
+          msg: 'Promo code applied successfully!',
           backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
+          textColor: Colors.white);
     }
   }
 
@@ -201,13 +198,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         stateController.text.isEmpty ||
         zipController.text.isEmpty ||
         countryController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields'),
+      Fluttertoast.showToast(
+          msg: 'Please fill all required fields',
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+          textColor: Colors.white);
       return false;
     }
     return true;
@@ -238,19 +232,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     log('');
     log("[checkout] ${order.toJson().toString()}");
 
-    context.read<CheckoutProvider>().handlePurchase(order);
+    context.read<CheckoutProvider>().handlePurchase(context, order);
   }
 
   Future<void> handlePlaceOrder(CheckoutProvider checkoutprovider) async {
     // Validate shipping address
     if (selectedAddress == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add a shipping address'),
+      Fluttertoast.showToast(
+          msg: 'Please add a shipping address',
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+          textColor: Colors.white);
       return;
     }
 

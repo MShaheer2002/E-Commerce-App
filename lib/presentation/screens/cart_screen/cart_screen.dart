@@ -3,6 +3,7 @@ import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -48,9 +49,10 @@ class _CartScreenState extends State<CartScreen> {
 
   void navigateToCheckout(List<CartItemModel> cartItems) {
     if (selectedItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select items to checkout')),
-      );
+      Fluttertoast.showToast(
+          msg: 'Please select items to checkout',
+          backgroundColor: Colors.black,
+          textColor: Colors.white);
       return;
     }
 
