@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/providers/admin/cloudinary_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -444,51 +446,52 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
     _formKey.currentState!.save();
 
     if (imageFiles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text("Please add at least one image"),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      Fluttertoast.showToast(
+          msg: "Please add at least one image",
+          backgroundColor: Colors.black,
+          textColor: Colors.white);
       return;
     }
 
-    final imageUrls = imageFiles.map((f) => f.path).toList();
+    final cloudinary = context.read<CloudinaryProvider>();
+    final productProvider = context.read<ProductmanagementProvider>();
 
     try {
-      await context.read<ProductmanagementProvider>().addNewProduct(
-            name: name,
-            description: description,
-            price: price,
-            categoryId: selectedCategoryId!,
-            stock: stock,
-            imageUrls: imageUrls,
-          );
+      // Upload images to Cloudinary under folder: category/productName
+      final folderPath = "products/$selectedCategoryId/$name";
+      final urls =
+          await cloudinary.uploadMultipleImages(imageFiles, folder: folderPath);
+
+      if (urls.isEmpty) {
+        Fluttertoast.showToast(
+            msg: "Image upload failed!",
+            backgroundColor: Colors.black,
+            textColor: Colors.white);
+        return;
+      }
+
+      await productProvider.addNewProduct(
+        name: name,
+        description: description,
+        price: price,
+        categoryId: selectedCategoryId!,
+        stock: stock,
+        imageUrls: urls,
+      );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text("Product added successfully!"),
-            behavior: SnackBarBehavior.floating,
+        Fluttertoast.showToast(
+            msg: "Product Successfully Added",
             backgroundColor: Colors.green,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+            textColor: Colors.white);
         Navigator.pop(context);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          behavior: SnackBarBehavior.floating,
+      Fluttertoast.showToast(
+          msg: "Something went wrong while Adding product try later",
           backgroundColor: Colors.red,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+          textColor: Colors.white);
+      return;
     }
   }
 }

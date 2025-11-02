@@ -1,8 +1,12 @@
+import 'package:e_commerce_app/core/cache.dart';
+import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -19,6 +23,44 @@ class AdminDashboard extends StatelessWidget {
           context: context,
           title: "Dashboard",
           showBackButton: false,
+          actions: [
+            GestureDetector(
+              onTap: () async {
+                await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Are you sure you want to logout?'),
+                    content: const Text('This action cannot be undone.'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                      ),
+                      ElevatedButton(
+                        child: const Text('Yes, Logout'),
+                        onPressed: () async {
+                          await context.read<AuthProvider>().logout(context);
+
+                          // Optionally clear cache on logout
+                          final cache = CacheService();
+                          await cache.clearCache();
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.only(right: 15),
+                child: const Icon(
+                  Iconsax.logout4,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -109,14 +151,14 @@ class AdminDashboard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            /// ---- Analytics Section ----
-            sectionTile(
-              context,
-              title: "Analytics",
-              subtitle: "View sales and product performance",
-              icon: Iconsax.chart,
-              routeName: "/admin/analytics",
-            ),
+            // /// ---- Analytics Section ----
+            // sectionTile(
+            //   context,
+            //   title: "Analytics",
+            //   subtitle: "View sales and product performance",
+            //   icon: Iconsax.chart,
+            //   routeName: "/admin/analytics",
+            // ),
           ],
         ),
       ),
@@ -135,9 +177,7 @@ class AdminDashboard extends StatelessWidget {
     double cardWidth = (width - 60) / 2; // fits 2 per row
 
     return InkWell(
-      onTap: () {
-        // Optional: add navigation to detail analytics
-      },
+      onTap: () async {},
       borderRadius: BorderRadius.circular(20),
       child: Container(
         height: 150,

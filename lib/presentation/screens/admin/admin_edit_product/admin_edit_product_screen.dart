@@ -6,8 +6,11 @@ import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../core/providers/admin/cloudinary_provider.dart';
 
 class AdminEditProductScreen extends StatefulWidget {
   final ProductModel product;
@@ -48,7 +51,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         SnackBar(
           content: const Text("Maximum 4 images allowed"),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
       return;
@@ -144,7 +148,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                       const SizedBox(height: 32),
 
                       // Product Details Section
-                      _buildSectionTitle("Product Details", "Basic information"),
+                      _buildSectionTitle(
+                          "Product Details", "Basic information"),
                       const SizedBox(height: 16),
                       _buildTextField(
                         label: 'Product Name',
@@ -164,7 +169,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                       const SizedBox(height: 32),
 
                       // Pricing & Stock Section
-                      _buildSectionTitle("Pricing & Stock", "Set price and quantity"),
+                      _buildSectionTitle(
+                          "Pricing & Stock", "Set price and quantity"),
                       const SizedBox(height: 16),
                       Row(
                         children: [
@@ -264,9 +270,10 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: KprimaryColor, width: 2),
+          borderSide: const BorderSide(color: KprimaryColor, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       maxLines: maxLines,
       keyboardType: keyboardType,
@@ -289,7 +296,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         children: [
           ...existingImageUrls.map((url) => _buildExistingImageCard(url)),
           ...imageFiles.map((file) => _buildLocalImageCard(file)),
-          if (existingImageUrls.length + imageFiles.length < 4) _buildAddImageCard(),
+          if (existingImageUrls.length + imageFiles.length < 4)
+            _buildAddImageCard(),
         ],
       ),
     );
@@ -398,14 +406,18 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: KprimaryColor.withOpacity(0.3), width: 2),
         ),
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_photo_alternate_outlined, color: KprimaryColor, size: 32),
+            Icon(Icons.add_photo_alternate_outlined,
+                color: KprimaryColor, size: 32),
             const SizedBox(height: 4),
             Text(
               "Add",
-              style: TextStyle(color: KprimaryColor, fontSize: 12, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                  color: KprimaryColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -430,11 +442,12 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         }
 
         final categories = snapshot.data!.docs
-            .map((doc) => CategoryModel.fromMap(doc.data() as Map<String, dynamic>))
+            .map((doc) =>
+                CategoryModel.fromMap(doc.data() as Map<String, dynamic>))
             .toList();
 
         return DropdownButtonFormField<String>(
-          value: selectedCategoryId,
+          initialValue: selectedCategoryId,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey[50],
@@ -448,9 +461,10 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: KprimaryColor, width: 2),
+              borderSide: const BorderSide(color: KprimaryColor, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
           hint: const Text("Select a category"),
           items: categories
@@ -476,7 +490,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
           foregroundColor: Colors.white,
           elevation: 0,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onPressed: () => _saveChanges(context),
         child: const Row(
@@ -484,7 +499,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
           children: [
             Icon(Icons.check_circle_outline, size: 22),
             SizedBox(width: 8),
-            Text("Save Changes", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text("Save Changes",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -495,47 +511,69 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
-    final imageUrls = [
-      ...existingImageUrls,
-      ...imageFiles.map((f) => f.path),
-    ];
+    // If both existing and new images are empty
+    if (existingImageUrls.isEmpty && imageFiles.isEmpty) {
+      Fluttertoast.showToast(
+        msg: "Please add at least one image",
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+      );
+      return;
+    }
 
-    final updatedProduct = ProductModel(
-      id: widget.product.id,
-      name: name,
-      description: description,
-      price: price,
-      categoryId: selectedCategoryId ?? '',
-      imageUrls: imageUrls,
-      stock: stock,
-      createdAt: widget.product.createdAt,
-    );
+    final cloudinary = context.read<CloudinaryProvider>();
+    final productProvider = context.read<ProductmanagementProvider>();
 
     try {
-      await context
-          .read<ProductmanagementProvider>()
-          .updateProduct(widget.product.id!, updatedProduct);
+      // Upload new images to Cloudinary
+      List<String> newImageUrls = [];
+      if (imageFiles.isNotEmpty) {
+        newImageUrls = await cloudinary.uploadMultipleImages(
+          imageFiles,
+          folder:
+              "ecommerce/products/$selectedCategoryId/$name", // Organized by category/product name
+        );
+      }
 
+      // 2️⃣ Combine existing + new images
+      final allImageUrls = [...existingImageUrls, ...newImageUrls];
+
+      // 3️⃣ Create updated product model
+      final updatedProduct = ProductModel(
+        id: widget.product.id,
+        name: name,
+        description: description,
+        price: price,
+        categoryId: selectedCategoryId ?? '',
+        imageUrls: allImageUrls,
+        stock: stock,
+        createdAt: widget.product.createdAt,
+      );
+
+      // 4️⃣ Update Firestore document
+      await productProvider.updateProduct(widget.product.id!, updatedProduct);
+
+      // 5️⃣ Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text("Product updated successfully!"),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Colors.green,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
         Navigator.pop(context);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.red,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+      Fluttertoast.showToast(
+        msg: "Something went wrong while editing the product. Try again later.",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
+      debugPrint("Error editing product: $e");
     }
   }
 }

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/providers/handle_unautharized_access_provider.dart';
+import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,7 +10,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 class FavoriteService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final HandleUnauthorizedAccessProvider _authGuard;
-  FavoriteService(this._authGuard);
+  final ProductAnalyticsProvider _analyticsProvider;
+  FavoriteService(this._authGuard, this._analyticsProvider);
 
   bool _isLoaded = false;
   bool _isLoading = false;
@@ -82,9 +86,10 @@ class FavoriteService extends ChangeNotifier {
           'productId': productId,
           'addedAt': Timestamp.now(),
         });
+        unawaited(_analyticsProvider.incrementAddToFav(productId));
       }
     } catch (e, stack) {
-      // ❌ STEP 2: Revert if Firestore call fails
+      // STEP 2: Revert if Firestore call fails
       if (isCurrentlyFav) {
         _favoriteProductIds.add(productId);
       } else {

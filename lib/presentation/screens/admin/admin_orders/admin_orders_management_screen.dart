@@ -62,7 +62,7 @@ class AdminOrdersManagementScreen extends StatelessWidget {
             ),
           ),
           body: const TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
+            physics:  NeverScrollableScrollPhysics(),
             children: [
               OrdersListView(status: OrderStatus.placed),
               OrdersListView(status: OrderStatus.shipped),

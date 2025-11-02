@@ -1,4 +1,6 @@
 // lib/core/providers/provider_setup.dart
+import 'package:e_commerce_app/core/providers/admin/analytics_provider.dart';
+import 'package:e_commerce_app/core/providers/admin/cloudinary_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/userManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/cart_provider.dart';
@@ -7,6 +9,7 @@ import 'package:e_commerce_app/core/providers/checkout_provider.dart';
 import 'package:e_commerce_app/core/providers/fav_provider.dart';
 import 'package:e_commerce_app/core/providers/handle_unautharized_access_provider.dart';
 import 'package:e_commerce_app/core/providers/notification_provider.dart';
+import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
 import 'package:e_commerce_app/core/providers/product_provider.dart';
 import 'package:e_commerce_app/core/providers/search_provider.dart';
 import 'package:e_commerce_app/core/providers/single_product_provider.dart';
@@ -27,17 +30,25 @@ class AppProvider {
         create: (_) => SingleProductProvider()),
     ChangeNotifierProvider(create: (_) => HandleUnauthorizedAccessProvider()),
 
-    ChangeNotifierProxyProvider<HandleUnauthorizedAccessProvider,
-        FavoriteService>(
-      create: (context) =>
-          FavoriteService(context.read<HandleUnauthorizedAccessProvider>()),
-      update: (context, authGuard, previous) =>
-          previous ?? FavoriteService(authGuard),
+    ChangeNotifierProvider(create: (_) => ProductAnalyticsProvider()),
+
+    ChangeNotifierProxyProvider2<HandleUnauthorizedAccessProvider,
+        ProductAnalyticsProvider, FavoriteService>(
+      create: (context) => FavoriteService(
+          context.read<HandleUnauthorizedAccessProvider>(),
+          context.read<ProductAnalyticsProvider>()),
+      update: (context, authGuard, analytics, previous) =>
+          previous ?? FavoriteService(authGuard, analytics),
     ),
 
     ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider()),
-    ChangeNotifierProvider<CartProvider>(
-        create: (_) => CartProvider()..setUser()),
+    ChangeNotifierProxyProvider<ProductAnalyticsProvider, CartProvider>(
+      create: (context) =>
+          CartProvider(context.read<ProductAnalyticsProvider>())..setUser(),
+      update: (context, analytics, previous) {
+        return previous ?? CartProvider(analytics);
+      },
+    ),
     ChangeNotifierProvider<ProfileSetupProvider>(
         create: (context) => ProfileSetupProvider()),
     ChangeNotifierProvider<CacheProvider>(create: (_) => CacheProvider()),
@@ -47,15 +58,28 @@ class AppProvider {
     // -----------------------Admin------------------------
     ChangeNotifierProvider<UserManagementProvider>(
         create: (context) => UserManagementProvider()),
-    ChangeNotifierProvider<ProductmanagementProvider>(
-        create: (context) => ProductmanagementProvider()),
-
-    ChangeNotifierProxyProvider<HandleUnauthorizedAccessProvider,
-        CheckoutProvider>(
+    ChangeNotifierProxyProvider<ProductAnalyticsProvider,
+        ProductmanagementProvider>(
       create: (context) =>
-          CheckoutProvider(context.read<HandleUnauthorizedAccessProvider>()),
-      update: (context, authGuard, previous) =>
-          previous ?? CheckoutProvider(authGuard),
+          ProductmanagementProvider(context.read<ProductAnalyticsProvider>()),
+      update: (context, analyticsProvider, previous) {
+        return previous ?? ProductmanagementProvider(analyticsProvider);
+      },
     ),
+
+    ChangeNotifierProxyProvider2<HandleUnauthorizedAccessProvider,
+        ProductAnalyticsProvider, CheckoutProvider>(
+      create: (context) => CheckoutProvider(
+          context.read<HandleUnauthorizedAccessProvider>(),
+          context.read<ProductAnalyticsProvider>()),
+      update: (context, authGuard, analytics, previous) =>
+          previous ?? CheckoutProvider(authGuard, analytics),
+    ),
+
+    ChangeNotifierProvider<CloudinaryProvider>(
+        create: (_) => CloudinaryProvider()),
+
+    ChangeNotifierProvider<AnalyticsProvider>(
+        create: (_) => AnalyticsProvider()),
   ];
 }

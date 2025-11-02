@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +14,7 @@ class ProductmanagementProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _isMoreLoading = false;
   bool _hasMore = true;
+  final ProductAnalyticsProvider _analyticsProvider;
 
   DocumentSnapshot? _lastDocument;
 
@@ -22,7 +26,7 @@ class ProductmanagementProvider with ChangeNotifier {
   bool get isMoreLoading => _isMoreLoading;
   bool get hasMore => _hasMore;
 
-  ProductmanagementProvider() {
+  ProductmanagementProvider(this._analyticsProvider) {
     fetchCategories();
     fetchProducts(initialLoad: true);
   }
@@ -72,13 +76,13 @@ class ProductmanagementProvider with ChangeNotifier {
       // If fewer items than limit → no more data
       if (snapshot.docs.length < _limit) _hasMore = false;
     } catch (e) {
-      debugPrint("❌ Error fetching products: $e");
+      log("Error fetching products: $e");
     } finally {
       _isLoading = false;
       _isMoreLoading = false;
       notifyListeners();
     }
-  } 
+  }
 
   // 📦 Fetch all categories
   Future<void> fetchCategories() async {
@@ -96,7 +100,14 @@ class ProductmanagementProvider with ChangeNotifier {
   // ➕ Add product
   Future<void> addProduct(ProductModel product) async {
     try {
-      await _firestore.collection('products').add(product.toMap());
+      final docRef =
+          await _firestore.collection('products').add(product.toMap());
+
+      // ✅ Add product ID to Firestore document
+      await _firestore.collection('products').doc(docRef.id).update({
+        'id': docRef.id,
+      });
+
       await fetchProducts(initialLoad: true);
     } catch (e) {
       debugPrint("Error adding product: $e");
@@ -141,7 +152,7 @@ class ProductmanagementProvider with ChangeNotifier {
     return category.name;
   }
 
-  // ➕ Add New Product (moved from screen)
+  // Add New Product (moved from screen)
   Future<void> addNewProduct({
     required String name,
     required String description,
@@ -161,10 +172,13 @@ class ProductmanagementProvider with ChangeNotifier {
         createdAt: Timestamp.now(),
       );
 
-      await _firestore.collection('products').add(product.toMap());
-
+      final docRef =
+          await _firestore.collection('products').add(product.toMap());
       // Refresh product list after adding
       await fetchProducts(initialLoad: true);
+
+      final productId = docRef.id;
+      await _analyticsProvider.createAnalyticsForNewProduct(productId);
     } catch (e) {
       debugPrint("Error adding new product: $e");
     }

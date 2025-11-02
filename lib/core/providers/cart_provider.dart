@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
 import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,9 @@ class CartProvider extends ChangeNotifier {
   final Map<String, CartItemModel> _items = {};
   String? _userId;
   bool _isLoading = false;
+  ProductAnalyticsProvider _analyticsProvider;
+
+  CartProvider(this._analyticsProvider);
 
   String get userId => _userId ?? '';
   bool get isLoading => _isLoading;
@@ -122,6 +127,8 @@ class CartProvider extends ChangeNotifier {
 
     _saveCart();
     notifyListeners();
+
+    unawaited(_analyticsProvider.incrementAddToCart(productId));
   }
 
   void removeFromCart(String productId) {

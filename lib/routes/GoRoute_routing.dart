@@ -3,6 +3,7 @@ import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_add_product/admin_add_product_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_analytics/admin_product_analytics_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_dashboard/admin_dashboard.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_edit_product/admin_edit_product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_orders/admin_orders_management_screen.dart';
@@ -154,6 +155,13 @@ GoRouter createRouter(AuthProvider authProvider) {
         path: "/admin/orders",
         builder: (context, state) => const AdminOrdersManagementScreen(),
       ),
+
+      GoRoute(
+          path: "/admin/analytics",
+          builder: (context, state) {
+            final String productId = state.extra as String;
+            return AdminProductAnalyticsScreen(productId: productId);
+          }),
     ],
   );
 }
