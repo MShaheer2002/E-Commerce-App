@@ -1,6 +1,7 @@
 // lib/core/providers/provider_setup.dart
 import 'package:e_commerce_app/core/providers/admin/analytics_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/cloudinary_provider.dart';
+import 'package:e_commerce_app/core/providers/admin/global_analytics_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/userManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/cart_provider.dart';
@@ -81,5 +82,8 @@ class AppProvider {
 
     ChangeNotifierProvider<AnalyticsProvider>(
         create: (_) => AnalyticsProvider()),
+
+    ChangeNotifierProvider<GlobalAnalyticsProvider>(
+        create: (_) => GlobalAnalyticsProvider()),
   ];
 }

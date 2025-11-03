@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/presentation/models/product_analytics_model.dart';
 import 'package:e_commerce_app/presentation/models/sale_entry_model.dart';
@@ -89,6 +91,10 @@ class ProductAnalyticsProvider with ChangeNotifier {
         'totalRevenue': FieldValue.increment(totalPrice),
         'sales': FieldValue.arrayUnion([saleEntry.toMap()]),
       });
+
+      if (saleEntry != null) {
+        unawaited(_firestore.collection("sales_logs").add(saleEntry.toMap()));
+      }
     });
   }
 
@@ -194,5 +200,4 @@ class ProductAnalyticsProvider with ChangeNotifier {
 
   //   debugPrint("✅ Dummy analytics data successfully added for $productId");
   // }
-
 }

@@ -1,6 +1,9 @@
 import 'package:e_commerce_app/core/cache.dart';
+import 'package:e_commerce_app/core/providers/admin/analytics_provider.dart';
+import 'package:e_commerce_app/core/providers/admin/global_analytics_provider.dart';
 import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/analytics_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
@@ -8,8 +11,20 @@ import 'package:iconsax/iconsax.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class AdminDashboard extends StatelessWidget {
+class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
+
+  @override
+  State<AdminDashboard> createState() => _AdminDashboardState();
+}
+
+class _AdminDashboardState extends State<AdminDashboard> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<GlobalAnalyticsProvider>().generateAnalytics();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,28 +43,64 @@ class AdminDashboard extends StatelessWidget {
               onTap: () async {
                 await showDialog<bool>(
                   context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Are you sure you want to logout?'),
-                    content: const Text('This action cannot be undone.'),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context).pop(false);
-                        },
-                      ),
-                      ElevatedButton(
-                        child: const Text('Yes, Logout'),
-                        onPressed: () async {
-                          await context.read<AuthProvider>().logout(context);
+                  barrierDismissible: false,
+                  builder: (context) {
+                    bool isLoggingOut = false;
 
-                          // Optionally clear cache on logout
-                          final cache = CacheService();
-                          await cache.clearCache();
-                        },
+                    return StatefulBuilder(
+                      builder: (context, setState) => AlertDialog(
+                        title: const Text('Are you sure you want to logout?'),
+                        content: isLoggingOut
+                            ? const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(strokeWidth: 2),
+                                  SizedBox(width: 12),
+                                  Text('Logging out...'),
+                                ],
+                              )
+                            : const Text('This action cannot be undone.'),
+                        actions: isLoggingOut
+                            ? []
+                            : <Widget>[
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                ),
+                                ElevatedButton(
+                                  child: const Text('Yes, Logout'),
+                                  onPressed: () async {
+                                    setState(() => isLoggingOut = true);
+
+                                    try {
+                                      await context
+                                          .read<AuthProvider>()
+                                          .logout(context);
+
+                                      final cache = CacheService();
+                                      await cache.clearCache();
+
+                                      if (context.mounted)
+                                        Navigator.of(context).pop(true);
+                                    } catch (e) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content:
+                                                  Text('Logout failed: $e')),
+                                        );
+                                      }
+                                      setState(() => isLoggingOut = false);
+                                    }
+                                  },
+                                ),
+                              ],
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
               child: Container(
@@ -69,40 +120,49 @@ class AdminDashboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// ---- Dashboard Cards ----
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              alignment: WrapAlignment.spaceBetween,
-              children: [
-                dashboardCard(
-                  context,
-                  icon: Iconsax.graph,
-                  value: "\$25,012",
-                  title: "Today Sales",
-                  gradientColors: [Colors.purple, Colors.purpleAccent],
-                ),
-                dashboardCard(
-                  context,
-                  icon: Iconsax.box,
-                  value: "25",
-                  title: "Pending Orders",
-                  gradientColors: [Colors.pinkAccent, Colors.pink],
-                ),
-                dashboardCard(
-                  context,
-                  icon: Iconsax.layer,
-                  value: "501",
-                  title: "Stock Available",
-                  gradientColors: [Colors.cyan, Colors.lightBlueAccent],
-                ),
-                dashboardCard(
-                  context,
-                  icon: Iconsax.shopping_cart,
-                  value: "182",
-                  title: "Today Orders",
-                  gradientColors: [Colors.orangeAccent, Colors.amber],
-                ),
-              ],
+            Consumer<GlobalAnalyticsProvider>(
+              builder: (context, value, child) {
+                return Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    dashboardCard(
+                      context,
+                      icon: Iconsax.graph,
+                      value:
+                          "\$${(value.analytics?.totalRevenue ?? 0).toStringAsFixed(2)}",
+                      title: "Today Sales",
+                      gradientColors: [Colors.purple, Colors.purpleAccent],
+                      isLoading: value.isLoading,
+                    ),
+                    dashboardCard(
+                      context,
+                      icon: Iconsax.box,
+                      value: "${value.ordersPending}",
+                      title: "Pending Orders",
+                      gradientColors: [Colors.pinkAccent, Colors.pink],
+                      isLoading: value.isLoading,
+                    ),
+                    dashboardCard(
+                      context,
+                      icon: Iconsax.layer,
+                      value: "${value.analytics?.totalStock ?? 0}",
+                      title: "Stock Available",
+                      gradientColors: [Colors.cyan, Colors.lightBlueAccent],
+                      isLoading: value.isLoading,
+                    ),
+                    dashboardCard(
+                      context,
+                      icon: Iconsax.shopping_cart,
+                      value: "${value.todaySales}",
+                      title: "Today Orders",
+                      gradientColors: [Colors.orangeAccent, Colors.amber],
+                      isLoading: value.isLoading,
+                    ),
+                  ],
+                );
+              },
             ),
 
             const SizedBox(height: 40),
@@ -151,14 +211,14 @@ class AdminDashboard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // /// ---- Analytics Section ----
-            // sectionTile(
-            //   context,
-            //   title: "Analytics",
-            //   subtitle: "View sales and product performance",
-            //   icon: Iconsax.chart,
-            //   routeName: "/admin/analytics",
-            // ),
+            /// ---- Analytics Section ----
+            sectionTile(
+              context,
+              title: "Analytics",
+              subtitle: "View sales and product performance",
+              icon: Iconsax.chart,
+              routeName: "/admin/global-analytics",
+            ),
           ],
         ),
       ),
@@ -172,6 +232,7 @@ class AdminDashboard extends StatelessWidget {
     required String value,
     required String title,
     required List<Color> gradientColors,
+    required bool isLoading,
   }) {
     double width = MediaQuery.of(context).size.width;
     double cardWidth = (width - 60) / 2; // fits 2 per row
@@ -180,7 +241,7 @@ class AdminDashboard extends StatelessWidget {
       onTap: () async {},
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        height: 150,
+        height: 120,
         width: cardWidth,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -207,28 +268,26 @@ class AdminDashboard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  isLoading == true
+                      ? SizedBox(
+                          height: 15,
+                          width: 15,
+                          child: SmallLoader(
+                              backgroundColor: Colors.white, strokeWidth: 1))
+                      : Text(
+                          value,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                   Text(
                     title,
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Tap to View",
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 12,
                     ),
                   ),
                 ],

@@ -6,6 +6,7 @@ import 'package:e_commerce_app/presentation/screens/admin/admin_add_product/admi
 import 'package:e_commerce_app/presentation/screens/admin/admin_analytics/admin_product_analytics_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_dashboard/admin_dashboard.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_edit_product/admin_edit_product_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_global_analytics/admin_global_analytics_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_orders/admin_orders_management_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_products_mangement/admin_products_mangement_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_user_management/admin_user_management_screen.dart';
@@ -161,6 +162,12 @@ GoRouter createRouter(AuthProvider authProvider) {
           builder: (context, state) {
             final String productId = state.extra as String;
             return AdminProductAnalyticsScreen(productId: productId);
+          }),
+
+      GoRoute(
+          path: "/admin/global-analytics",
+          builder: (context, state) {
+            return const AdminGlobalAnalyticsScreen();
           }),
     ],
   );

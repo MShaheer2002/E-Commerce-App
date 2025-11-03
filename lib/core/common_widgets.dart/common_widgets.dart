@@ -237,10 +237,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
 }
 
 // ignore: non_constant_identifier_names
-Widget SmallLoader({Color backgroundColor = KprimaryColor}) {
+Widget SmallLoader({Color backgroundColor = KprimaryColor,double strokeWidth = 3}) {
   return CircularProgressIndicator(
     color: backgroundColor,
-    strokeWidth: 3,
+    strokeWidth: strokeWidth,
   );
 }
 
