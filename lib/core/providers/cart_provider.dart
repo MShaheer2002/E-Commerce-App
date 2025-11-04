@@ -36,6 +36,19 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
+  List<CartItemModel> _selectedItems = [];
+  List<CartItemModel> get selectedItems => _selectedItems;
+
+  void setSelectedItems(List<CartItemModel> items) {
+    _selectedItems = items;
+    notifyListeners();
+  }
+
+  void clearSelectedItems() {
+    _selectedItems.clear();
+    notifyListeners();
+  }
+
   Future<void> loadCart() async {
     if (_userId == null) return;
     _isLoading = true;
@@ -162,4 +175,7 @@ class CartProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+
+
 }

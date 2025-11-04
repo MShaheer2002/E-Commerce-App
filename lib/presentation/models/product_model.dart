@@ -11,9 +11,11 @@ class ProductModel {
   final int stock;
   final bool isFeatured;
   final Timestamp createdAt;
+  final String? promoCode;
+  final Timestamp? promoCodeEndTime;
 
   const ProductModel({
-     this.id,
+    this.id,
     required this.name,
     required this.description,
     required this.price,
@@ -23,9 +25,12 @@ class ProductModel {
     required this.stock,
     this.isFeatured = false,
     required this.createdAt,
+    this.promoCode,
+    this.promoCodeEndTime,
   });
 
   ProductModel copyWith({
+    String? id,
     String? name,
     String? description,
     double? price,
@@ -33,10 +38,12 @@ class ProductModel {
     String? categoryId,
     List<String>? imageUrls,
     int? stock,
-    bool? isFeatured, required String id,
+    bool? isFeatured,
+    String? promoCode,
+    Timestamp? promoCodeEndTime,
   }) {
     return ProductModel(
-      id: id,
+      id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
       price: price ?? this.price,
@@ -46,6 +53,8 @@ class ProductModel {
       stock: stock ?? this.stock,
       isFeatured: isFeatured ?? this.isFeatured,
       createdAt: createdAt,
+      promoCode: promoCode ?? this.promoCode,
+      promoCodeEndTime: promoCodeEndTime ?? this.promoCodeEndTime,
     );
   }
 
@@ -61,6 +70,8 @@ class ProductModel {
       'stock': stock,
       'isFeatured': isFeatured,
       'createdAt': createdAt,
+      'promoCode': promoCode,
+      'promoCodeEndTime': promoCodeEndTime,
     };
   }
 
@@ -70,13 +81,16 @@ class ProductModel {
       name: map['name'] ?? '',
       description: map['description'] ?? '',
       price: (map['price'] ?? 0).toDouble(),
-      discountPrice:
-          map['discountPrice'] != null ? (map['discountPrice']).toDouble() : null,
+      discountPrice: map['discountPrice'] != null
+          ? (map['discountPrice']).toDouble()
+          : null,
       categoryId: map['categoryId'] ?? '',
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
       stock: map['stock'] ?? 0,
       isFeatured: map['isFeatured'] ?? false,
       createdAt: map['createdAt'] ?? Timestamp.now(),
+      promoCode: map['promoCode'],
+      promoCodeEndTime: map['promoCodeEndTime'],
     );
   }
 }

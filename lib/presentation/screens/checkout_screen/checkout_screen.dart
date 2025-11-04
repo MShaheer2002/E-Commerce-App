@@ -2,11 +2,14 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/providers/admin/settings_provider.dart';
+import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/checkout_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/address_model.dart';
 import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/order_model.dart';
+import 'package:e_commerce_app/presentation/models/promo_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -16,11 +19,8 @@ import 'package:provider/provider.dart';
 import '../../../core/payment_intent.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final List<CartItemModel> selectedItems;
-
   const CheckoutScreen({
     super.key,
-    required this.selectedItems,
   });
 
   @override
@@ -46,9 +46,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   TextEditingController zipController = TextEditingController();
   TextEditingController countryController = TextEditingController();
 
+  List<CartItemModel> cartItems = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<SettingsProvider>().fetchGlobalPromo();
+    if(kDebugMode){
+      promoController.text = "WEEKDAY10";
+    }
+  }
+
   double calculateSubtotal() {
-    return widget.selectedItems
-        .fold(0.0, (sum, item) => sum + (item.quantity * item.product.price));
+    return cartItems.fold(
+        0.0, (sum, item) => sum + (item.quantity * item.product.price));
   }
 
   double calculateShipping() {
@@ -68,17 +80,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         promoDiscount;
   }
 
-  void applyPromoCode() {
-    if (promoController.text.isNotEmpty) {
-      setState(() {
-        promoApplied = true;
-        promoDiscount = 5.0; // Example discount
-      });
+  void applyPromoCode(List<PromoCode> promoCodes) {
+    final enteredCode = promoController.text.trim().toUpperCase();
+
+    if (enteredCode.isEmpty) {
       Fluttertoast.showToast(
-          msg: 'Promo code applied successfully!',
-          backgroundColor: Colors.green,
-          textColor: Colors.white);
+        msg: "Please enter a promo code",
+        backgroundColor: Colors.orange,
+        textColor: Colors.white,
+      );
+      return;
     }
+
+    // Try to find a matching valid promo
+    final matchingPromo = promoCodes.firstWhere(
+      (promo) =>
+          promo.code.toUpperCase() == enteredCode && promo.isCurrentlyValid,
+    );
+
+    if (matchingPromo == null || matchingPromo == "") {
+      Fluttertoast.showToast(
+        msg: "Invalid or expired promo code",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      return;
+    }
+
+    // Apply the discount
+    setState(() {
+      promoApplied = true;
+      promoDiscount = matchingPromo.discountPercent;
+    });
+
+    Fluttertoast.showToast(
+      msg: "Promo code applied: ${matchingPromo.discountPercent}% off",
+      backgroundColor: Colors.green,
+      textColor: Colors.white,
+    );
   }
 
   void _showAddAddressDialog() {
@@ -216,7 +255,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     AddressModel addressModel = AddressModel.fromMap(selectedAddress!);
     final OrderModel order = OrderModel(
       userId: provider.userId,
-      cartItems: widget.selectedItems,
+      cartItems: cartItems,
       totalAmount: double.parse(calculateTotal().toStringAsFixed(2)),
       orderDate: Timestamp.now(),
       paymentIntentId: paymentIndentId,
@@ -286,6 +325,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = context.watch<CartProvider>();
+    cartItems = cartProvider.selectedItems.toList();
     if (kDebugMode) {
       nameController.text = "Muhammad Shaheer";
       phoneController.text = "+923113304672";
@@ -368,11 +409,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               // _buildPaymentOptions(width, height),
               // SizedBox(height: height * 0.025),
 
-              // // Promo Code Section
-              // _buildSectionHeader(context, 'PROMOS', width),
-              // SizedBox(height: height * 0.015),
-              // _buildPromoCodeField(width, height),
-              // SizedBox(height: height * 0.025),
+              // Promo Code Section
+              _buildSectionHeader(context, 'PROMOS', width),
+              SizedBox(height: height * 0.015),
+              _buildPromoCodeField(width, height),
+              SizedBox(height: height * 0.025),
 
               // Items Section
               _buildSectionHeader(context, 'ITEMS', width),
@@ -456,7 +497,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withValues(alpha:0.1),
+            color: Colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -480,7 +521,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       subtitle,
                       style: TextStyle(
                         fontSize: width * 0.035,
-                        color: Colors.white.withValues(alpha:0.6),
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -550,11 +591,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? KprimaryColor.withValues(alpha:0.15)
-              : Colors.white.withValues(alpha:0.05),
+              ? KprimaryColor.withValues(alpha: 0.15)
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? KprimaryColor : Colors.white.withValues(alpha:0.1),
+            color: isSelected
+                ? KprimaryColor
+                : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -568,7 +611,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 border: Border.all(
                   color: isSelected
                       ? KprimaryColor
-                      : Colors.white.withValues(alpha:0.4),
+                      : Colors.white.withValues(alpha: 0.4),
                   width: 2,
                 ),
                 color: isSelected ? KprimaryColor : Colors.transparent,
@@ -650,11 +693,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? KprimaryColor.withValues(alpha:0.15)
-              : Colors.white.withValues(alpha:0.05),
+              ? KprimaryColor.withValues(alpha: 0.15)
+              : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? KprimaryColor : Colors.white.withValues(alpha:0.1),
+            color: isSelected
+                ? KprimaryColor
+                : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -668,7 +713,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 border: Border.all(
                   color: isSelected
                       ? KprimaryColor
-                      : Colors.white.withValues(alpha:0.4),
+                      : Colors.white.withValues(alpha: 0.4),
                   width: 2,
                 ),
                 color: isSelected ? KprimaryColor : Colors.transparent,
@@ -684,7 +729,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(width: width * 0.03),
             Icon(
               icon,
-              color: isSelected ? KprimaryColor : Colors.white.withValues(alpha:0.6),
+              color: isSelected
+                  ? KprimaryColor
+                  : Colors.white.withValues(alpha: 0.6),
               size: width * 0.05,
             ),
             SizedBox(width: width * 0.03),
@@ -711,10 +758,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         vertical: height * 0.012,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha:0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withValues(alpha:0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -730,7 +777,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               decoration: InputDecoration(
                 hintText: 'Apply promo code',
                 hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha:0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                   fontSize: width * 0.04,
                 ),
                 border: InputBorder.none,
@@ -739,27 +786,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
             ),
           ),
-          InkWell(
-            onTap: applyPromoCode,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: width * 0.04,
-                vertical: height * 0.01,
-              ),
-              decoration: BoxDecoration(
-                color: KprimaryColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                'Apply',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: width * 0.035,
-                  fontWeight: FontWeight.w600,
+          Consumer<SettingsProvider>(builder: (context, value, child) {
+            return InkWell(
+              onTap: () =>
+                  applyPromoCode(value.globalSettings?.promoCodes ?? []),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: width * 0.04,
+                  vertical: height * 0.01,
                 ),
+                decoration: BoxDecoration(
+                  color: KprimaryColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: value.isLoading == true
+                    ? Center(
+                        child: SmallLoader(
+                            backgroundColor: KprimaryColor, strokeWidth: 2),
+                      )
+                    : Text(
+                        'Apply',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width * 0.035,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -775,7 +830,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             vertical: height * 0.015,
           ),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha:0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
@@ -809,20 +864,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ),
         // Items
-        ...widget.selectedItems.asMap().entries.map((entry) {
+        ...cartItems.asMap().entries.map((entry) {
           int index = entry.key;
           CartItemModel item = entry.value;
-          bool isLast = index == widget.selectedItems.length - 1;
+          bool isLast = index == cartItems.length - 1;
 
           return Container(
             padding: EdgeInsets.all(width * 0.04),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha:0.03),
+              color: Colors.white.withValues(alpha: 0.03),
               border: Border(
                 bottom: BorderSide(
                   color: isLast
                       ? Colors.transparent
-                      : Colors.white.withValues(alpha:0.05),
+                      : Colors.white.withValues(alpha: 0.05),
                   width: 1,
                 ),
               ),
@@ -894,7 +949,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         'Description',
                         style: TextStyle(
                           fontSize: width * 0.032,
-                          color: Colors.white.withValues(alpha:0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                         ),
                       ),
                       SizedBox(height: height * 0.005),
@@ -938,17 +993,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: EdgeInsets.all(width * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha:0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withValues(alpha:0.1),
+          color: Colors.white.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
       child: Column(
         children: [
           _buildSummaryRow(
-            'Subtotal (${widget.selectedItems.length})',
+            'Subtotal (${cartItems.length})',
             '\$${subtotal.toStringAsFixed(2)}',
             width,
             false,
@@ -963,7 +1018,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           SizedBox(height: height * 0.015),
           _buildSummaryRow(
             'Taxes',
-            '\${taxes.toStringAsFixed(2)}',
+            '\$${taxes.toStringAsFixed(2)}',
             width,
             false,
           ),
@@ -979,7 +1034,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ],
           SizedBox(height: height * 0.02),
           Divider(
-            color: Colors.white.withValues(alpha:0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             thickness: 1,
           ),
           SizedBox(height: height * 0.02),
@@ -1010,7 +1065,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             fontSize: isTotal ? width * 0.045 : width * 0.038,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
             color: color ??
-                (isTotal ? Colors.white : Colors.white.withValues(alpha:0.7)),
+                (isTotal ? Colors.white : Colors.white.withValues(alpha: 0.7)),
           ),
         ),
         Text(
@@ -1056,7 +1111,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               : 'Your order has been placed successfully.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withValues(alpha:0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         ),
         actions: [

@@ -216,6 +216,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
               icon: Iconsax.chart,
               routeName: "/admin/global-analytics",
             ),
+
+            const SizedBox(height: 16),
+
+            /// ---- Analytics Section ----
+            sectionTile(
+              context,
+              title: "Settings",
+              subtitle: "App Settings",
+              icon: Iconsax.setting4,
+              routeName: "/admin/settings",
+            ),
           ],
         ),
       ),
@@ -249,7 +260,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: gradientColors.last.withValues(alpha:0.4),
+              color: gradientColors.last.withValues(alpha: 0.4),
               blurRadius: 10,
               offset: const Offset(0, 6),
             ),
@@ -282,7 +293,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Text(
                     title,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha:0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -313,7 +324,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha:0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -324,7 +335,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: KprimaryColor.withValues(alpha:0.15),
+                color: KprimaryColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(12),

@@ -1,4 +1,3 @@
-import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
@@ -9,6 +8,7 @@ import 'package:e_commerce_app/presentation/screens/admin/admin_edit_product/adm
 import 'package:e_commerce_app/presentation/screens/admin/admin_global_analytics/admin_global_analytics_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_orders/admin_orders_management_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_products_mangement/admin_products_mangement_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_settings_screen/admin_setting_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_user_management/admin_user_management_screen.dart';
 import 'package:e_commerce_app/presentation/screens/category_screen/category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/checkout_screen/checkout_screen.dart';
@@ -117,8 +117,7 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/checkout-screen',
         builder: (context, state) {
-          final items = state.extra as List<CartItemModel>;
-          return CheckoutScreen(selectedItems: items);
+          return const CheckoutScreen();
         },
       ),
       GoRoute(
@@ -169,6 +168,11 @@ GoRouter createRouter(AuthProvider authProvider) {
           builder: (context, state) {
             return const AdminGlobalAnalyticsScreen();
           }),
+
+      GoRoute(
+        path: "/admin/settings",
+        builder: (context, state) => const AdminSettingScreen(),
+      ),
     ],
   );
 }

@@ -26,7 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
-    // TODO: implement initStates
     super.initState();
     if (kDebugMode) {
       emailCtrl.text = "admin@admin.com";

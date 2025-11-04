@@ -60,8 +60,13 @@ class _CartScreenState extends State<CartScreen> {
         .where((item) => selectedItems.contains(item.product.id))
         .toList();
 
-    // Navigate to checkout screen with selected items
-    context.push("/checkout-screen", extra: selected);
+    // 🔥 Instead of pushing with extra, save to provider
+    final cartProvider = context.read<CartProvider>();
+    cartProvider.setSelectedItems(selected);
+
+    // ✅ Now just navigate (no data passing)
+    context.push("/checkout-screen");
+    
   }
 
   @override
@@ -121,7 +126,7 @@ class _CartScreenState extends State<CartScreen> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha:0.04),
+                          color: Colors.black.withValues(alpha: 0.04),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -245,7 +250,7 @@ Widget buildCartItem({
       borderRadius: BorderRadius.circular(16),
       boxShadow: [
         BoxShadow(
-          color: Colors.white.withValues(alpha:0.04),
+          color: Colors.white.withValues(alpha: 0.04),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),
