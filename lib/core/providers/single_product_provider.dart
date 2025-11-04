@@ -5,7 +5,7 @@ class SingleProductProvider extends ChangeNotifier {
   int _quantity = 1;
   int _currentImageIndex = 0;
 
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   String? _userId;
 
   String get userId => _userId ?? '';

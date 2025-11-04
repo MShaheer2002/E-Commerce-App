@@ -97,7 +97,7 @@ class NotificationScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withValues(alpha:0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
@@ -109,7 +109,7 @@ class NotificationScreen extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
               ),
               child: ClipOval(
@@ -151,7 +151,7 @@ class NotificationScreen extends StatelessWidget {
                       Flexible(
                         child: Text(
                           username,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: KprimaryColor,
@@ -174,7 +174,7 @@ class NotificationScreen extends StatelessWidget {
                     action,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha:0.9),
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -186,14 +186,14 @@ class NotificationScreen extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha:0.05),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         commentText,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha:0.9),
                           height: 1.3,
                         ),
                         maxLines: 2,

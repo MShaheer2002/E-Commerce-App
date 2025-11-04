@@ -27,6 +27,7 @@ class _AdminProductSalesHistoryScreenState
   void initState() {
     super.initState();
     Future.microtask(() {
+      // ignore: use_build_context_synchronously
       context.read<AnalyticsProvider>().getProductAnalytics(widget.productId);
     });
   }
@@ -183,9 +184,9 @@ class _AdminProductSalesHistoryScreenState
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha:0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha:0.2)),
       ),
       child: Column(
         children: [
@@ -226,7 +227,7 @@ class _AdminProductSalesHistoryScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -243,10 +244,10 @@ class _AdminProductSalesHistoryScreenState
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: KprimaryColor.withOpacity(0.1),
+                    color: KprimaryColor.withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.receipt_long,
                     color: KprimaryColor,
                     size: 24,

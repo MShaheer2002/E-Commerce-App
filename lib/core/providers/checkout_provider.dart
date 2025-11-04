@@ -19,7 +19,7 @@ class CheckoutProvider extends ChangeNotifier {
 
   bool orderConfirmed = false;
   String? _userId;
-  bool _isloading = false;
+  final bool _isloading = false;
 
   AddressModel? get addressModel => _addressModel;
 

@@ -26,7 +26,7 @@ class SearchProvider with ChangeNotifier {
       final snapshot = await _firestore
           .collection('products')
           .orderBy('name')
-          .startAt([query]).endAt(['${query}\uf8ff']).get();
+          .startAt([query]).endAt(['$query\uf8ff']).get();
 
       _results =
           snapshot.docs.map((doc) => ProductModel.fromMap(doc.data())).toList();

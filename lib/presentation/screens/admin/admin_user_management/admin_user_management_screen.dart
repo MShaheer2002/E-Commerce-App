@@ -6,7 +6,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
 class AdminUserManagementScreen extends StatefulWidget {
-  const AdminUserManagementScreen({Key? key}) : super(key: key);
+  const AdminUserManagementScreen({super.key});
 
   @override
   State<AdminUserManagementScreen> createState() =>
@@ -131,8 +131,9 @@ class _UserManagementScreenState extends State<AdminUserManagementScreen> {
                           itemCount: filteredUsers.length,
                           itemBuilder: (context, index) {
                             final user = filteredUsers[index];
-                            if (user.email == "admin@admin.com")
-                              return SizedBox.shrink();
+                            if (user.email == "admin@admin.com") {
+                              return const SizedBox.shrink();
+                            }
                             return _UserCard(user: user);
                           },
                         ),

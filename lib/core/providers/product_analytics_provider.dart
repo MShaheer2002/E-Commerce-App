@@ -92,9 +92,9 @@ class ProductAnalyticsProvider with ChangeNotifier {
         'sales': FieldValue.arrayUnion([saleEntry.toMap()]),
       });
 
-      if (saleEntry != null) {
+
         unawaited(_firestore.collection("sales_logs").add(saleEntry.toMap()));
-      }
+      
     });
   }
 

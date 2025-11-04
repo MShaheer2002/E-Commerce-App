@@ -125,7 +125,6 @@ class FavoriteService extends ChangeNotifier {
         notifyListeners();
         return [];
       }
-      ;
 
       final productIds =
           favSnapshot.docs.map((doc) => doc['productId'] as String).toList();

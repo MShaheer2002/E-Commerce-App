@@ -168,7 +168,7 @@ class ProfileSetupProvider extends ChangeNotifier {
           }
         }
         log("[Profile Setup Provider] in profile loaded");
-        log("[Profile Setup Provider] ${_imageUrl}");
+        log("[Profile Setup Provider] $_imageUrl");
 
         await cache.cacheProfile(
           name: data['name'] ?? '',

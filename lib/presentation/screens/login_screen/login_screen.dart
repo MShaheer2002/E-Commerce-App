@@ -99,17 +99,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           final role = await auth.getUserRole();
 
                           if (!mounted) return; // ✅ check before using context
+                          // ignore: use_build_context_synchronously
                           Navigator.of(context).pop(); // close loader safely
                           if (role == 'admin') {
                             Fluttertoast.showToast(msg: "Welcome, Admin!");
                             Future.microtask(
+                                // ignore: use_build_context_synchronously
                                 () => context.go('/adminDashboard'));
                           } else {
                             Fluttertoast.showToast(msg: "Welcome back!");
+                            // ignore: use_build_context_synchronously
                             context.go('/');
                           } // go to home
                         } on firebase.FirebaseAuthException catch (e) {
                           if (!mounted) return; // ✅ safe again
+                          // ignore: use_build_context_synchronously
                           Navigator.of(context).pop(); // close loader
                           Fluttertoast.showToast(
                             msg: e.message ?? 'Login failed',
@@ -117,6 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         } catch (e) {
                           if (!mounted) return;
+                          // ignore: use_build_context_synchronously
                           Navigator.of(context).pop();
                           Fluttertoast.showToast(
                             msg: 'Unexpected error occurred',

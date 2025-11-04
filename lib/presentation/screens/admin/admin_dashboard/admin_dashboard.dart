@@ -1,14 +1,11 @@
 import 'package:e_commerce_app/core/cache.dart';
-import 'package:e_commerce_app/core/providers/admin/analytics_provider.dart';
+import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/admin/global_analytics_provider.dart';
-import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/analytics_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
 class AdminDashboard extends StatefulWidget {
@@ -21,7 +18,6 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     context.read<GlobalAnalyticsProvider>().generateAnalytics();
   }
@@ -82,8 +78,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       final cache = CacheService();
                                       await cache.clearCache();
 
-                                      if (context.mounted)
-                                        Navigator.of(context).pop(true);
+                                      if (context.mounted) {
+                                        context.pop();
+                                      }
                                     } catch (e) {
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(context)
@@ -252,7 +249,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: gradientColors.last.withOpacity(0.4),
+              color: gradientColors.last.withValues(alpha:0.4),
               blurRadius: 10,
               offset: const Offset(0, 6),
             ),
@@ -285,7 +282,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   Text(
                     title,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha:0.9),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -316,7 +313,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha:0.08),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -327,7 +324,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: KprimaryColor.withOpacity(0.15),
+                color: KprimaryColor.withValues(alpha:0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(12),

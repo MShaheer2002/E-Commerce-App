@@ -31,7 +31,6 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       resizeToAvoidBottomInset: false, // Prevents background from moving
@@ -138,7 +137,7 @@ class ProfileImagePicker extends StatelessWidget {
                 border: Border.all(color: Colors.white, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha:0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -272,7 +271,7 @@ class ProfileForm extends StatelessWidget {
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha:0.9),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -301,7 +300,7 @@ class ProfileForm extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha:0.9),
             borderRadius: BorderRadius.circular(12),
           ),
           child: IntlPhoneField(

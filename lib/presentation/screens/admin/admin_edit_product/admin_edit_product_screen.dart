@@ -124,7 +124,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha:0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -309,7 +309,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha:0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -328,10 +328,10 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha:0.7),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha:0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -355,7 +355,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha:0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -374,10 +374,10 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha:0.7),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha:0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -400,14 +400,14 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: KprimaryColor.withOpacity(0.3), width: 2),
+          border: Border.all(color: KprimaryColor.withValues(alpha:0.3), width: 2),
         ),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.add_photo_alternate_outlined,
                 color: KprimaryColor, size: 32),
-            const SizedBox(height: 4),
+             SizedBox(height: 4),
             Text(
               "Add",
               style: TextStyle(
@@ -443,7 +443,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
             .toList();
 
         return DropdownButtonFormField<String>(
-          initialValue: selectedCategoryId,
+          value: selectedCategoryId,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey[50],
@@ -556,6 +556,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
             backgroundColor: Colors.green,
             textColor: Colors.white);
 
+        // ignore: use_build_context_synchronously
         Navigator.pop(context);
       }
     } catch (e) {

@@ -187,6 +187,7 @@ class AuthProvider with ChangeNotifier {
       await _auth.signOut();
 
       _rawUser = null;
+      // ignore: use_build_context_synchronously
       context.go("/login");
       notifyListeners();
     } catch (e) {

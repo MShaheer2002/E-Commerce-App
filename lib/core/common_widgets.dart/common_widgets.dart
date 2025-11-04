@@ -85,7 +85,7 @@ class Background extends StatelessWidget {
           if (overlayColor != null && overlayOpacity > 0)
             Positioned.fill(
               child: Container(
-                color: overlayColor!.withOpacity(overlayOpacity),
+                color: overlayColor!.withValues(alpha:overlayOpacity),
               ),
             ),
 
@@ -150,7 +150,7 @@ class CustomButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor:
-              isDisabled ? backgroundColor.withOpacity(0.5) : backgroundColor,
+              isDisabled ? backgroundColor.withValues(alpha:0.5) : backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
@@ -367,7 +367,7 @@ CachedNetworkImage cacheImage(String imageUrl, {bool showLoader = false}) {
         : const SizedBox.shrink(),
     errorWidget: (context, url, error) {
       log("[Image not Loading] $error");
-      return Icon(Icons.error);
+      return const Icon(Icons.error);
     },
   );
 }
@@ -390,7 +390,7 @@ Widget FavProductWidget({
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.grey.withValues(alpha:0.15),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -490,7 +490,7 @@ Widget buildCartItem({
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withOpacity(0.1),
+          color: Colors.grey.withValues(alpha:0.1),
           spreadRadius: 1,
           blurRadius: 5,
           offset: const Offset(0, 2),
@@ -690,7 +690,7 @@ PreferredSizeWidget adminCustomAppBar({
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1), // subtle shadow
+            color: Colors.black.withValues(alpha:0.1), // subtle shadow
             blurRadius: 6,
             offset: const Offset(0, 3), // downward shadow
           ),

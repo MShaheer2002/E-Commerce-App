@@ -66,7 +66,7 @@ class CustomEmptyDataWidget extends StatelessWidget {
               Text(
                 title!,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
@@ -86,7 +86,7 @@ class CustomEmptyDataWidget extends StatelessWidget {
             child: Text(
               subTitle!,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w400,

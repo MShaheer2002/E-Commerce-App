@@ -151,6 +151,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             emailCtrl.text.trim(), passCtrl.text.trim());
 
                         // Sign-up succeeded: verification email has been sent and user is signed out.
+                        // ignore: use_build_context_synchronously
                         Navigator.of(context).pop(); // dismiss loader
 
                         Fluttertoast.showToast(
@@ -160,8 +161,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         );
 
                         // Navigate explicitly to login
+                        // ignore: use_build_context_synchronously
                         if (mounted) context.go('/login');
                       } on firebase.FirebaseAuthException catch (e) {
+                        // ignore: use_build_context_synchronously
                         Navigator.of(context).pop(); // dismiss loader
                         Fluttertoast.showToast(
                             msg: e.message ?? 'Signup failed',
@@ -175,7 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     },
                     child: auth.isLoading == true
                         ? Center(child: SmallLoader())
-                        : Text(
+                        : const Text(
                             "Continue",
                             style: TextStyle(
                               color: Colors.white,

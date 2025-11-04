@@ -108,7 +108,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha:0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -285,7 +285,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha:0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -304,10 +304,10 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha:0.7),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha:0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -330,7 +330,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: KprimaryColor.withOpacity(0.3), width: 2),
+          border: Border.all(color: KprimaryColor.withValues(alpha:0.3), width: 2),
         ),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -340,7 +340,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             SizedBox(height: 4),
             Text(
               "Add",
-              style: const TextStyle(
+              style: TextStyle(
                   color: KprimaryColor,
                   fontSize: 12,
                   fontWeight: FontWeight.w500),
@@ -476,6 +476,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             msg: "Product Successfully Added",
             backgroundColor: Colors.green,
             textColor: Colors.white);
+        // ignore: use_build_context_synchronously
         Navigator.pop(context);
       }
     } catch (e) {

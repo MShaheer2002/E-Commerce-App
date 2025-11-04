@@ -55,7 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
               height: 55,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha:0.7),
               ),
               child: TextField(
                 controller: searchController,
@@ -141,7 +141,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   subtitle: Text(
-                    "${product.description}",
+                    product.description,
                     style: const TextStyle(color: Colors.white),
                   ),
                   onTap: () {

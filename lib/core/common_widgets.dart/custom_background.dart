@@ -58,7 +58,7 @@ class ScratchedTexturePainter extends CustomPainter {
       final y = random.nextDouble() * size.height;
       final opacity = random.nextDouble() * 0.1;
       
-      paint.color = Colors.white.withOpacity(opacity);
+      paint.color = Colors.white.withValues(alpha:opacity);
       canvas.drawCircle(Offset(x, y), 0.5, paint);
     }
   }
@@ -67,7 +67,7 @@ class ScratchedTexturePainter extends CustomPainter {
                       int count, double opacityBase, double strokeWidth) {
     for (int i = 0; i < count; i++) {
       final paint = Paint()
-        ..color = Colors.white.withOpacity(opacityBase * (0.3 + random.nextDouble() * 0.7))
+        ..color = Colors.white.withValues(alpha:opacityBase * (0.3 + random.nextDouble() * 0.7))
         ..strokeWidth = strokeWidth * (0.5 + random.nextDouble() * 0.5)
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;
@@ -112,7 +112,7 @@ class ScratchedTexturePainter extends CustomPainter {
     // Add some prominent diagonal scratches like in the image
     for (int i = 0; i < 20; i++) {
       final paint = Paint()
-        ..color = Colors.white.withOpacity(0.2 + random.nextDouble() * 0.3)
+        ..color = Colors.white.withValues(alpha:0.2 + random.nextDouble() * 0.3)
         ..strokeWidth = 0.5 + random.nextDouble() * 1.5
         ..strokeCap = StrokeCap.round
         ..style = PaintingStyle.stroke;

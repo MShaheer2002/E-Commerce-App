@@ -150,7 +150,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -271,7 +271,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -283,7 +283,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -328,7 +328,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -557,7 +557,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
           child: LinearProgressIndicator(
             value: percentage / 100,
             minHeight: 6,
-            backgroundColor: color.withOpacity(0.2),
+            backgroundColor: color.withValues(alpha:0.2),
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -582,7 +582,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -668,8 +668,8 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
                 show: true,
                 gradient: LinearGradient(
                   colors: [
-                    KprimaryColor.withOpacity(0.3),
-                    KprimaryColor.withOpacity(0.0),
+                    KprimaryColor.withValues(alpha:0.3),
+                    KprimaryColor.withValues(alpha:0.0),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -722,7 +722,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -847,7 +847,7 @@ class _ProductAnalyticsScreenState extends State<AdminProductAnalyticsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

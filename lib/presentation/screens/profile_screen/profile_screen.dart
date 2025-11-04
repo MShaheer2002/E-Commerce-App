@@ -15,28 +15,21 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String? _name;
-  String? _email;
-  String? _imageUrl;
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    // ignore: use_build_context_synchronously
     Future.microtask(() => context.read<CacheProvider>().loadCachedProfile());
   }
 
-  Future<void> _loadProfile() async {
-    final cache = CacheService();
-    final data =
-        await cache.loadCachedProfile(); // return a Map<String, String>
-    setState(() {
-      _name = data['name'];
-      _email = data['email'];
-      _imageUrl = data['imageUrl'];
-      _isLoading = false;
-    });
-  }
+  // Future<void> _loadProfile() async {
+  //   final cache = CacheService();
+  //   final data =
+  //       await cache.loadCachedProfile(); // return a Map<String, String>
+  //   setState(() {
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onTap: onTap,
         leading: Container(
           decoration: BoxDecoration(
-            color: KprimaryColor.withOpacity(0.1),
+            color: KprimaryColor.withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(

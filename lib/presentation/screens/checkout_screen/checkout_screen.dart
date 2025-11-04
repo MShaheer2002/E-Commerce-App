@@ -134,7 +134,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.white.withOpacity(0.6)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
             ),
           ),
           TextButton(
@@ -175,9 +175,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
@@ -453,10 +453,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           vertical: height * 0.018,
         ),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha:0.1),
             width: 1,
           ),
         ),
@@ -480,7 +480,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       subtitle,
                       style: TextStyle(
                         fontSize: width * 0.035,
-                        color: Colors.white.withOpacity(0.6),
+                        color: Colors.white.withValues(alpha:0.6),
                       ),
                     ),
                   ],
@@ -550,11 +550,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? KprimaryColor.withOpacity(0.15)
-              : Colors.white.withOpacity(0.05),
+              ? KprimaryColor.withValues(alpha:0.15)
+              : Colors.white.withValues(alpha:0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? KprimaryColor : Colors.white.withOpacity(0.1),
+            color: isSelected ? KprimaryColor : Colors.white.withValues(alpha:0.1),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -568,7 +568,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 border: Border.all(
                   color: isSelected
                       ? KprimaryColor
-                      : Colors.white.withOpacity(0.4),
+                      : Colors.white.withValues(alpha:0.4),
                   width: 2,
                 ),
                 color: isSelected ? KprimaryColor : Colors.transparent,
@@ -650,11 +650,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? KprimaryColor.withOpacity(0.15)
-              : Colors.white.withOpacity(0.05),
+              ? KprimaryColor.withValues(alpha:0.15)
+              : Colors.white.withValues(alpha:0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? KprimaryColor : Colors.white.withOpacity(0.1),
+            color: isSelected ? KprimaryColor : Colors.white.withValues(alpha:0.1),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -668,7 +668,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 border: Border.all(
                   color: isSelected
                       ? KprimaryColor
-                      : Colors.white.withOpacity(0.4),
+                      : Colors.white.withValues(alpha:0.4),
                   width: 2,
                 ),
                 color: isSelected ? KprimaryColor : Colors.transparent,
@@ -684,7 +684,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(width: width * 0.03),
             Icon(
               icon,
-              color: isSelected ? KprimaryColor : Colors.white.withOpacity(0.6),
+              color: isSelected ? KprimaryColor : Colors.white.withValues(alpha:0.6),
               size: width * 0.05,
             ),
             SizedBox(width: width * 0.03),
@@ -711,10 +711,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         vertical: height * 0.012,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha:0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha:0.1),
           width: 1,
         ),
       ),
@@ -730,7 +730,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               decoration: InputDecoration(
                 hintText: 'Apply promo code',
                 hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha:0.4),
                   fontSize: width * 0.04,
                 ),
                 border: InputBorder.none,
@@ -775,7 +775,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             vertical: height * 0.015,
           ),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha:0.05),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(12),
               topRight: Radius.circular(12),
@@ -817,12 +817,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           return Container(
             padding: EdgeInsets.all(width * 0.04),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.03),
+              color: Colors.white.withValues(alpha:0.03),
               border: Border(
                 bottom: BorderSide(
                   color: isLast
                       ? Colors.transparent
-                      : Colors.white.withOpacity(0.05),
+                      : Colors.white.withValues(alpha:0.05),
                   width: 1,
                 ),
               ),
@@ -894,7 +894,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         'Description',
                         style: TextStyle(
                           fontSize: width * 0.032,
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha:0.5),
                         ),
                       ),
                       SizedBox(height: height * 0.005),
@@ -924,7 +924,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -938,10 +938,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: EdgeInsets.all(width * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha:0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha:0.1),
           width: 1,
         ),
       ),
@@ -979,7 +979,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ],
           SizedBox(height: height * 0.02),
           Divider(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha:0.2),
             thickness: 1,
           ),
           SizedBox(height: height * 0.02),
@@ -1010,7 +1010,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             fontSize: isTotal ? width * 0.045 : width * 0.038,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
             color: color ??
-                (isTotal ? Colors.white : Colors.white.withOpacity(0.7)),
+                (isTotal ? Colors.white : Colors.white.withValues(alpha:0.7)),
           ),
         ),
         Text(
@@ -1056,7 +1056,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               : 'Your order has been placed successfully.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha:0.7),
           ),
         ),
         actions: [

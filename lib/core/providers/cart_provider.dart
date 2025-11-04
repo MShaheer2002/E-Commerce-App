@@ -11,11 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class CartProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final Map<String, CartItemModel> _items = {};
   String? _userId;
   bool _isLoading = false;
-  ProductAnalyticsProvider _analyticsProvider;
+  final ProductAnalyticsProvider _analyticsProvider;
 
   CartProvider(this._analyticsProvider);
 
