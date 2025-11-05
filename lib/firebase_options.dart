@@ -63,6 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '217641499247',
     projectId: 'ecommerceaapp-5e165',
     storageBucket: 'ecommerceaapp-5e165.firebasestorage.app',
+    androidClientId: '217641499247-0oa881mjj7mvh2649hip8513koopn6lf.apps.googleusercontent.com',
+    iosClientId: '217641499247-oe0i5lclithfepe6mbi6tto2mvhbkof3.apps.googleusercontent.com',
     iosBundleId: 'com.example.eCommerceApp',
   );
 
@@ -72,6 +74,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '217641499247',
     projectId: 'ecommerceaapp-5e165',
     storageBucket: 'ecommerceaapp-5e165.firebasestorage.app',
+    androidClientId: '217641499247-0oa881mjj7mvh2649hip8513koopn6lf.apps.googleusercontent.com',
+    iosClientId: '217641499247-oe0i5lclithfepe6mbi6tto2mvhbkof3.apps.googleusercontent.com',
     iosBundleId: 'com.example.eCommerceApp',
   );
 
@@ -83,4 +87,5 @@ class DefaultFirebaseOptions {
     authDomain: 'ecommerceaapp-5e165.firebaseapp.com',
     storageBucket: 'ecommerceaapp-5e165.firebasestorage.app',
   );
+
 }

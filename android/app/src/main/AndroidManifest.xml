@@ -2,23 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.e_commerce_app">
 
-    <!-- Required for network access -->
+    <!-- Required permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <application>
-        <meta-data
-        android:name="com.google.firebase.messaging.default_notification_channel_id"
-        android:value="high_importance_channel"/>
-    </application>
-
 
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="E-Commerce-App"
         android:theme="@style/NormalTheme">
+
+        <!-- ✅ Put Firebase meta-data inside this single application tag -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
 
         <!-- Main Flutter Activity -->
         <activity

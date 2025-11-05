@@ -5,26 +5,40 @@ import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/providers/theme_provider.dart';
 import 'package:e_commerce_app/routes/GoRoute_routing.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
+
+// ✅ Must be outside main() — background notifications handler
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('🔔 Background message: ${message.notification?.title}');
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
+  // Load .env
   await dotenv.load(fileName: ".env");
-  // Stripe.publishableKey = "pk_test_51SKkGKIx5HBFdIuYOeBnkjsfSRhTZ8bsgTCkgXtN5wtp6jauZVCznPsxamVgBrfD7osuMZtkVD41HLfpVQx0hxys00Lsgvc1mW";
+
+  // Stripe key
   Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY']!;
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // ✅ Background message handler must be set BEFORE Firebase.initializeApp
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Register all providers globally
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
+  // ✅ Initialize NotificationProvider (permissions, token, channels, etc.)
+  final notificationProvider = NotificationProvider();
+  await notificationProvider.initNotifications();
+
+  // ✅ Launch the app
   runApp(
     MultiProvider(
       providers: AppProvider.all,
@@ -48,10 +62,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     final authProvider = context.read<AuthProvider>();
     _router = createRouter(authProvider);
-
-       // Initialize notifications here
-    final notificationProvider = context.read<NotificationProvider>();
-    notificationProvider.initNotifications();
   }
 
   @override
