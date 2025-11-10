@@ -18,11 +18,13 @@ class AdminGlobalAnalyticsScreen extends StatefulWidget {
 class _AdminGlobalAnalyticsScreenState
     extends State<AdminGlobalAnalyticsScreen> {
   @override
-  void initState() {
-    super.initState();
+  void setState(VoidCallback fn) {
+    // TODO: implement setState
+    super.setState(fn);
+
+    // Safe to fetch here — outside build phase
     Future.microtask(() {
-      // ignore: use_build_context_synchronously
-      context.read<GlobalAnalyticsProvider>().fetchGlobalAnalytics();
+      Provider.of<GlobalAnalyticsProvider>(context, listen: false).fetchGlobalAnalytics();
     });
   }
 
@@ -215,7 +217,7 @@ class _AdminGlobalAnalyticsScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -227,7 +229,7 @@ class _AdminGlobalAnalyticsScreenState
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha:0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -272,7 +274,7 @@ class _AdminGlobalAnalyticsScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -407,7 +409,7 @@ class _AdminGlobalAnalyticsScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -489,8 +491,8 @@ class _AdminGlobalAnalyticsScreenState
                 show: true,
                 gradient: LinearGradient(
                   colors: [
-                    Colors.green.withValues(alpha:0.3),
-                    Colors.green.withValues(alpha:0.0),
+                    Colors.green.withValues(alpha: 0.3),
+                    Colors.green.withValues(alpha: 0.0),
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -522,7 +524,7 @@ class _AdminGlobalAnalyticsScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -630,7 +632,7 @@ class _AdminGlobalAnalyticsScreenState
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

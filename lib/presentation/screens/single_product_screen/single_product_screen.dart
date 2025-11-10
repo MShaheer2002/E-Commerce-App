@@ -10,9 +10,11 @@ import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SingleProductScreen extends StatefulWidget {
   final ProductModel productModel;
@@ -86,6 +88,38 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
               imageUrls: widget.productModel.imageUrls,
               height: sectionHeight,
             ),
+            // Sold Out Badge
+            if (widget.productModel.isSoldout)
+              Positioned(
+                top: 80,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'SOLD OUT',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
               child: Row(
@@ -143,6 +177,10 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
         ),
         SizedBox(height: verticalPadding * 0.5),
 
+        // Pricing Section
+        _buildPricingSection(width),
+        SizedBox(height: verticalPadding * 0.5),
+
         // Product Description
         Text(
           widget.productModel.description,
@@ -154,68 +192,205 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
         ),
         SizedBox(height: verticalPadding),
 
-        // Quantity Selector
-        Consumer<SingleProductProvider>(
-          builder: (context, value, child) => Row(
-            children: [
-              _QuantityButton(
-                icon: Icons.remove,
-                onTap: provider.decreaseQuantity,
-              ),
-              SizedBox(width: width * 0.05),
-              Text(
-                '${provider.quantity}',
-                style: TextStyle(
-                  fontSize: width * 0.05,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(width: width * 0.05),
-              _QuantityButton(
-                icon: Icons.add,
-                onTap: provider.increaseQuantity,
-              ),
-            ],
-          ),
-        ),
-
+        // Stock Information
+        _buildStockInfo(width),
         SizedBox(height: verticalPadding),
 
-        // Note Text Field
-        _buildNoteTextField(width * 0.035),
-        SizedBox(height: verticalPadding * 2),
-
-        // Add to Cart Button
-        Consumer<SingleProductProvider>(
-          builder: (context, value, child) => buildAddToBasketButton(
-            width,
-            height,
-            'Add to Cart - ${(widget.productModel.price * provider.quantity).toStringAsFixed(2)} USD',
-            () {
-              log("[cart] ${provider.quantity}");
-              final cartService = context.read<CartProvider>();
-              cartService.setUser();
-
-              final cartItem = CartItemModel(
-                  userId: provider.userId,
-                  addedAt: Timestamp.now(),
-                  priceAtPurchase: widget.productModel.price,
-                  product: widget.productModel,
-                  quantity: provider.quantity);
-
-              cartService.addToCart(cartItem);
-
-              context.pop();
-              Fluttertoast.showToast(
-                  msg: "Saved in Cart",
-                  textColor: Colors.white,
-                  backgroundColor: Colors.green);
-            },
+        // Quantity Selector (only if not sold out)
+        if (!widget.productModel.isSoldout)
+          Consumer<SingleProductProvider>(
+            builder: (context, value, child) => Row(
+              children: [
+                _QuantityButton(
+                  icon: Icons.remove,
+                  onTap: provider.decreaseQuantity,
+                ),
+                SizedBox(width: width * 0.05),
+                Text(
+                  '${provider.quantity}',
+                  style: TextStyle(
+                    fontSize: width * 0.05,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(width: width * 0.05),
+                _QuantityButton(
+                  icon: Icons.add,
+                  onTap: provider.increaseQuantity,
+                ),
+              ],
+            ),
           ),
-        ),
+
+        if (!widget.productModel.isSoldout) SizedBox(height: verticalPadding),
+
+        // Note Text Field (only if not sold out)
+        if (!widget.productModel.isSoldout) _buildNoteTextField(width * 0.035),
+
+        // Amazon Link Button
+        if (widget.productModel.productLink != null)
+          _amazonLinkButton(widget.productModel.productLink!),
+
+        const SizedBox(height: 20),
+
+        // Add to Cart Button or Sold Out Message
+        if (widget.productModel.isSoldout || (widget.productModel.stock <= 0))
+          _buildSoldOutButton(width, height)
+        else
+          Consumer<SingleProductProvider>(
+            builder: (context, value, child) => buildAddToBasketButton(
+              width,
+              height,
+              'Add to Cart - \$${(widget.productModel.price * provider.quantity).toStringAsFixed(2)}',
+              () {
+                log("[cart] ${provider.quantity}");
+                final cartService = context.read<CartProvider>();
+                cartService.setUser();
+
+                final cartItem = CartItemModel(
+                    userId: provider.userId,
+                    addedAt: Timestamp.now(),
+                    priceAtPurchase: widget.productModel.price,
+                    product: widget.productModel,
+                    quantity: provider.quantity);
+
+                cartService.addToCart(cartItem);
+
+                context.pop();
+                Fluttertoast.showToast(
+                    msg: "Added to Cart",
+                    textColor: Colors.white,
+                    backgroundColor: Colors.green);
+              },
+            ),
+          ),
         SizedBox(height: verticalPadding * 2),
       ],
+    );
+  }
+
+  // --- Pricing Section with Retail Price Struck Through ---
+  Widget _buildPricingSection(double width) {
+    final hasRetailPrice = widget.productModel.retailPrice > 0;
+    final discount = hasRetailPrice
+        ? ((widget.productModel.retailPrice - widget.productModel.price) /
+                widget.productModel.retailPrice *
+                100)
+            .round()
+        : 0;
+
+    return Row(
+      children: [
+        // Current Price (Bold)
+        Text(
+          '\$${widget.productModel.price.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: width * 0.07,
+            fontWeight: FontWeight.bold,
+            color: KprimaryColor,
+          ),
+        ),
+        if (hasRetailPrice) ...[
+          SizedBox(width: width * 0.03),
+          // Retail Price (Struck Through)
+          Text(
+            '\$${widget.productModel.retailPrice.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: width * 0.045,
+              color: Colors.white.withOpacity(0.5),
+              decoration: TextDecoration.lineThrough,
+              decorationColor: Colors.white.withOpacity(0.5),
+              decorationThickness: 2,
+            ),
+          ),
+          SizedBox(width: width * 0.02),
+          // Discount Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '-$discount%',
+              style: TextStyle(
+                fontSize: width * 0.03,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // --- Stock Information ---
+  Widget _buildStockInfo(double width) {
+    final stock = widget.productModel.stock;
+    final isLowStock = stock > 0 && stock <= 5;
+
+    return Row(
+      children: [
+        Icon(
+          stock > 0 ? Icons.check_circle : Icons.cancel,
+          color: stock > 0 ? Colors.green : Colors.red,
+          size: width * 0.045,
+        ),
+        SizedBox(width: width * 0.02),
+        Text(
+          stock > 0
+              ? (isLowStock
+                  ? 'Only $stock left in stock'
+                  : 'In Stock ($stock available)')
+              : 'Out of Stock',
+          style: TextStyle(
+            fontSize: width * 0.035,
+            color: stock > 0
+                ? (isLowStock ? Colors.orange : Colors.green)
+                : Colors.red,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- Sold Out Button ---
+  Widget _buildSoldOutButton(double width, double height) {
+    return Container(
+      width: width,
+      height: height * 0.065,
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.5),
+          width: 2,
+        ),
+      ),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.remove_shopping_cart,
+              color: Colors.white.withOpacity(0.7),
+              size: width * 0.06,
+            ),
+            SizedBox(width: width * 0.02),
+            Text(
+              'Currently Unavailable',
+              style: TextStyle(
+                fontSize: width * 0.045,
+                fontWeight: FontWeight.w600,
+                color: Colors.white.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -244,9 +419,60 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
       ),
     );
   }
+
+  Widget _amazonLinkButton(String link) {
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse(link);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } else {
+          log('Could not launch $link');
+          Fluttertoast.showToast(msg: "Could not open link");
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        width: double.infinity,
+        height: 50,
+        decoration: BoxDecoration(
+          color: const Color(0xFFFF9900), // Amazon Primary Orange
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: const Offset(0, 2),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              'assets/svgs/amazon.svg',
+              height: 25,
+              colorFilter:
+                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'View on Amazon',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Urbanist',
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-// --- Stateless Product Image Slider (no stateful widget anymore) ---
+// --- Stateless Product Image Slider ---
 class _ProductImageSlider extends StatelessWidget {
   final List<String> imageUrls;
   final double height;

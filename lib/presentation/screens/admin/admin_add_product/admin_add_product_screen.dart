@@ -25,6 +25,8 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
   String name = '';
   String description = '';
   double price = 0;
+  double retailPrice = 0;
+  String? productLink;
   int stock = 0;
   String? selectedCategoryId;
   List<File> imageFiles = [];
@@ -108,7 +110,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha:0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -154,10 +156,19 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
                         children: [
                           Expanded(
                             child: _buildTextField(
-                              label: 'Price',
+                              label: 'Sale Price',
                               hint: '0.00',
                               keyboardType: TextInputType.number,
                               prefixText: '\$ ',
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Required';
+                                }
+                                if (double.tryParse(v) == null) {
+                                  return 'Invalid number';
+                                }
+                                return null;
+                              },
                               onSaved: (v) => price = double.parse(v!),
                             ),
                           ),
@@ -167,10 +178,66 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
                               label: 'Stock',
                               hint: '0',
                               keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Required';
+                                }
+                                if (int.tryParse(v) == null) {
+                                  return 'Invalid number';
+                                }
+                                return null;
+                              },
                               onSaved: (v) => stock = int.parse(v!),
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Retail Price Section
+                      _buildSectionTitle(
+                          "Retail Price", "Original/MSRP price for comparison"),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        label: 'Retail Price',
+                        hint: '0.00',
+                        keyboardType: TextInputType.number,
+                        prefixText: '\$ ',
+                        validator: (v) {
+                          if (v != null && v.isNotEmpty) {
+                            if (double.tryParse(v) == null) {
+                              return 'Invalid number';
+                            }
+                            final retail = double.parse(v);
+                            if (retail > 0 && retail < price) {
+                              return 'Should be higher than sale price';
+                            }
+                          }
+                          return null;
+                        },
+                        onSaved: (v) =>
+                            retailPrice = v!.isEmpty ? 0 : double.parse(v),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Amazon Link Section
+                      _buildSectionTitle("Amazon Link (Optional)",
+                          "Add product link for reference"),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        label: 'Amazon Product URL',
+                        hint: 'https://www.amazon.com/...',
+                        keyboardType: TextInputType.url,
+                        prefixIcon: Icons.link,
+                        validator: (v) {
+                          if (v != null && v.isNotEmpty) {
+                            if (!Uri.tryParse(v)!.isAbsolute) {
+                              return 'Please enter a valid URL';
+                            }
+                          }
+                          return null;
+                        },
+                        onSaved: (v) => productLink = v!.isEmpty ? null : v,
                       ),
                       const SizedBox(height: 32),
 
@@ -226,12 +293,15 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
     TextInputType? keyboardType,
     int maxLines = 1,
     String? prefixText,
+    IconData? prefixIcon,
   }) {
     return TextFormField(
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         prefixText: prefixText,
+        prefixIcon:
+            prefixIcon != null ? Icon(prefixIcon, color: KprimaryColor) : null,
         filled: true,
         fillColor: Colors.grey[50],
         border: OutlineInputBorder(
@@ -245,6 +315,14 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: KprimaryColor, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -285,7 +363,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha:0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -304,10 +382,10 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black.withValues(alpha:0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha:0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -330,7 +408,8 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: KprimaryColor.withValues(alpha:0.3), width: 2),
+          border:
+              Border.all(color: KprimaryColor.withValues(alpha: 0.3), width: 2),
         ),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -463,12 +542,14 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
       }
 
       await productProvider.addNewProduct(
+        retailPrice: retailPrice,
         name: name,
         description: description,
         price: price,
         categoryId: selectedCategoryId!,
         stock: stock,
         imageUrls: urls,
+        productLink: productLink,
       );
 
       if (mounted) {

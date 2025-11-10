@@ -87,7 +87,6 @@ class AppProvider {
     ChangeNotifierProvider<GlobalAnalyticsProvider>(
         create: (_) => GlobalAnalyticsProvider()),
 
-    ChangeNotifierProvider<SettingsProvider>(
-        create: (_) => SettingsProvider()),
+    ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
   ];
 }

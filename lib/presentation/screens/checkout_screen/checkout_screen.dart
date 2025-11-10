@@ -10,10 +10,12 @@ import 'package:e_commerce_app/presentation/models/address_model.dart';
 import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
 import 'package:e_commerce_app/presentation/models/order_model.dart';
 import 'package:e_commerce_app/presentation/models/promo_model.dart';
+import 'package:e_commerce_app/presentation/models/tax_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/payment_intent.dart';
@@ -53,8 +55,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // TODO: implement initState
     super.initState();
     context.read<SettingsProvider>().fetchGlobalPromo();
-    if(kDebugMode){
-      promoController.text = "WEEKDAY10";
+    context.read<SettingsProvider>().fetchTaxes();
+    if (kDebugMode) {
+      promoController.text = "Summer20";
     }
   }
 
@@ -70,7 +73,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   double calculateTaxes() {
-    return calculateSubtotal() * 0.10; // 10% tax
+    final settingsProvider = context.read<SettingsProvider>();
+    final taxes = settingsProvider.taxes ?? [];
+
+    if (taxes.isEmpty) return 0.0;
+
+    double totalTax = 0.0;
+    final subtotal = calculateSubtotal();
+
+    for (var tax in taxes) {
+      if (tax.isActive) {
+        totalTax += tax.calculateTax(subtotal);
+      }
+    }
+
+    return totalTax;
   }
 
   double calculateTotal() {
@@ -92,11 +109,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // Try to find a matching valid promo
-    final matchingPromo = promoCodes.firstWhere(
-      (promo) =>
-          promo.code.toUpperCase() == enteredCode && promo.isCurrentlyValid,
-    );
+    PromoCode? matchingPromo;
+    try {
+      matchingPromo = promoCodes.firstWhere(
+        (promo) =>
+            promo.code.toUpperCase() == enteredCode.toUpperCase() &&
+            promo.isCurrentlyValid,
+      );
+    } catch (_) {
+      matchingPromo = null;
+    }
 
     if (matchingPromo == null || matchingPromo == "") {
       Fluttertoast.showToast(
@@ -110,7 +132,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     // Apply the discount
     setState(() {
       promoApplied = true;
-      promoDiscount = matchingPromo.discountPercent;
+      promoDiscount = matchingPromo?.discountPercent ?? 0;
     });
 
     Fluttertoast.showToast(
@@ -788,8 +810,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           Consumer<SettingsProvider>(builder: (context, value, child) {
             return InkWell(
-              onTap: () =>
-                  applyPromoCode(value.globalSettings?.promoCodes ?? []),
+              onTap: () {
+                log('[Promo code] ${value.globalSettings?.promoCodes?.first.discountPercent}');
+                applyPromoCode(value.globalSettings?.promoCodes ?? []);
+              },
               child: Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: width * 0.04,
@@ -990,6 +1014,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     double taxes = calculateTaxes();
     double total = calculateTotal();
 
+    final settingsProvider = context.watch<SettingsProvider>();
+    final taxList =
+        settingsProvider.taxes?.where((tax) => tax.isActive).toList() ?? [];
+
     return Container(
       padding: EdgeInsets.all(width * 0.04),
       decoration: BoxDecoration(
@@ -1001,6 +1029,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSummaryRow(
             'Subtotal (${cartItems.length})',
@@ -1011,22 +1040,37 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           SizedBox(height: height * 0.015),
           _buildSummaryRow(
             'Shipping total',
-            shipping == 0 ? 'Free' : '\${shipping.toStringAsFixed(2)}',
+            shipping == 0 ? 'Free' : '\$${shipping.toStringAsFixed(2)}',
             width,
             false,
           ),
-          SizedBox(height: height * 0.015),
-          _buildSummaryRow(
-            'Taxes',
-            '\$${taxes.toStringAsFixed(2)}',
-            width,
-            false,
-          ),
+
+          // Display all active taxes
+          if (taxList.isNotEmpty) ...[
+            SizedBox(height: height * 0.015),
+            ...taxList.map((tax) {
+              double taxAmount = tax.calculateTax(subtotal);
+              String taxLabel = tax.type == TaxType.percentage
+                  ? '${tax.name} (${tax.rate}%)'
+                  : tax.name;
+
+              return Padding(
+                padding: EdgeInsets.only(bottom: height * 0.015),
+                child: _buildSummaryRow(
+                  taxLabel,
+                  '\$${taxAmount.toStringAsFixed(2)}',
+                  width,
+                  false,
+                ),
+              );
+            }),
+          ],
+
           if (promoApplied) ...[
             SizedBox(height: height * 0.015),
             _buildSummaryRow(
               'Promo Discount',
-              '\$${promoDiscount.toStringAsFixed(2)}',
+              '-\$${promoDiscount.toStringAsFixed(2)}',
               width,
               false,
               color: Colors.green,

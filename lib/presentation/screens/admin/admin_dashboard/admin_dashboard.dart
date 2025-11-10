@@ -19,7 +19,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   void initState() {
     super.initState();
-    context.read<GlobalAnalyticsProvider>().generateAnalytics();
+
+    // Safe to fetch here — outside build phase
+    Future.microtask(() {
+      Provider.of<GlobalAnalyticsProvider>(context, listen: false)
+          .fetchGlobalAnalytics();
+    });
   }
 
   @override

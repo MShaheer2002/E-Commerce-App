@@ -158,11 +158,19 @@ class ProductmanagementProvider with ChangeNotifier {
     required String description,
     required double price,
     required String categoryId,
+    required double retailPrice,
     required int stock,
+    required String? productLink,
     required List<String> imageUrls,
   }) async {
     try {
+      final docRef = _firestore.collection('products').doc();
+      // Create product with the ID included
       final product = ProductModel(
+        id: docRef.id,
+        productLink: productLink,
+        isSoldout: false,
+        retailPrice: retailPrice,
         name: name,
         description: description,
         price: price,
@@ -172,8 +180,8 @@ class ProductmanagementProvider with ChangeNotifier {
         createdAt: Timestamp.now(),
       );
 
-      final docRef =
-          await _firestore.collection('products').add(product.toMap());
+      // Save to Firestore
+      await docRef.set(product.toMap());
       // Refresh product list after adding
       await fetchProducts(initialLoad: true);
 
