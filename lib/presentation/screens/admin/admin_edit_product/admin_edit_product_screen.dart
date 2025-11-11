@@ -27,6 +27,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
   late String name;
   late String description;
   late double price;
+  late double retailPrice;
+  String? productLink;
   late int stock;
   String? selectedCategoryId;
   late List<File> imageFiles;
@@ -38,6 +40,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
     name = widget.product.name;
     description = widget.product.description;
     price = widget.product.price;
+    retailPrice = widget.product.retailPrice ?? 0;
+    productLink = widget.product.productLink;
     stock = widget.product.stock;
     selectedCategoryId = widget.product.categoryId;
     existingImageUrls = List<String>.from(widget.product.imageUrls);
@@ -172,11 +176,20 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                         children: [
                           Expanded(
                             child: _buildTextField(
-                              label: 'Price',
+                              label: 'Sale Price',
                               hint: '0.00',
                               initialValue: price.toString(),
                               keyboardType: TextInputType.number,
                               prefixText: '\$ ',
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Required';
+                                }
+                                if (double.tryParse(v) == null) {
+                                  return 'Invalid number';
+                                }
+                                return null;
+                              },
                               onSaved: (v) => price = double.parse(v!),
                             ),
                           ),
@@ -187,10 +200,69 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                               hint: '0',
                               initialValue: stock.toString(),
                               keyboardType: TextInputType.number,
+                              validator: (v) {
+                                if (v == null || v.isEmpty) {
+                                  return 'Required';
+                                }
+                                if (int.tryParse(v) == null) {
+                                  return 'Invalid number';
+                                }
+                                return null;
+                              },
                               onSaved: (v) => stock = int.parse(v!),
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Retail Price Section
+                      _buildSectionTitle(
+                          "Retail Price", "Original/MSRP price for comparison"),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        label: 'Retail Price',
+                        hint: '0.00',
+                        initialValue:
+                            retailPrice > 0 ? retailPrice.toString() : '',
+                        keyboardType: TextInputType.number,
+                        prefixText: '\$ ',
+                        validator: (v) {
+                          if (v != null && v.isNotEmpty) {
+                            if (double.tryParse(v) == null) {
+                              return 'Invalid number';
+                            }
+                            final retail = double.parse(v);
+                            if (retail > 0 && retail < price) {
+                              return 'Should be higher than sale price';
+                            }
+                          }
+                          return null;
+                        },
+                        onSaved: (v) =>
+                            retailPrice = v!.isEmpty ? 0 : double.parse(v),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Amazon Link Section
+                      _buildSectionTitle("Amazon Link (Optional)",
+                          "Add product link for reference"),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        label: 'Amazon Product URL',
+                        hint: 'https://www.amazon.com/...',
+                        initialValue: productLink ?? '',
+                        keyboardType: TextInputType.url,
+                        prefixIcon: Icons.link,
+                        validator: (v) {
+                          if (v != null && v.isNotEmpty) {
+                            if (!Uri.tryParse(v)!.isAbsolute) {
+                              return 'Please enter a valid URL';
+                            }
+                          }
+                          return null;
+                        },
+                        onSaved: (v) => productLink = v!.isEmpty ? null : v,
                       ),
                       const SizedBox(height: 32),
 
@@ -247,6 +319,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
     TextInputType? keyboardType,
     int maxLines = 1,
     String? prefixText,
+    IconData? prefixIcon,
   }) {
     return TextFormField(
       initialValue: initialValue,
@@ -254,6 +327,8 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         labelText: label,
         hintText: hint,
         prefixText: prefixText,
+        prefixIcon:
+            prefixIcon != null ? Icon(prefixIcon, color: KprimaryColor) : null,
         filled: true,
         fillColor: Colors.grey[50],
         border: OutlineInputBorder(
@@ -267,6 +342,14 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: KprimaryColor, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -525,20 +608,21 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
       // Upload new images to Cloudinary
       List<String> newImageUrls = [];
       if (imageFiles.isNotEmpty) {
+        final folderPath = "products/$selectedCategoryId/$name";
         newImageUrls = await cloudinary.uploadMultipleImages(
           imageFiles,
-          folder:
-              "ecommerce/products/$selectedCategoryId/$name", // Organized by category/product name
+          folder: folderPath,
         );
       }
 
-      // 2️⃣ Combine existing + new images
+      // Combine existing + new images
       final allImageUrls = [...existingImageUrls, ...newImageUrls];
 
-      // 3️⃣ Create updated product model
+      // Create updated product model
       final updatedProduct = ProductModel(
-        isSoldout: false,
-        retailPrice: 0,
+        isSoldout: widget.product.isSoldout,
+        retailPrice: retailPrice,
+        productLink: productLink,
         id: widget.product.id,
         name: name,
         description: description,
@@ -549,10 +633,10 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
         createdAt: widget.product.createdAt,
       );
 
-      // 4️⃣ Update Firestore document
+      // Update Firestore document
       await productProvider.updateProduct(widget.product.id!, updatedProduct);
 
-      // 5️⃣ Show success message
+      // Show success message
       if (mounted) {
         Fluttertoast.showToast(
             msg: "Product updated successfully!",

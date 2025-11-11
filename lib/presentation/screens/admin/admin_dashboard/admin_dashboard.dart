@@ -202,6 +202,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
             const SizedBox(height: 16),
 
+            /// ---- Products Section ----
+            sectionTile(
+              context,
+              title: "Category",
+              subtitle: "Create and Manage Category",
+              icon: Iconsax.category_24,
+              routeName: "/admin/admin-category",
+            ),
+
+            const SizedBox(height: 16),
+
             /// ---- Orders Section ----
             sectionTile(
               context,

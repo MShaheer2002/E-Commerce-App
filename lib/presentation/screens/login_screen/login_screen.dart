@@ -7,6 +7,7 @@ import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,10 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      // emailCtrl.text = "admin@admin.com";
-      // passCtrl.text = "abc12345678";
-      emailCtrl.text = "unknowusers420@gmail.com";
-      passCtrl.text = "12345678";
+      emailCtrl.text = "admin@admin.com";
+      passCtrl.text = "abc12345678";
+      //   emailCtrl.text = "unknowusers420@gmail.com";
+      //   passCtrl.text = "12345678";
     }
   }
 
@@ -231,44 +232,85 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: height * 0.02),
-                  CustomButton(
-                    onPressed: () async {
-                      try {
-                        if (Platform.isAndroid) {
-                          Fluttertoast.showToast(
-                              msg: "This is not avaible for Android",
-                              backgroundColor: Colors.black,
-                              textColor: Colors.white);
-                        } else {
-                          await auth.signInWithApple();
-                        }
-                      } on firebase.FirebaseAuthException catch (e) {
-                        Fluttertoast.showToast(
-                            msg: e.message ?? "Something went wrong");
-                        return;
-                      } catch (e) {
-                        log("[Google Sign in Errror] $e");
-                        Fluttertoast.showToast(msg: "Something went wrong");
-                        return;
-                      }
-                    },
-                    backgroundColor: Colors.white,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  // CustomButton(
+                  //   onPressed: () async {
+                  //     try {
+                  //       if (Platform.isAndroid) {
+                  //         Fluttertoast.showToast(
+                  //             msg: "This is not avaible for Android",
+                  //             backgroundColor: Colors.black,
+                  //             textColor: Colors.white);
+                  //       } else {
+                  //         await auth.signInWithApple();
+                  //       }
+                  //     } on firebase.FirebaseAuthException catch (e) {
+                  //       Fluttertoast.showToast(
+                  //           msg: e.message ?? "Something went wrong");
+                  //       return;
+                  //     } catch (e) {
+                  //       log("[Google Sign in Errror] $e");
+                  //       Fluttertoast.showToast(msg: "Something went wrong");
+                  //       return;
+                  //     }
+                  //   },
+                  //   backgroundColor: Colors.white,
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.center,
+                  //     children: [
+                  //       SvgPicture.asset(
+                  //         "assets/svgs/apple.svg",
+                  //         height: 30,
+                  //       ),
+                  //       SizedBox(width: width * 0.02),
+                  //       const Text(
+                  //         "Continue with Apple",
+                  //         style: TextStyle(color: Colors.black),
+                  //       )
+                  //     ],
+                  //   ),
+                  // ),
+                  // SizedBox(height: height * 0.02),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
                       children: [
-                        SvgPicture.asset(
-                          "assets/svgs/apple.svg",
-                          height: 30,
+                        const TextSpan(
+                          text: 'By clicking continue, you agree to our ',
                         ),
-                        SizedBox(width: width * 0.02),
-                        const Text(
-                          "Continue with Apple",
-                          style: TextStyle(color: Colors.black),
-                        )
+                        TextSpan(
+                          text: 'Terms of Service',
+                          style: TextStyle(
+                            color: KprimaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              print('Terms of Service tapped');
+                              // TODO: open link or navigate
+                            },
+                        ),
+                        const TextSpan(
+                          text: ' and ',
+                        ),
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          style: const TextStyle(
+                            color: KprimaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              print('Privacy Policy tapped');
+                              // TODO: open link or navigate
+                            },
+                        ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: height * 0.02),
+                  )
                 ],
               ),
             ),

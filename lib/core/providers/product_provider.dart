@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:flutter/foundation.dart';
@@ -44,20 +46,28 @@ class ProductProvider with ChangeNotifier {
   }
 
   /// 🔄 Fetch categories (real-time stream)
-  void listenToCategory() {
-    _db
-        .collection('categories')
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .listen((snapshot) {
-      _categories = snapshot.docs
-          .map((doc) => CategoryModel.fromMap(doc.data()))
-          .toList();
-      notifyListeners();
-    }, onError: (error) {
-      _errorMessage = error.toString();
-      notifyListeners();
-    });
+  Future<void> listenToCategory() async {
+    try {
+      final snapshot = await _db.collection('categories').get();
+      _categories =
+          snapshot.docs.map((e) => CategoryModel.fromMap(e.data())).toList();
+    } catch (e, s) {
+      log("[Category] error $e");
+      log("[Category] stack $s");
+    }
+    // _db
+    //     .collection('categories')
+    //     .orderBy('createdAt', descending: true)
+    //     .snapshots()
+    //     .listen((snapshot) {
+    //   _categories = snapshot.docs
+    //       .map((doc) => CategoryModel.fromMap(doc.data()))
+    //       .toList();
+    //   notifyListeners();
+    // }, onError: (error) {
+    //   _errorMessage = error.toString();
+    //   notifyListeners();
+    // });
   }
 
   /// ➕ Add a product

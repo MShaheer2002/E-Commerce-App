@@ -85,7 +85,7 @@ class Background extends StatelessWidget {
           if (overlayColor != null && overlayOpacity > 0)
             Positioned.fill(
               child: Container(
-                color: overlayColor!.withValues(alpha:overlayOpacity),
+                color: overlayColor!.withValues(alpha: overlayOpacity),
               ),
             ),
 
@@ -149,8 +149,9 @@ class CustomButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              isDisabled ? backgroundColor.withValues(alpha:0.5) : backgroundColor,
+          backgroundColor: isDisabled
+              ? backgroundColor.withValues(alpha: 0.5)
+              : backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
@@ -237,7 +238,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
 }
 
 // ignore: non_constant_identifier_names
-Widget SmallLoader({Color backgroundColor = KprimaryColor,double strokeWidth = 3}) {
+Widget SmallLoader(
+    {Color backgroundColor = KprimaryColor, double strokeWidth = 3}) {
   return CircularProgressIndicator(
     color: backgroundColor,
     strokeWidth: strokeWidth,
@@ -254,29 +256,85 @@ Widget ProductWidget(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🖼 Product Image with rounded corners
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              height: height * 0.16,
-              width: width * 0.4,
-              color: Colors.grey[200], // optional background
-              child: product.imageUrls.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: product.imageUrls.first,
-                      fit: BoxFit.cover, // fill and crop if needed
-                      progressIndicatorBuilder:
-                          (context, url, downloadProgress) => Center(
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  value: downloadProgress.progress)),
-                      errorWidget: (context, url, error) {
-                        return const Icon(Icons.error);
-                      },
-                    )
-                  : const Center(child: Icon(Icons.image_not_supported)),
-            ),
-          ),
+          (product.isSoldout == true || product.stock <= 0)
+              ? Stack(
+                  children: [
+                    // 🖼 Product Image with rounded corners
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        height: height * 0.16,
+                        width: width * 0.4,
+                        color: Colors.grey[200], // optional background
+                        child: product.imageUrls.isNotEmpty
+                            ? Container(
+                                decoration: BoxDecoration(color: Colors.black),
+                                child: CachedNetworkImage(
+                                  imageUrl: product.imageUrls.first,
+                                  fit: BoxFit.cover, // fill and crop if needed
+                                  progressIndicatorBuilder: (context, url,
+                                          downloadProgress) =>
+                                      Center(
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              value:
+                                                  downloadProgress.progress)),
+                                  errorWidget: (context, url, error) {
+                                    return const Icon(Icons.error);
+                                  },
+                                ),
+                              )
+                            : const Center(
+                                child: Icon(Icons.image_not_supported)),
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadiusGeometry.circular(16),
+                      child: Container(
+                        height: height * 0.16,
+                        width: width * 0.4,
+                        decoration: const BoxDecoration(color: Colors.black54),
+                        child: const Center(
+                          child: Text(
+                            "Sold out",
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                                fontFamily: "Urbanist",
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              :
+              // 🖼 Product Image with rounded corners
+              ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    height: height * 0.16,
+                    width: width * 0.4,
+                    color: Colors.grey[200], // optional background
+                    child: product.imageUrls.isNotEmpty
+                        ? Container(
+                            decoration: BoxDecoration(color: Colors.black),
+                            child: CachedNetworkImage(
+                              imageUrl: product.imageUrls.first,
+                              fit: BoxFit.cover, // fill and crop if needed
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) => Center(
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          value: downloadProgress.progress)),
+                              errorWidget: (context, url, error) {
+                                return const Icon(Icons.error);
+                              },
+                            ),
+                          )
+                        : const Center(child: Icon(Icons.image_not_supported)),
+                  ),
+                ),
 
           SizedBox(height: height * 0.008),
 
@@ -390,7 +448,7 @@ Widget FavProductWidget({
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha:0.15),
+            color: Colors.grey.withValues(alpha: 0.15),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -490,7 +548,7 @@ Widget buildCartItem({
       borderRadius: BorderRadius.circular(12),
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withValues(alpha:0.1),
+          color: Colors.grey.withValues(alpha: 0.1),
           spreadRadius: 1,
           blurRadius: 5,
           offset: const Offset(0, 2),
@@ -690,7 +748,7 @@ PreferredSizeWidget adminCustomAppBar({
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha:0.1), // subtle shadow
+            color: Colors.black.withValues(alpha: 0.1), // subtle shadow
             blurRadius: 6,
             offset: const Offset(0, 3), // downward shadow
           ),

@@ -3,6 +3,7 @@ import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_add_product/admin_add_product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_analytics/admin_product_analytics_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_category_management/admin_category_management_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_dashboard/admin_dashboard.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_edit_product/admin_edit_product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_global_analytics/admin_global_analytics_screen.dart';
@@ -172,6 +173,11 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: "/admin/settings",
         builder: (context, state) => const AdminSettingScreen(),
+      ),
+
+      GoRoute(
+        path: "/admin/admin-category",
+        builder: (context, state) => const AdminCategoryManagementScreen(),
       ),
     ],
   );
