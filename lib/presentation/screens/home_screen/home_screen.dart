@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 55,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              color: Colors.white.withValues(alpha:0.7),
+                              color: Colors.white.withValues(alpha: 0.7),
                             ),
                             child: const Row(
                               children: [
@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 decoration: BoxDecoration(
                                   color: isActive
                                       ? Colors.white
-                                      : Colors.white.withValues(alpha:0.6),
+                                      : Colors.white.withValues(alpha: 0.6),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),

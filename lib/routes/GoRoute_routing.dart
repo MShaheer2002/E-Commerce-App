@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:e_commerce_app/presentation/models/category_model.dart';
+import 'package:e_commerce_app/presentation/models/order_model.dart';
 import 'package:e_commerce_app/presentation/models/product_model.dart';
 import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_add_product/admin_add_product_screen.dart';
@@ -8,6 +11,7 @@ import 'package:e_commerce_app/presentation/screens/admin/admin_dashboard/admin_
 import 'package:e_commerce_app/presentation/screens/admin/admin_edit_product/admin_edit_product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_global_analytics/admin_global_analytics_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_orders/admin_orders_management_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_orders/admin_single_order_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_products_mangement/admin_products_mangement_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_settings_screen/admin_setting_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_user_management/admin_user_management_screen.dart';
@@ -17,6 +21,7 @@ import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_tab/home_tab.dart';
 import 'package:e_commerce_app/presentation/screens/login_screen/login_screen.dart';
+import 'package:e_commerce_app/presentation/screens/order_status/order_status_screen.dart';
 import 'package:e_commerce_app/presentation/screens/product_by_category_screen/product_by_category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/products_screen/product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/profile_setup/profile_setup.dart';
@@ -100,6 +105,12 @@ GoRouter createRouter(AuthProvider authProvider) {
         path: '/category-screen',
         builder: (context, state) => const CategoryScreen(),
       ),
+
+      GoRoute(
+        path: '/order-status',
+        builder: (context, state) => const OrderStatusScreen(),
+      ),
+
       GoRoute(
         path: '/product-by-category',
         builder: (context, state) {
@@ -113,7 +124,12 @@ GoRouter createRouter(AuthProvider authProvider) {
       ),
       GoRoute(
         path: '/search-screen',
-        builder: (context, state) => const SearchScreen(),
+        builder: (context, state) {
+          final bool isAdmin = state.extra as bool;
+          return SearchScreen(
+            isAdmin: isAdmin,
+          );
+        },
       ),
       GoRoute(
         path: '/checkout-screen',
@@ -178,6 +194,16 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: "/admin/admin-category",
         builder: (context, state) => const AdminCategoryManagementScreen(),
+      ),
+
+      GoRoute(
+        path: "/admin/single-order-screen",
+        builder: (context, state) {
+          final order = state.extra as OrderModel;
+          log(" [Single Order Screen] provider ${order}");
+
+          return AdminSingleOrderScreen(order: order);
+        },
       ),
     ],
   );

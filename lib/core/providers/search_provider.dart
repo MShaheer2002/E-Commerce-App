@@ -22,11 +22,13 @@ class SearchProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    final lowerQuery = query.toLowerCase();
+
     try {
       final snapshot = await _firestore
           .collection('products')
-          .orderBy('name')
-          .startAt([query]).endAt(['$query\uf8ff']).get();
+          .orderBy('search_name')
+          .startAt([lowerQuery]).endAt(['$lowerQuery\uf8ff']).get();
 
       _results =
           snapshot.docs.map((doc) => ProductModel.fromMap(doc.data())).toList();

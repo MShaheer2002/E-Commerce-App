@@ -114,35 +114,45 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
     return Scaffold(
       body: _screens[_selectedIndex](),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/tabbar.png'),
-            fit: BoxFit.cover,
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // The top separator line
+          Container(
+            height: 1, // thickness of the line
+            color: KprimaryColor,
           ),
-        ),
-        child: Theme(
-          data: Theme.of(context).copyWith(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            splashFactory: NoSplash.splashFactory,
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            items: List.generate(
-              icons.length,
-              (index) => _buildNavItem(icons[index], index),
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/tabbar.png'),
+                fit: BoxFit.cover,
+              ),
             ),
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            selectedFontSize: 0,
-            unselectedFontSize: 0,
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                splashFactory: NoSplash.splashFactory,
+              ),
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                items: List.generate(
+                  icons.length,
+                  (index) => _buildNavItem(icons[index], index),
+                ),
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+                selectedFontSize: 0,
+                unselectedFontSize: 0,
+                showSelectedLabels: false,
+                showUnselectedLabels: false,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

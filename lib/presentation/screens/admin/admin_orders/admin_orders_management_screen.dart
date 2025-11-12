@@ -1,6 +1,7 @@
 import 'package:e_commerce_app/core/providers/admin/order_management_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:e_commerce_app/presentation/models/order_model.dart';
@@ -16,7 +17,7 @@ class AdminOrdersManagementScreen extends StatelessWidget {
       child: DefaultTabController(
         length: 4,
         child: Scaffold(
-          backgroundColor: const Color(0xFFF8F9FA),
+          backgroundColor: Colors.grey[50],
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 0,
@@ -60,9 +61,10 @@ class AdminOrdersManagementScreen extends StatelessWidget {
                 ),
               ),
             ),
+         
           ),
           body: const TabBarView(
-            physics:  NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             children: [
               OrdersListView(status: OrderStatus.placed),
               OrdersListView(status: OrderStatus.shipped),
@@ -140,7 +142,10 @@ class _OrdersListViewState extends State<OrdersListView> {
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final order = orders[index];
-              return _OrderCard(order: order);
+              return _OrderCard(
+                order: order,
+                index: index,
+              );
             },
           ),
         );
@@ -151,148 +156,153 @@ class _OrdersListViewState extends State<OrdersListView> {
 
 class _OrderCard extends StatelessWidget {
   final OrderModel order;
+  final int index;
 
-  const _OrderCard({required this.order});
+  const _OrderCard({required this.order, required this.index});
 
   @override
   Widget build(BuildContext context) {
     final formattedDate =
         DateFormat('MMM dd, yyyy • hh:mm a').format(order.orderDate.toDate());
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "Order #${order.orderId}",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF2D3436),
+    return GestureDetector(
+      onTap: () => context.push("/admin/single-order-screen", extra: order),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "Order #${order.orderId}",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF2D3436),
+                              ),
                             ),
+                            const SizedBox(width: 8),
+                            _StatusBadge(status: order.orderStatus),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          formattedDate,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
                           ),
-                          const SizedBox(width: 8),
-                          _StatusBadge(status: order.orderStatus),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        formattedDate,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                _buildStatusMenu(context),
-              ],
+                  _buildStatusMenu(context),
+                ],
+              ),
             ),
-          ),
 
-          const Divider(height: 1, color: Color(0xFFE8E8E8)),
+            // const Divider(height: 1, color: Color(0xFFE8E8E8)),
 
-          // Products Section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Ordered Items",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2D3436),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ...order.cartItems.map((item) => _ProductItem(item: item)),
-              ],
-            ),
-          ),
+            // // Products Section
+            // Padding(
+            //   padding: const EdgeInsets.all(16),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       const Text(
+            //         "Ordered Items",
+            //         style: TextStyle(
+            //           fontSize: 14,
+            //           fontWeight: FontWeight.w600,
+            //           color: Color(0xFF2D3436),
+            //         ),
+            //       ),
+            //       const SizedBox(height: 12),
+            //       ...order.cartItems.map((item) => _ProductItem(item: item)),
+            //     ],
+            //   ),
+            // ),
 
-          const Divider(height: 1, color: Color(0xFFE8E8E8)),
+            const Divider(height: 1, color: Color(0xFFE8E8E8)),
 
-          // Footer Section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _InfoRow(
-                        icon: Icons.location_on_outlined,
-                        text: "${order.address.city}, ${order.address.country}",
-                      ),
-                      const SizedBox(height: 6),
-                      _InfoRow(
-                        icon: Icons.payment_outlined,
-                        text: order.paymentMethod.toUpperCase(),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: KprimaryColor.withValues(alpha:0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        "Total Amount",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF636E72),
-                          fontWeight: FontWeight.w500,
+            // Footer Section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _InfoRow(
+                          icon: Icons.location_on_outlined,
+                          text:
+                              "${order.address.city}, ${order.address.country}",
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "\$${order.totalAmount.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: KprimaryColor,
+                        const SizedBox(height: 6),
+                        _InfoRow(
+                          icon: Icons.payment_outlined,
+                          text: order.paymentMethod.toUpperCase(),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: KprimaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          "Total Amount",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF636E72),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "\$${order.totalAmount.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: KprimaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -477,7 +487,7 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: _getColor().withValues(alpha:0.1),
+        color: _getColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(

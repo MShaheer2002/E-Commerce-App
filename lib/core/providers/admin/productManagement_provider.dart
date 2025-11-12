@@ -104,9 +104,10 @@ class ProductmanagementProvider with ChangeNotifier {
           await _firestore.collection('products').add(product.toMap());
 
       // ✅ Add product ID to Firestore document
-      await _firestore.collection('products').doc(docRef.id).update({
-        'id': docRef.id,
-      });
+      await _firestore
+          .collection('products')
+          .doc(docRef.id)
+          .update({'id': docRef.id, 'search_name': product.name.toLowerCase()});
 
       await fetchProducts(initialLoad: true);
     } catch (e) {
@@ -189,6 +190,28 @@ class ProductmanagementProvider with ChangeNotifier {
       await _analyticsProvider.createAnalyticsForNewProduct(productId);
     } catch (e) {
       debugPrint("Error adding new product: $e");
+    }
+  }
+
+  Future<void> addLowercaseFieldToAllProducts() async {
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      final snapshot = await firestore.collection('products').get();
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        final name = data['name'];
+
+        if (name != null && name is String) {
+          await doc.reference.update({'search_name': name.toLowerCase()});
+          print('Updated: ${doc.id}');
+        }
+      }
+
+      print('✅ All products updated with name_lower');
+    } catch (e) {
+      print('❌ Error while updating: $e');
     }
   }
 }

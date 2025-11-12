@@ -15,7 +15,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -65,6 +64,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context.push("/profile-setup");
                   },
                 ),
+                SizedBox(height: height * 0.01),
+                _buildMenuItem(
+                  icon: Icons.edit,
+                  title: "Order History",
+                  onTap: () {
+                    context.push('/order-status');
+                  },
+                ),
                 _buildMenuItem(
                   icon: Icons.login,
                   title: "Logout",
@@ -105,9 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildMenuItem(
                   icon: Icons.security_outlined,
                   title: "Security",
-                  onTap: () {
-                    
-                  },
+                  onTap: () {},
                 ),
                 _buildMenuItem(
                   icon: Icons.privacy_tip_outlined,
@@ -186,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onTap: onTap,
         leading: Container(
           decoration: BoxDecoration(
-            color: KprimaryColor.withValues(alpha:0.1),
+            color: KprimaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(

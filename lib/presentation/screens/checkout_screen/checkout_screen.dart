@@ -221,7 +221,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             },
             child: const Text(
               'Save',
-              style: TextStyle(color: KprimaryColor),
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -242,7 +242,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: KprimaryColor),
+          borderSide: const BorderSide(color: Colors.white),
           borderRadius: BorderRadius.circular(8),
         ),
         contentPadding:
@@ -533,7 +533,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     title,
                     style: TextStyle(
                       fontSize: width * 0.04,
-                      color: KprimaryColor,
+                      color: Colors.white,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -552,7 +552,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             Icon(
               icon,
-              color: KprimaryColor,
+              color: Colors.white,
               size: width * 0.045,
             ),
           ],
@@ -613,13 +613,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? KprimaryColor.withValues(alpha: 0.15)
+              ? Colors.white.withValues(alpha: 0.15)
               : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? KprimaryColor
-                : Colors.white.withValues(alpha: 0.1),
+            color:
+                isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -632,11 +631,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? KprimaryColor
+                      ? Colors.white
                       : Colors.white.withValues(alpha: 0.4),
                   width: 2,
                 ),
-                color: isSelected ? KprimaryColor : Colors.transparent,
+                color: isSelected ? Colors.white : Colors.transparent,
               ),
               child: isSelected
                   ? Icon(
@@ -652,7 +651,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 description,
                 style: TextStyle(
                   fontSize: width * 0.04,
-                  color: isSelected ? KprimaryColor : Colors.white,
+                  color: isSelected ? Colors.white : Colors.white,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
@@ -661,7 +660,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               price,
               style: TextStyle(
                 fontSize: width * 0.04,
-                color: KprimaryColor,
+                color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -715,13 +714,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? KprimaryColor.withValues(alpha: 0.15)
+              ? Colors.white.withValues(alpha: 0.15)
               : Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? KprimaryColor
-                : Colors.white.withValues(alpha: 0.1),
+            color:
+                isSelected ? Colors.white : Colors.white.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -734,11 +732,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? KprimaryColor
+                      ? Colors.white
                       : Colors.white.withValues(alpha: 0.4),
                   width: 2,
                 ),
-                color: isSelected ? KprimaryColor : Colors.transparent,
+                color: isSelected ? Colors.white : Colors.transparent,
               ),
               child: isSelected
                   ? Icon(
@@ -752,7 +750,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             Icon(
               icon,
               color: isSelected
-                  ? KprimaryColor
+                  ? Colors.white
                   : Colors.white.withValues(alpha: 0.6),
               size: width * 0.05,
             ),
@@ -762,7 +760,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 title,
                 style: TextStyle(
                   fontSize: width * 0.04,
-                  color: isSelected ? KprimaryColor : Colors.white,
+                  color: isSelected ? Colors.white : Colors.white,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
@@ -826,7 +824,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: value.isLoading == true
                     ? Center(
                         child: SmallLoader(
-                            backgroundColor: KprimaryColor, strokeWidth: 2),
+                            backgroundColor: Colors.white, strokeWidth: 2),
                       )
                     : Text(
                         'Apply',
@@ -869,7 +867,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   style: TextStyle(
                     fontSize: width * 0.035,
                     fontWeight: FontWeight.w600,
-                    color: KprimaryColor,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -880,7 +878,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   style: TextStyle(
                     fontSize: width * 0.035,
                     fontWeight: FontWeight.w600,
-                    color: KprimaryColor,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -981,7 +979,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         'Quantity: ${item.quantity}',
                         style: TextStyle(
                           fontSize: width * 0.035,
-                          color: KprimaryColor,
+                          color: Colors.white,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -996,7 +994,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     style: TextStyle(
                       fontSize: width * 0.04,
                       fontWeight: FontWeight.w600,
-                      color: KprimaryColor,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -1085,6 +1083,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           _buildSummaryRow(
             'Total',
             '\$${total.toStringAsFixed(2)}',
+            color: KprimaryColor,
             width,
             true,
           ),
@@ -1117,7 +1116,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           style: TextStyle(
             fontSize: isTotal ? width * 0.05 : width * 0.04,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
-            color: color ?? KprimaryColor,
+            color: color ?? Colors.white,
           ),
         ),
       ],
@@ -1166,7 +1165,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             },
             child: const Text(
               'OK',
-              style: TextStyle(color: KprimaryColor),
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ],

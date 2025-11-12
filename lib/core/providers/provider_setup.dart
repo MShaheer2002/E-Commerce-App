@@ -3,6 +3,7 @@ import 'package:e_commerce_app/core/providers/admin/analytics_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/categoryManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/cloudinary_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/global_analytics_provider.dart';
+import 'package:e_commerce_app/core/providers/admin/order_management_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/settings_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/userManagement_provider.dart';
@@ -91,5 +92,8 @@ class AppProvider {
     ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
     ChangeNotifierProvider<CategorymanagementProvider>(
         create: (_) => CategorymanagementProvider()),
+
+    ChangeNotifierProvider<OrderManagementProvider>(
+        create: (_) => OrderManagementProvider()),
   ];
 }
