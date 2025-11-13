@@ -179,6 +179,7 @@ class ProductmanagementProvider with ChangeNotifier {
         imageUrls: imageUrls,
         stock: stock,
         createdAt: Timestamp.now(),
+        search_name: name.toLowerCase(),
       );
 
       // Save to Firestore

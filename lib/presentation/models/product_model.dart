@@ -16,6 +16,7 @@ class ProductModel {
   final String? promoCode;
   final Timestamp? promoCodeEndTime;
   final String? productLink;
+  final String? search_name;
 
   const ProductModel({
     this.id,
@@ -33,6 +34,7 @@ class ProductModel {
     this.promoCode,
     this.promoCodeEndTime,
     this.productLink,
+    required this.search_name,
   });
 
   ProductModel copyWith({
@@ -50,6 +52,7 @@ class ProductModel {
     String? promoCode,
     String? productLink,
     Timestamp? promoCodeEndTime,
+    String? search_name,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -67,6 +70,7 @@ class ProductModel {
       productLink: productLink ?? this.productLink,
       promoCode: promoCode ?? this.promoCode,
       promoCodeEndTime: promoCodeEndTime ?? this.promoCodeEndTime,
+      search_name: search_name ?? '',
     );
   }
 
@@ -87,6 +91,7 @@ class ProductModel {
       'promoCode': promoCode,
       'productLink': productLink,
       'promoCodeEndTime': promoCodeEndTime,
+      'search_name': search_name,
     };
   }
 
@@ -109,6 +114,7 @@ class ProductModel {
       promoCode: map['promoCode'],
       productLink: map['productLink'],
       promoCodeEndTime: map['promoCodeEndTime'],
+      search_name: map['search_name'],
     );
   }
 }

@@ -620,18 +620,18 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
 
       // Create updated product model
       final updatedProduct = ProductModel(
-        isSoldout: widget.product.isSoldout,
-        retailPrice: retailPrice,
-        productLink: productLink,
-        id: widget.product.id,
-        name: name,
-        description: description,
-        price: price,
-        categoryId: selectedCategoryId ?? '',
-        imageUrls: allImageUrls,
-        stock: stock,
-        createdAt: widget.product.createdAt,
-      );
+          isSoldout: widget.product.isSoldout,
+          retailPrice: retailPrice,
+          productLink: productLink,
+          id: widget.product.id,
+          name: name,
+          description: description,
+          price: price,
+          categoryId: selectedCategoryId ?? '',
+          imageUrls: allImageUrls,
+          stock: stock,
+          createdAt: widget.product.createdAt,
+          search_name: name.toLowerCase());
 
       // Update Firestore document
       await productProvider.updateProduct(widget.product.id!, updatedProduct);
