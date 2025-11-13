@@ -224,6 +224,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
             const SizedBox(height: 16),
 
+            /// ---- Banner Section ----
+            sectionTile(
+              context,
+              title: "Banner Management",
+              subtitle: "Add Banner to the app",
+              icon: Iconsax.edit,
+              routeName: "/admin/banner-screen",
+            ),
+
+            const SizedBox(height: 16),
+
             /// ---- Analytics Section ----
             sectionTile(
               context,

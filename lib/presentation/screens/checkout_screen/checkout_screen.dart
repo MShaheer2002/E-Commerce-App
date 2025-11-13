@@ -54,8 +54,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<SettingsProvider>().fetchGlobalPromo();
-    context.read<SettingsProvider>().fetchTaxes();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) {
+        context.read<SettingsProvider>().fetchGlobalPromo();
+        context.read<SettingsProvider>().fetchTaxes();
+      },
+    );
+
     if (kDebugMode) {
       promoController.text = "Summer20";
     }

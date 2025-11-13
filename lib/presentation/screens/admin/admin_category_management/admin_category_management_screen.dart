@@ -418,7 +418,6 @@ class _CategoryDialogState extends State<_CategoryDialog> {
           createdAt: widget.category!.createdAt,
         );
         await categoryProvider.editCategory(updatedCategory);
-        await categoryProvider.fetchCategory();
 
         if (mounted) {
           Navigator.pop(context);
@@ -437,7 +436,6 @@ class _CategoryDialogState extends State<_CategoryDialog> {
           createdAt: Timestamp.now(),
         );
         await categoryProvider.createCategory(newCategory);
-        await categoryProvider.fetchCategory();
 
         if (mounted) {
           Navigator.pop(context);

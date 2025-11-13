@@ -66,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 SizedBox(height: height * 0.01),
                 _buildMenuItem(
-                  icon: Icons.edit,
+                  icon: Icons.history_edu_outlined,
                   title: "Order History",
                   onTap: () {
                     context.push('/order-status');

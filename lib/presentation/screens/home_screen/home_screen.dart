@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:e_commerce_app/core/providers/admin/banner_provider.dart';
 import 'package:e_commerce_app/core/providers/product_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
@@ -20,25 +21,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _currentIndex = 0;
 
-  final List<Color> _carouselColors = [
-    Colors.amber,
-    Colors.red,
-    Colors.blue,
-    Colors.green,
-    Colors.purple,
-  ];
-
   @override
   void initState() {
     super.initState();
 
     // Schedule initialization after the first frame to avoid context issues
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<ProductProvider>(context, listen: false);
-      provider.init();
-    });
+      final productProvider =
+          Provider.of<ProductProvider>(context, listen: false);
+      productProvider.init();
 
-    // context.read<FavoriteService>().loadUserFavorites();
+      // Fetch banners from Firebase
+      final bannerProvider =
+          Provider.of<BannerProvider>(context, listen: false);
+      bannerProvider.userFetchBanner();
+    });
   }
 
   @override
@@ -47,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
     double width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       body: Background(
         child: SingleChildScrollView(
           child: SafeArea(
@@ -97,114 +93,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ),
-                      // GestureDetector(
-                      // onTap: () => context.push('/favorite-screen'),
-                      //   child: Padding(
-                      //     padding: const EdgeInsets.only(left: 10.0),
-                      //     child: SvgPicture.asset("assets/svgs/favorite.svg"),
-                      //   ),
-                      // ),
                     ],
                   ),
 
                   SizedBox(height: height * 0.02),
 
-                  Stack(
-                    children: [
-                      CarouselSlider.builder(
-                        carouselController: _carouselController,
-                        itemCount: _carouselColors.length,
-                        options: CarouselOptions(
-                          height: height * 0.2,
-                          autoPlay: true,
-                          autoPlayInterval: const Duration(seconds: 3),
-                          enlargeCenterPage: true,
-                          viewportFraction: 0.8,
-                          aspectRatio: 16 / 9,
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              _currentIndex = index;
-                            });
-                          },
-                        ),
-                        itemBuilder: (context, index, realIdx) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: _carouselColors[index]),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: width * 0.06),
-                                  child: const Row(
-                                    children: [
-                                      Text(
-                                        '50% \nDiscount!',
-                                        style: TextStyle(
-                                            fontFamily: "Urbanist",
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 20),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Container(
-                                    height: 60,
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Colors.transparent,
-                                          Colors.black26,
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-
-                      // ⚪ Dots Indicator
-                      Positioned(
-                        bottom: 8,
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children:
-                              _carouselColors.asMap().entries.map((entry) {
-                            final isActive = entry.key == _currentIndex;
-                            return GestureDetector(
-                              onTap: () =>
-                                  _carouselController.animateToPage(entry.key),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                height: 8,
-                                width: isActive ? 20 : 8,
-                                decoration: BoxDecoration(
-                                  color: isActive
-                                      ? Colors.white
-                                      : Colors.white.withValues(alpha: 0.6),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Firebase Banner Carousel
+                  _buildBannerCarousel(height, width),
 
                   homeWidget(height, width),
                 ],
@@ -213,6 +108,189 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBannerCarousel(double height, double width) {
+    final bannerProvider = Provider.of<BannerProvider>(context);
+    final banners = bannerProvider.banners;
+
+    // Show loading indicator while fetching
+    if (bannerProvider.isLoading) {
+      return Container(
+        height: height * 0.2,
+        width: width * 0.8,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: SmallLoader(backgroundColor: KprimaryColor, strokeWidth: 2),
+        ),
+      );
+    }
+
+    // If no banners, show placeholder
+    if (banners.isEmpty) {
+      return Container(
+        height: height * 0.2,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.image_not_supported_outlined,
+                size: 48,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'No banners available',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        CarouselSlider.builder(
+          carouselController: _carouselController,
+          itemCount: banners.length,
+          options: CarouselOptions(
+            height: height * 0.2,
+            autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 4),
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            autoPlayCurve: Curves.fastOutSlowIn,
+            enlargeCenterPage: true,
+            viewportFraction: 0.85,
+            aspectRatio: 16 / 9,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+          itemBuilder: (context, index, realIdx) {
+            final banner = banners[index];
+
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Banner Image from Firebase
+                  Image.network(
+                    banner.imageUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: Center(
+                            child: SmallLoader(
+                                backgroundColor: KprimaryColor,
+                                strokeWidth: 2)),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey.shade300,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.broken_image_outlined,
+                                size: 48,
+                                color: Colors.grey.shade500,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Image not available',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // Gradient overlay for better dot visibility
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: 60,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black38,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+
+        // Dots Indicator
+        if (banners.length > 1)
+          Positioned(
+            bottom: 8,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: banners.asMap().entries.map((entry) {
+                final isActive = entry.key == _currentIndex;
+                return GestureDetector(
+                  onTap: () => _carouselController.animateToPage(entry.key),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    height: 8,
+                    width: isActive ? 24 : 8,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+      ],
     );
   }
 
@@ -235,7 +313,9 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(
               height: height * 0.14,
               child: categories.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: SmallLoader(
+                          backgroundColor: KprimaryColor, strokeWidth: 2))
                   : ListView.builder(
                       itemCount: categories.length,
                       scrollDirection: Axis.horizontal,
@@ -244,12 +324,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
             ),
-
             titleWidget("Products", () {
               context.push('/products');
             }),
-
-            // You can implement product UI similarly by mapping provider.products
             SizedBox(height: height * 0.02),
             SizedBox(
               height: height * 0.3,

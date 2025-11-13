@@ -31,17 +31,27 @@ class CategorymanagementProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> editCategory(CategoryModel updatecategory) async {
+  Future<void> editCategory(CategoryModel updatedCategory) async {
     try {
       _isLoading = true;
       notifyListeners();
+
+      // 🔹 Update in Firestore
       await _db
           .collection('categories')
-          .doc(updatecategory.id)
-          .update(updatecategory.toMap());
+          .doc(updatedCategory.id)
+          .update(updatedCategory.toMap());
+
+      // 🔹 Update locally in _categories list
+      final index = _categories.indexWhere((c) => c.id == updatedCategory.id);
+      if (index != -1) {
+        _categories[index] = updatedCategory;
+      }
+
+      log("[Admin Category] [edit] Updated category locally and remotely.");
     } catch (e, s) {
-      log("[Admin Category] [fetch] Error $e");
-      log("[Admin Category] [fetch] Error Stack $s");
+      log("[Admin Category] [edit] Error: $e");
+      log("[Admin Category] [edit] Stack: $s");
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -61,6 +71,8 @@ class CategorymanagementProvider extends ChangeNotifier {
           createdAt: Timestamp.now());
 
       await docRef.set(Finalcategory.toMap());
+      _categories.add(Finalcategory);
+      notifyListeners();
     } catch (e, s) {
       log("[Admin Category] [category] Error $e");
       log("[Admin Category] [category] Error Stack $s");

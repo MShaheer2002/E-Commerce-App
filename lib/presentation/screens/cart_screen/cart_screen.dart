@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -17,6 +18,8 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   Set<String> selectedItems = {};
   bool selectAll = false;
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
 
   void toggleSelectAll(List<CartItemModel> cartItems) {
     setState(() {
@@ -66,7 +69,18 @@ class _CartScreenState extends State<CartScreen> {
 
     // ✅ Now just navigate (no data passing)
     context.push("/checkout-screen");
-    
+  }
+
+  Future<void> _refreshCart() async {
+    final cartProvider = context.read<CartProvider>();
+    await cartProvider.loadCart(); // Make sure your provider has this
+    _refreshController.refreshCompleted();
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
   }
 
   @override
@@ -182,33 +196,40 @@ class _CartScreenState extends State<CartScreen> {
 
                   // Cart Items List
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
-                      itemCount: cartItems.length,
-                      itemBuilder: (context, index) {
-                        final item = cartItems[index];
-                        final isSelected =
-                            selectedItems.contains(item.product.id);
+                    child: SmartRefresher(
+                      controller: _refreshController,
+                      onRefresh: _refreshCart,
+                      header: const WaterDropHeader(
+                        waterDropColor: KprimaryColor,
+                      ),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
+                        itemCount: cartItems.length,
+                        itemBuilder: (context, index) {
+                          final item = cartItems[index];
+                          final isSelected =
+                              selectedItems.contains(item.product.id);
 
-                        return buildCartItem(
-                          context: context,
-                          cartItem: item,
-                          isSelected: isSelected,
-                          onSelectToggle: () =>
-                              toggleItemSelection(item.product.id ?? ''),
-                          onDelete: () =>
-                              cartService.removeFromCart(item.product.id ?? ''),
-                          onQuantityChanged: (newQuantity) {
-                            if (newQuantity > item.quantity) {
-                              cartService
-                                  .increaseQuantity(item.product.id ?? '');
-                            } else {
-                              cartService
-                                  .decreaseQuantity(item.product.id ?? '');
-                            }
-                          },
-                        );
-                      },
+                          return buildCartItem(
+                            context: context,
+                            cartItem: item,
+                            isSelected: isSelected,
+                            onSelectToggle: () =>
+                                toggleItemSelection(item.product.id ?? ''),
+                            onDelete: () => cartService
+                                .removeFromCart(item.product.id ?? ''),
+                            onQuantityChanged: (newQuantity) {
+                              if (newQuantity > item.quantity) {
+                                cartService
+                                    .increaseQuantity(item.product.id ?? '');
+                              } else {
+                                cartService
+                                    .decreaseQuantity(item.product.id ?? '');
+                              }
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],

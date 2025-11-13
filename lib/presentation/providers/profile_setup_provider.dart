@@ -2,19 +2,22 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/cache.dart';
+import 'package:e_commerce_app/core/providers/admin/cloudinary_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+// Import your CloudinaryProvider
 
 class ProfileSetupProvider extends ChangeNotifier {
   // Firebase Instances
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
   final cache = CacheService();
+
+  // Add Cloudinary Provider
+  final CloudinaryProvider _cloudinaryProvider = CloudinaryProvider();
 
   // Controllers
   final TextEditingController nameController = TextEditingController();
@@ -29,6 +32,7 @@ class ProfileSetupProvider extends ChangeNotifier {
   DateTime? _dateOfBirth;
   bool _isLoading = false;
   String? _imageUrl;
+  double _uploadProgress = 0.0;
 
   // Getters
   File? get profileImage => _profileImage;
@@ -36,6 +40,8 @@ class ProfileSetupProvider extends ChangeNotifier {
   DateTime? get dateOfBirth => _dateOfBirth;
   bool get isLoading => _isLoading;
   String? get imageUrl => _imageUrl;
+  double get uploadProgress => _uploadProgress;
+  bool get isUploading => _cloudinaryProvider.isUploading;
 
   Future<void> saveUserFromAuth(User firebaseUser) async {
     final userRef = _firestore.collection('users').doc(firebaseUser.uid);
@@ -46,7 +52,7 @@ class ProfileSetupProvider extends ChangeNotifier {
         'uid': firebaseUser.uid,
         'email': firebaseUser.email,
         'name': firebaseUser.displayName ?? '',
-        'role': 'user', // default role
+        'role': 'user',
         'photoUrl': firebaseUser.photoURL ?? '',
         'createdAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),
@@ -87,13 +93,6 @@ class ProfileSetupProvider extends ChangeNotifier {
   }
 
   bool validateForm() {
-    // return nameController.text.isNotEmpty &&
-    //     emailController.text.isNotEmpty &&
-    //     dobController.text.isNotEmpty &&
-    //     _selectedGender.isNotEmpty &&
-    //     phoneController.text.isNotEmpty &&
-    //     addressController.text.isNotEmpty;
-
     return emailController.text.isNotEmpty;
   }
 
@@ -102,12 +101,16 @@ class ProfileSetupProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _setUploadProgress(double progress) {
+    _uploadProgress = progress;
+    notifyListeners();
+  }
+
   // -----------------------------
   // FIREBASE LOGIC
   // -----------------------------
 
   /// Called after sign-in (email/password or Google)
-  /// Saves basic user info if not already in Firestore
   Future<void> createUserIfNew() async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -167,7 +170,7 @@ class ProfileSetupProvider extends ChangeNotifier {
             );
           }
         }
-        log("[Profile Setup Provider] in profile loaded");
+        log("[Profile Setup Provider] profile loaded");
         log("[Profile Setup Provider] $_imageUrl");
 
         await cache.cacheProfile(
@@ -189,7 +192,7 @@ class ProfileSetupProvider extends ChangeNotifier {
     }
   }
 
-  /// Save updated profile to Firestore & Firebase Auth
+  /// Save updated profile to Firestore using Cloudinary for image upload
   Future<void> saveUserProfile() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -206,20 +209,41 @@ class ProfileSetupProvider extends ChangeNotifier {
       _setLoading(true);
       String? downloadUrl = _imageUrl;
 
-      // Upload image if selected
+      // Upload image to Cloudinary if selected
       if (_profileImage != null) {
-        final ref = _storage.ref().child('user_profiles/${user.uid}.jpg');
         try {
-          final uploadTask = ref.putFile(_profileImage!);
-          uploadTask.snapshotEvents.listen((event) {
-            log("Upload: ${(event.bytesTransferred / event.totalBytes * 100).toStringAsFixed(1)}%");
-          });
+          _setUploadProgress(0.3);
+          Fluttertoast.showToast(
+            msg: "Uploading image...",
+            backgroundColor: Colors.blue,
+          );
 
-          await uploadTask;
-          downloadUrl = await ref.getDownloadURL();
-          await user.updatePhotoURL(downloadUrl);
+          // Upload to Cloudinary with folder organization
+          final cloudinaryUrl = await _cloudinaryProvider.uploadImage(
+            _profileImage!,
+            folder: 'user_profiles/${user.uid}',
+          );
+
+          _setUploadProgress(0.7);
+
+          if (cloudinaryUrl != null) {
+            downloadUrl = cloudinaryUrl;
+            // Update Firebase Auth profile photo URL
+            await user.updatePhotoURL(downloadUrl);
+            log("[Cloudinary Upload] Success: $downloadUrl");
+          } else {
+            throw Exception("Failed to upload image to Cloudinary");
+          }
+
+          _setUploadProgress(1.0);
         } catch (e) {
-          log("[image upload error] $e");
+          log("[Cloudinary upload error] $e");
+          Fluttertoast.showToast(
+            msg: "Failed to upload image",
+            backgroundColor: Colors.red,
+          );
+          _setLoading(false);
+          return;
         }
       }
 
@@ -241,22 +265,33 @@ class ProfileSetupProvider extends ChangeNotifier {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
+      // Save to Firestore
       await _firestore
           .collection('users')
           .doc(user.uid)
           .set(profileData, SetOptions(merge: true));
 
+      // Update local cache
       await cache.cacheProfile(
         name: nameController.text.trim(),
         imageUrl: downloadUrl ?? '',
         email: emailController.text.trim(),
       );
 
-      Fluttertoast.showToast(msg: "Profile updated successfully!");
+      Fluttertoast.showToast(
+        msg: "Profile updated successfully!",
+        backgroundColor: Colors.green,
+      );
+
+      // Reset upload progress
+      _setUploadProgress(0.0);
     } catch (e, stack) {
       debugPrint("🔥 Error saving profile: $e");
       debugPrint(stack.toString());
-      Fluttertoast.showToast(msg: "Failed to update profile");
+      Fluttertoast.showToast(
+        msg: "Failed to update profile",
+        backgroundColor: Colors.red,
+      );
     } finally {
       _setLoading(false);
     }

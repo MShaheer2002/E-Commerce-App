@@ -37,7 +37,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
       favoriteService.loadFavoritesForUser();
     });
 
-    isFav = favoriteService.isProductFavorite(widget.productModel.id ?? "0");
+    isFav = favoriteService.isFavorite(widget.productModel.id ?? "0");
   }
 
   @override
@@ -133,7 +133,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
                   Consumer<FavoriteService>(
                     builder: (context, favoriteService, _) {
                       final isFav = favoriteService
-                          .isProductFavorite(widget.productModel.id ?? "");
+                          .isFavorite(widget.productModel.id ?? "");
                       return IconButton(
                         icon: Icon(
                           isFav ? Icons.favorite : Icons.favorite_border,

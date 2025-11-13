@@ -33,9 +33,9 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
     double height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Prevents background from moving
+      resizeToAvoidBottomInset: false,
       body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(), // Dismiss keyboard
+        onTap: () => FocusScope.of(context).unfocus(),
         child: Stack(
           children: [
             // Background
@@ -75,29 +75,42 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
                           Consumer<ProfileSetupProvider>(
                             builder: (context, provider, _) {
                               return CustomButton(
-                                onPressed: () {
-                                  if (provider.validateForm()) {
-                                    provider.saveUserProfile();
-                                    context.pop();
-                                    Fluttertoast.showToast(
-                                        msg: 'Profile updated successfully!',
-                                        backgroundColor: Colors.green,
-                                        textColor: Colors.white);
-                                  } else {
-                                    Fluttertoast.showToast(
-                                        msg: 'Profile updated successfully!',
-                                        backgroundColor: Colors.red,
-                                        textColor: Colors.white);
-                                  }
-                                },
-                                child: const Text(
-                                  'Update Profile',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                onPressed: (provider.isLoading ||
+                                        provider.isUploading)
+                                    ? () {}
+                                    : () {
+                                        if (provider.validateForm()) {
+                                          provider.saveUserProfile().then((_) {
+                                            if (context.mounted) {
+                                              context.pop();
+                                            }
+                                          });
+                                        } else {
+                                          Fluttertoast.showToast(
+                                            msg: 'Please fill required fields!',
+                                            backgroundColor: Colors.red,
+                                            textColor: Colors.white,
+                                          );
+                                        }
+                                      },
+                                child:
+                                    provider.isLoading || provider.isUploading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Update Profile',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                               );
                             },
                           ),
@@ -109,6 +122,46 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
                   ),
                 ),
               ),
+            ),
+
+            // Upload Progress Overlay
+            Consumer<ProfileSetupProvider>(
+              builder: (context, provider, _) {
+                if (provider.isUploading) {
+                  return Container(
+                    color: Colors.black54,
+                    child: Center(
+                      child: Card(
+                        margin: const EdgeInsets.all(20),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Uploading image...',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              if (provider.uploadProgress > 0)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    '${(provider.uploadProgress * 100).toStringAsFixed(0)}%',
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ],
         ),
@@ -137,7 +190,7 @@ class ProfileImagePicker extends StatelessWidget {
                 border: Border.all(color: Colors.white, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha:0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -149,10 +202,21 @@ class ProfileImagePicker extends StatelessWidget {
                         provider.profileImage!,
                         fit: BoxFit.cover,
                       )
-                    : provider.imageUrl != null
+                    : provider.imageUrl != null && provider.imageUrl!.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: provider.imageUrl!,
                             fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[300],
+                              child: Icon(
+                                Icons.person,
+                                size: 60,
+                                color: Colors.grey[600],
+                              ),
+                            ),
                           )
                         : Container(
                             color: Colors.grey[300],
@@ -271,7 +335,7 @@ class ProfileForm extends StatelessWidget {
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha:0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -300,7 +364,7 @@ class ProfileForm extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha:0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
           ),
           child: IntlPhoneField(

@@ -5,12 +5,15 @@ import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class CategoryScreen extends StatelessWidget {
   const CategoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    RefreshController _refreshController =
+        RefreshController(initialRefresh: false);
     // Using MediaQuery for responsive sizing
     final width = MediaQuery.of(context).size.width;
     final productProvider = context.read<ProductProvider>();
@@ -37,25 +40,34 @@ class CategoryScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-                  itemCount: productProvider.categories.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.8,
-                  ),
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => context.push('/product-by-category',
-                          extra: productProvider.categories[index]),
-                      child: CategoryItem(
-                        category: productProvider.categories[index],
-                        itemSize: itemSize,
-                      ),
-                    );
+                child: SmartRefresher(
+                  controller: _refreshController,
+                  header: const WaterDropHeader(waterDropColor: KprimaryColor),
+                  onRefresh: () {
+                    productProvider.listenToCategory();
+                    _refreshController.refreshCompleted();
                   },
+                  child: GridView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                    itemCount: productProvider.categories.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () => context.push('/product-by-category',
+                            extra: productProvider.categories[index]),
+                        child: CategoryItem(
+                          category: productProvider.categories[index],
+                          itemSize: itemSize,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
