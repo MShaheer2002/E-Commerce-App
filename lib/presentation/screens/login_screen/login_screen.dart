@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
@@ -54,13 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   SizedBox(height: height * 0.04),
                   Image.asset("assets/images/productPlug_logo.png"),
-                  const Text(
-                    "Enter your email to sign up for this app",
-                    style: TextStyle(
-                        color: KprimaryColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold),
-                  ),
+                  const SizedBox(height: 20),
                   SizedBox(height: height * 0.02),
                   CustomTextField(
                     hintText: "email@domain.com",
@@ -73,6 +66,29 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: passCtrl,
                     horizontalPadding: width * 0.06,
                     isPassword: true,
+                  ),
+                  SizedBox(height: height * 0.01),
+
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: width * 0.06),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            context.push('/forgot-password');
+                          },
+                        child: const Text(
+                            textAlign: TextAlign.right,
+                            "Forgot password?",
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: KprimaryColor,
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: height * 0.02),
                   Consumer<AuthProvider>(
@@ -148,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        "Don’t have an account?",
+                        "Don't have an account?",
                         style: TextStyle(color: Colors.white),
                       ),
                       GestureDetector(
@@ -315,80 +331,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-        )
-        // body: Background(
-        // child: Padding(
-        //   padding: const EdgeInsets.all(16),
-        //   child: Column(
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: [
-        //       TextField(
-        //         controller: emailCtrl,
-        //         decoration: const InputDecoration(labelText: 'Email'),
-        //       ),
-        //       TextField(
-        //         controller: passCtrl,
-        //         decoration: const InputDecoration(labelText: 'Password'),
-        //         obscureText: true,
-        //       ),
-        //       const SizedBox(height: 16),
-
-        //       // Email/Password login
-        //       ElevatedButton(
-        //         onPressed: () async {
-        //           try {
-        //             await auth.loginWithEmail(
-        //               emailCtrl.text.trim(),
-        //               passCtrl.text.trim(),
-        //             );
-        //           } catch (e) {
-        //             ScaffoldMessenger.of(context).showSnackBar(
-        //               SnackBar(content: Text(e.toString())),
-        //             );
-        //           }
-        //         },
-        //         child: const Text('Login'),
-        //       ),
-
-        //       const SizedBox(height: 12),
-
-        //       // Google Sign-In button
-        //       ElevatedButton.icon(
-        //         onPressed: () async {
-        //           try {
-        //             await auth.signInWithGoogle();
-        //           } catch (e) {
-        //             log("[Sign in Errror] $e");
-        //             ScaffoldMessenger.of(context).showSnackBar(
-        //               SnackBar(content: Text(e.toString())),
-        //             );
-        //           }
-        //         },
-        //         icon: SvgPicture.asset(
-        //           'assets/svgs/google.svg', // 👈 add this 48x48 image in assets
-        //           height: 24,
-        //           width: 24,
-        //         ),
-        //         label: const Text('Sign in with Google'),
-        //         style: ElevatedButton.styleFrom(
-        //           backgroundColor: Colors.white,
-        //           foregroundColor: Colors.black87,
-        //           minimumSize: const Size(double.infinity, 48),
-        //           side: const BorderSide(color: Colors.grey),
-        //         ),
-        //       ),
-
-        //       const SizedBox(height: 16),
-
-        //       TextButton(
-        //         onPressed: () => context.go('/signup'),
-        //         child: const Text("Don't have an account? Sign Up"),
-        //       ),
-        //     ],
-        //   ),
-        // ),
-
-        // ),
-        );
+        ));
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/order_model.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +13,6 @@ class AdminSingleOrderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     log("[Single Order Screen] ${order.toJson()}");
-    final formattedDate =
-        DateFormat('MMMM dd, yyyy • hh:mm a').format(order.orderDate.toDate());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

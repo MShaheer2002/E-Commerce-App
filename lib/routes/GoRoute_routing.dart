@@ -19,6 +19,7 @@ import 'package:e_commerce_app/presentation/screens/admin/admin_user_management/
 import 'package:e_commerce_app/presentation/screens/category_screen/category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/checkout_screen/checkout_screen.dart';
 import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
+import 'package:e_commerce_app/presentation/screens/forgot_password/forgot_password.dart';
 import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
 import 'package:e_commerce_app/presentation/screens/home_tab/home_tab.dart';
 import 'package:e_commerce_app/presentation/screens/login_screen/login_screen.dart';
@@ -50,9 +51,11 @@ GoRouter createRouter(AuthProvider authProvider) {
       final goingToLogin = state.matchedLocation == '/login';
       final goingToSignup = state.matchedLocation == '/signup';
       final goingToSplash = state.matchedLocation == '/splash';
+      final goingToForgot = state.matchedLocation == '/forgot-password';
 
       // 1️⃣ If user is NOT logged in — only allow splash, login, signup
-      if (!isLoggedIn && !(goingToLogin || goingToSignup || goingToSplash)) {
+      if (!isLoggedIn &&
+          !(goingToLogin || goingToSignup || goingToSplash || goingToForgot)) {
         return '/login';
       }
 
@@ -145,6 +148,10 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/adminDashboard',
         builder: (context, state) => const AdminDashboard(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
 
       // ---------------------ADMIN SIDE--------------------------

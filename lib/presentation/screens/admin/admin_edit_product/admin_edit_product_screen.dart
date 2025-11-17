@@ -40,7 +40,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
     name = widget.product.name;
     description = widget.product.description;
     price = widget.product.price;
-    retailPrice = widget.product.retailPrice ?? 0;
+    retailPrice = widget.product.retailPrice;
     productLink = widget.product.productLink;
     stock = widget.product.stock;
     selectedCategoryId = widget.product.categoryId;

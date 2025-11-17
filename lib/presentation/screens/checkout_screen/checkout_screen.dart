@@ -15,7 +15,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/payment_intent.dart';
@@ -1014,12 +1013,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildOrderSummary(double width, double height) {
     double subtotal = calculateSubtotal();
     double shipping = calculateShipping();
-    double taxes = calculateTaxes();
+    calculateTaxes();
     double total = calculateTotal();
 
     final settingsProvider = context.watch<SettingsProvider>();
     final taxList =
-        settingsProvider.taxes?.where((tax) => tax.isActive).toList() ?? [];
+        settingsProvider.taxes.where((tax) => tax.isActive).toList();
 
     return Container(
       padding: EdgeInsets.all(width * 0.04),

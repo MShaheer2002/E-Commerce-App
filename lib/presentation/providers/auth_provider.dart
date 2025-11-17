@@ -234,4 +234,15 @@ class AuthProvider with ChangeNotifier {
     _cachedRole = doc.data()?['role'];
     return _cachedRole;
   }
+
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      log("[Auth] Reset email sent to $email");
+    } catch (e, s) {
+      log("[Auth] Forgot password error: $e");
+      log("[Auth] Stack: $s");
+      rethrow;
+    }
+  }
 }

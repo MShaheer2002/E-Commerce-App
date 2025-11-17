@@ -395,87 +395,87 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-class _ProductItem extends StatelessWidget {
-  final dynamic item;
+// class _ProductItem extends StatelessWidget {
+//   final dynamic item;
 
-  const _ProductItem({required this.item});
+//   const _ProductItem({required this.item});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          // Product Image
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FA),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: const Color(0xFFE8E8E8),
-                width: 1,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: item.product.imageUrls.isNotEmpty
-                  ? Image.network(
-                      item.product.imageUrls[0],
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(
-                        Icons.image_not_supported_outlined,
-                        color: Color(0xFFB2BEC3),
-                      ),
-                    )
-                  : const Icon(
-                      Icons.shopping_bag_outlined,
-                      color: Color(0xFFB2BEC3),
-                    ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Product Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.product.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2D3436),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Qty: ${item.quantity}",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Price
-          Text(
-            "\$${item.priceAtPurchase.toStringAsFixed(2)}",
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2D3436),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       margin: const EdgeInsets.only(bottom: 12),
+//       child: Row(
+//         children: [
+//           // Product Image
+//           Container(
+//             width: 56,
+//             height: 56,
+//             decoration: BoxDecoration(
+//               color: const Color(0xFFF8F9FA),
+//               borderRadius: BorderRadius.circular(8),
+//               border: Border.all(
+//                 color: const Color(0xFFE8E8E8),
+//                 width: 1,
+//               ),
+//             ),
+//             child: ClipRRect(
+//               borderRadius: BorderRadius.circular(8),
+//               child: item.product.imageUrls.isNotEmpty
+//                   ? Image.network(
+//                       item.product.imageUrls[0],
+//                       fit: BoxFit.cover,
+//                       errorBuilder: (_, __, ___) => const Icon(
+//                         Icons.image_not_supported_outlined,
+//                         color: Color(0xFFB2BEC3),
+//                       ),
+//                     )
+//                   : const Icon(
+//                       Icons.shopping_bag_outlined,
+//                       color: Color(0xFFB2BEC3),
+//                     ),
+//             ),
+//           ),
+//           const SizedBox(width: 12),
+//           // Product Details
+//           Expanded(
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   item.product.name,
+//                   style: const TextStyle(
+//                     fontSize: 14,
+//                     fontWeight: FontWeight.w600,
+//                     color: Color(0xFF2D3436),
+//                   ),
+//                   maxLines: 1,
+//                   overflow: TextOverflow.ellipsis,
+//                 ),
+//                 const SizedBox(height: 4),
+//                 Text(
+//                   "Qty: ${item.quantity}",
+//                   style: TextStyle(
+//                     fontSize: 13,
+//                     color: Colors.grey[600],
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           // Price
+//           Text(
+//             "\$${item.priceAtPurchase.toStringAsFixed(2)}",
+//             style: const TextStyle(
+//               fontSize: 15,
+//               fontWeight: FontWeight.w600,
+//               color: Color(0xFF2D3436),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class _StatusBadge extends StatelessWidget {
   final OrderStatus status;

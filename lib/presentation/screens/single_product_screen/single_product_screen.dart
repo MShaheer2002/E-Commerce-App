@@ -103,7 +103,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -298,9 +298,9 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
             '\$${widget.productModel.retailPrice.toStringAsFixed(2)}',
             style: TextStyle(
               fontSize: width * 0.045,
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               decoration: TextDecoration.lineThrough,
-              decorationColor: Colors.white.withOpacity(0.5),
+              decorationColor: Colors.white.withValues(alpha: 0.5),
               decorationThickness: 2,
             ),
           ),
@@ -363,10 +363,10 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
       width: width,
       height: height * 0.065,
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.3),
+        color: Colors.grey.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.grey.withOpacity(0.5),
+          color: Colors.grey.withValues(alpha: 0.5),
           width: 2,
         ),
       ),
@@ -376,7 +376,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
           children: [
             Icon(
               Icons.remove_shopping_cart,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               size: width * 0.06,
             ),
             SizedBox(width: width * 0.02),
@@ -385,7 +385,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
               style: TextStyle(
                 fontSize: width * 0.045,
                 fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -440,7 +440,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
           borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               offset: const Offset(0, 2),
               blurRadius: 4,
             ),

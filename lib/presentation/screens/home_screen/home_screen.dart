@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            context.push('/search-screen');
+                            context.push('/search-screen', extra: false);
                           },
                           child: Container(
                             height: 55,
