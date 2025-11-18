@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -13,7 +16,7 @@ class WebviewScreen extends StatefulWidget {
 
 class _WebviewScreenState extends State<WebviewScreen> {
   late final WebViewController _controller;
-  bool isLoading = true; // loading indicator
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -35,14 +38,30 @@ class _WebviewScreenState extends State<WebviewScreen> {
           onNavigationRequest: (NavigationRequest request) async {
             final url = request.url;
 
+            // Handle mailto: and tel: links
             if (url.startsWith('mailto:') || url.startsWith('tel:')) {
-              // Open email or phone app
-              if (await canLaunchUrl(Uri.parse(url))) {
-                await launchUrl(Uri.parse(url));
+              try {
+                final uri = Uri.parse(url);
+                // Don't check canLaunchUrl, just try to launch directly
+                await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalApplication,
+                );
+                log("[Success] Opened: $url");
+              } catch (e) {
+                log("[Error] Could not launch $url: $e");
+                if (mounted) {
+                  Fluttertoast.showToast(
+                    msg:
+                        "Could not open email app. Please install an email app.",
+                    toastLength: Toast.LENGTH_LONG,
+                  );
+                }
               }
               return NavigationDecision.prevent;
             }
 
+            // Allow all other navigation
             return NavigationDecision.navigate;
           },
         ),

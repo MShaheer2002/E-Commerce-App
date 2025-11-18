@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:e_commerce_app/core/cache.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
@@ -109,17 +111,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // General Section
                 _buildSectionTitle("General"),
                 SizedBox(height: height * 0.01),
-                _buildMenuItem(
-                  icon: Icons.security_outlined,
-                  title: "Security",
-                  onTap: () {},
-                ),
+
                 _buildMenuItem(
                   icon: Icons.privacy_tip_outlined,
                   title: "Privacy Policy",
-                  onTap: () {},
+                  onTap: () {
+                    log('Privacy Policy tapped');
+                    context.push("/webview",
+                        extra:
+                            "https://shaheerprojectsflutter.github.io/productplug-legal/privacy_policy.html");
+                  },
                 ),
 
+                _buildMenuItem(
+                  icon: Icons.support_agent_rounded,
+                  title: "Support",
+                  onTap: () {
+                    log('Support');
+                    context.push("/webview",
+                        extra:
+                            "https://shaheerprojectsflutter.github.io/productplug-legal/terms.html");
+                  },
+                ),
+                _buildMenuItem(
+                  icon: Icons.security_outlined,
+                  title: "Terms and Condition",
+                  onTap: () {
+                    log('Terms of Service tapped');
+                    context.push("/webview",
+                        extra:
+                            "https://shaheerprojectsflutter.github.io/productplug-legal/terms_and_condition.html");
+                  },
+                ),
                 SizedBox(height: height * 0.02),
               ],
             ),

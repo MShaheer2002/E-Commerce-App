@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // emailCtrl.text = "admin@admin.com";
       // passCtrl.text = "abc12345678";
       emailCtrl.text = "unknowusers420@gmail.com";
-      passCtrl.text = "12345678";
+      passCtrl.text = "abc123";
     }
   }
 

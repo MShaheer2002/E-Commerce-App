@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,8 +8,11 @@ import 'package:e_commerce_app/core/providers/admin/productManagement_provider.d
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class AdminAddProductScreen extends StatefulWidget {
@@ -30,6 +34,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
   int stock = 0;
   String? selectedCategoryId;
   List<File> imageFiles = [];
+  bool _isCompressing = false;
 
   Future<void> _pickImages() async {
     if (imageFiles.length >= 4) {
@@ -40,20 +45,116 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
       return;
     }
 
+    log('[Image Picker] Starting image selection...');
     final pickedFiles = await _picker.pickMultiImage(imageQuality: 80);
 
     if (pickedFiles.isNotEmpty) {
-      final newImages = pickedFiles.map((x) => File(x.path)).toList();
+      log('[Image Picker] Selected ${pickedFiles.length} images');
+      setState(() => _isCompressing = true);
 
-      if (imageFiles.length + newImages.length > 4) {
-        Fluttertoast.showToast(
-            msg: "Maximum 4 images allowed total",
-            textColor: Colors.white,
-            backgroundColor: Colors.black);
+      try {
+        final compressedFiles = <File>[];
+
+        for (var i = 0; i < pickedFiles.length; i++) {
+          log('[Image Picker] Processing image ${i + 1}/${pickedFiles.length}');
+          final compressed = await _compressImage(File(pickedFiles[i].path));
+          if (compressed != null) {
+            compressedFiles.add(compressed);
+            log('[Image Picker] ✅ Image ${i + 1} added to list');
+          } else {
+            log('[Image Picker] ⚠️ Image ${i + 1} compression failed, skipped');
+          }
+        }
+
+        if (imageFiles.length + compressedFiles.length > 4) {
+          log('[Image Picker] Total images would exceed limit (4)');
+          Fluttertoast.showToast(
+              msg: "Maximum 4 images allowed total",
+              textColor: Colors.white,
+              backgroundColor: Colors.black);
+        }
+
+        final allowedImages =
+            [...imageFiles, ...compressedFiles].take(4).toList();
+        setState(() => imageFiles = allowedImages);
+
+        log('[Image Picker] Final image count: ${imageFiles.length}');
+        log('[Image Picker] ✅ All images processed successfully');
+      } catch (e, stackTrace) {
+        log('[Image Picker] ❌ Error during image processing');
+        log('[Image Picker] Error: $e');
+        log('[Image Picker] Stack trace: $stackTrace');
+      } finally {
+        setState(() => _isCompressing = false);
+        log('[Image Picker] Compression state reset');
       }
+    } else {
+      log('[Image Picker] No images selected');
+    }
+  }
 
-      final allowedImages = [...imageFiles, ...newImages].take(4).toList();
-      setState(() => imageFiles = allowedImages);
+  /// Compress image before upload
+  Future<File?> _compressImage(File file) async {
+    log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    log('[Compression] Starting compression process');
+    log('[Compression] Original file path: ${file.path}');
+
+    try {
+      final originalSize = await file.length();
+      log('[Compression] Original file size: ${(originalSize / 1024).toStringAsFixed(2)} KB (${originalSize} bytes)');
+
+      final dir = await getTemporaryDirectory();
+      final targetPath = path.join(
+        dir.path,
+        'compressed_${DateTime.now().millisecondsSinceEpoch}${path.extension(file.path)}',
+      );
+
+      log('[Compression] Target path: $targetPath');
+      log('[Compression] Compression settings:');
+      log('  - Quality: 70');
+      log('  - Max Width: 1024px');
+      log('  - Max Height: 1024px');
+      log('  - Format: JPEG');
+
+      final stopwatch = Stopwatch()..start();
+
+      final result = await FlutterImageCompress.compressAndGetFile(
+        file.absolute.path,
+        targetPath,
+        quality: 70, // Adjust quality (0-100, lower = smaller file)
+        minWidth: 1024, // Maximum width
+        minHeight: 1024, // Maximum height
+        format: CompressFormat.jpeg, // Force JPEG format
+      );
+
+      stopwatch.stop();
+      log('[Compression] Compression took: ${stopwatch.elapsedMilliseconds}ms');
+
+      if (result != null) {
+        final compressedSize = await File(result.path).length();
+        final savedBytes = originalSize - compressedSize;
+        final savedPercentage = ((1 - compressedSize / originalSize) * 100);
+
+        log('[Compression] ✅ SUCCESS!');
+        log('[Compression] Compressed file size: ${(compressedSize / 1024).toStringAsFixed(2)} KB (${compressedSize} bytes)');
+        log('[Compression] Space saved: ${(savedBytes / 1024).toStringAsFixed(2)} KB (${savedPercentage.toStringAsFixed(1)}%)');
+        log('[Compression] Compressed file path: ${result.path}');
+        log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+        return File(result.path);
+      } else {
+        log('[Compression] ⚠️ Compression returned null');
+        log('[Compression] Returning original file');
+        log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        return file;
+      }
+    } catch (e, stackTrace) {
+      log('[Compression] ❌ ERROR during compression');
+      log('[Compression] Error: $e');
+      log('[Compression] Stack trace: $stackTrace');
+      log('[Compression] Returning original file as fallback');
+      log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      return file; // Return original if compression fails
     }
   }
 
@@ -72,191 +173,226 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
         title: "Add Product",
         showBackButton: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Create New Product",
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.5,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Fill in the details below to add a new product",
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Form Card
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: _formKey,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Section
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Image Section
-                      _buildSectionTitle("Product Images", "Up to 4 images"),
-                      const SizedBox(height: 16),
-                      _buildImagePicker(),
-                      const SizedBox(height: 32),
-
-                      // Product Details Section
-                      _buildSectionTitle(
-                          "Product Details", "Basic information"),
-                      const SizedBox(height: 16),
-                      _buildTextField(
-                        label: 'Product Name',
-                        hint: 'Enter product name',
-                        validator: (v) => v!.isEmpty ? 'Required field' : null,
-                        onSaved: (v) => name = v!,
+                      Text(
+                        "Create New Product",
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.5,
+                                ),
                       ),
-                      const SizedBox(height: 16),
-                      _buildTextField(
-                        label: 'Description',
-                        hint: 'Enter product description',
-                        maxLines: 4,
-                        onSaved: (v) => description = v!,
+                      const SizedBox(height: 4),
+                      Text(
+                        "Fill in the details below to add a new product",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
                       ),
-                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
 
-                      // Pricing & Stock Section
-                      _buildSectionTitle(
-                          "Pricing & Stock", "Set price and quantity"),
-                      const SizedBox(height: 16),
-                      Row(
+                // Form Card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: _buildTextField(
-                              label: 'Sale Price',
-                              hint: '0.00',
-                              keyboardType: TextInputType.number,
-                              prefixText: '\$ ',
-                              validator: (v) {
-                                if (v == null || v.isEmpty) {
-                                  return 'Required';
-                                }
+                          // Image Section
+                          _buildSectionTitle("Product Images",
+                              "Up to 4 images (auto-compressed)"),
+                          const SizedBox(height: 16),
+                          _buildImagePicker(),
+                          const SizedBox(height: 32),
+
+                          // Product Details Section
+                          _buildSectionTitle(
+                              "Product Details", "Basic information"),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            label: 'Product Name',
+                            hint: 'Enter product name',
+                            validator: (v) =>
+                                v!.isEmpty ? 'Required field' : null,
+                            onSaved: (v) => name = v!,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            label: 'Description',
+                            hint: 'Enter product description',
+                            maxLines: 4,
+                            onSaved: (v) => description = v!,
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Pricing & Stock Section
+                          _buildSectionTitle(
+                              "Pricing & Stock", "Set price and quantity"),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildTextField(
+                                  label: 'Sale Price',
+                                  hint: '0.00',
+                                  keyboardType: TextInputType.number,
+                                  prefixText: '\$ ',
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty) {
+                                      return 'Required';
+                                    }
+                                    if (double.tryParse(v) == null) {
+                                      return 'Invalid number';
+                                    }
+                                    return null;
+                                  },
+                                  onSaved: (v) => price = double.parse(v!),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: _buildTextField(
+                                  label: 'Stock',
+                                  hint: '0',
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty) {
+                                      return 'Required';
+                                    }
+                                    if (int.tryParse(v) == null) {
+                                      return 'Invalid number';
+                                    }
+                                    return null;
+                                  },
+                                  onSaved: (v) => stock = int.parse(v!),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Retail Price Section
+                          _buildSectionTitle("Retail Price",
+                              "Original/MSRP price for comparison"),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            label: 'Retail Price',
+                            hint: '0.00',
+                            keyboardType: TextInputType.number,
+                            prefixText: '\$ ',
+                            validator: (v) {
+                              if (v != null && v.isNotEmpty) {
                                 if (double.tryParse(v) == null) {
                                   return 'Invalid number';
                                 }
-                                return null;
-                              },
-                              onSaved: (v) => price = double.parse(v!),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildTextField(
-                              label: 'Stock',
-                              hint: '0',
-                              keyboardType: TextInputType.number,
-                              validator: (v) {
-                                if (v == null || v.isEmpty) {
-                                  return 'Required';
+                                final retail = double.parse(v);
+                                if (retail > 0 && retail < price) {
+                                  return 'Should be higher than sale price';
                                 }
-                                if (int.tryParse(v) == null) {
-                                  return 'Invalid number';
-                                }
-                                return null;
-                              },
-                              onSaved: (v) => stock = int.parse(v!),
-                            ),
+                              }
+                              return null;
+                            },
+                            onSaved: (v) =>
+                                retailPrice = v!.isEmpty ? 0 : double.parse(v),
                           ),
+                          const SizedBox(height: 32),
+
+                          // Amazon Link Section
+                          _buildSectionTitle("Amazon Link (Optional)",
+                              "Add product link for reference"),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            label: 'Amazon Product URL',
+                            hint: 'https://www.amazon.com/...',
+                            keyboardType: TextInputType.url,
+                            prefixIcon: Icons.link,
+                            validator: (v) {
+                              if (v != null && v.isNotEmpty) {
+                                if (!Uri.tryParse(v)!.isAbsolute) {
+                                  return 'Please enter a valid URL';
+                                }
+                              }
+                              return null;
+                            },
+                            onSaved: (v) => productLink = v!.isEmpty ? null : v,
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Category Section
+                          _buildSectionTitle(
+                              "Category", "Select product category"),
+                          const SizedBox(height: 16),
+                          _buildCategoryDropdown(),
                         ],
                       ),
-                      const SizedBox(height: 32),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
 
-                      // Retail Price Section
-                      _buildSectionTitle(
-                          "Retail Price", "Original/MSRP price for comparison"),
-                      const SizedBox(height: 16),
-                      _buildTextField(
-                        label: 'Retail Price',
-                        hint: '0.00',
-                        keyboardType: TextInputType.number,
-                        prefixText: '\$ ',
-                        validator: (v) {
-                          if (v != null && v.isNotEmpty) {
-                            if (double.tryParse(v) == null) {
-                              return 'Invalid number';
-                            }
-                            final retail = double.parse(v);
-                            if (retail > 0 && retail < price) {
-                              return 'Should be higher than sale price';
-                            }
-                          }
-                          return null;
-                        },
-                        onSaved: (v) =>
-                            retailPrice = v!.isEmpty ? 0 : double.parse(v),
-                      ),
-                      const SizedBox(height: 32),
+                // Save Button
+                _buildSaveButton(),
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
 
-                      // Amazon Link Section
-                      _buildSectionTitle("Amazon Link (Optional)",
-                          "Add product link for reference"),
-                      const SizedBox(height: 16),
-                      _buildTextField(
-                        label: 'Amazon Product URL',
-                        hint: 'https://www.amazon.com/...',
-                        keyboardType: TextInputType.url,
-                        prefixIcon: Icons.link,
-                        validator: (v) {
-                          if (v != null && v.isNotEmpty) {
-                            if (!Uri.tryParse(v)!.isAbsolute) {
-                              return 'Please enter a valid URL';
-                            }
-                          }
-                          return null;
-                        },
-                        onSaved: (v) => productLink = v!.isEmpty ? null : v,
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Category Section
-                      _buildSectionTitle("Category", "Select product category"),
-                      const SizedBox(height: 16),
-                      _buildCategoryDropdown(),
-                    ],
+          // Compression overlay
+          if (_isCompressing)
+            Container(
+              color: Colors.black.withValues(alpha: 0.5),
+              child: const Center(
+                child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text(
+                          'Compressing images...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-
-            // Save Button
-            _buildSaveButton(),
-            const SizedBox(height: 24),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -498,7 +634,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        onPressed: () => _saveProduct(context),
+        onPressed: _isCompressing ? null : () => _saveProduct(context),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -528,8 +664,9 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
     final productProvider = context.read<ProductmanagementProvider>();
 
     try {
-      // Upload images to Cloudinary under folder: category/productName
+      // Upload compressed images to Cloudinary
       final folderPath = "products/$selectedCategoryId/$name";
+
       final urls =
           await cloudinary.uploadMultipleImages(imageFiles, folder: folderPath);
 
@@ -557,7 +694,6 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
             msg: "Product Successfully Added",
             backgroundColor: Colors.green,
             textColor: Colors.white);
-        // ignore: use_build_context_synchronously
         Navigator.pop(context);
       }
     } catch (e) {
