@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onTap: () {
                             context.push('/forgot-password');
                           },
-                        child: const Text(
+                          child: const Text(
                             textAlign: TextAlign.right,
                             "Forgot password?",
                             style: TextStyle(
@@ -299,14 +299,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         TextSpan(
                           text: 'Terms of Service',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: KprimaryColor,
                             fontWeight: FontWeight.bold,
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              print('Terms of Service tapped');
-                              // TODO: open link or navigate
+                              log('Terms of Service tapped');
+                              context.push("/webview",
+                                  extra:
+                                      "https://shaheerprojectsflutter.github.io/productplug-legal/terms_and_condition.html");
                             },
                         ),
                         const TextSpan(
@@ -320,8 +322,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              print('Privacy Policy tapped');
-                              // TODO: open link or navigate
+                              log('Privacy Policy tapped');
+                              context.push("/webview",
+                                  extra:
+                                      "https://shaheerprojectsflutter.github.io/productplug-legal/privacy_policy.html");
                             },
                         ),
                       ],

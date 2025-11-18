@@ -31,6 +31,7 @@ import 'package:e_commerce_app/presentation/screens/search_screen/search_screen.
 import 'package:e_commerce_app/presentation/screens/signup_screen/signup_screen.dart';
 import 'package:e_commerce_app/presentation/screens/single_product_screen/single_product_screen.dart';
 import 'package:e_commerce_app/presentation/screens/splash_screen/splash_screen.dart';
+import 'package:e_commerce_app/presentation/screens/webview/webview_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -52,10 +53,15 @@ GoRouter createRouter(AuthProvider authProvider) {
       final goingToSignup = state.matchedLocation == '/signup';
       final goingToSplash = state.matchedLocation == '/splash';
       final goingToForgot = state.matchedLocation == '/forgot-password';
+      final goingtoWebview = state.matchedLocation == '/webview';
 
       // 1️⃣ If user is NOT logged in — only allow splash, login, signup
       if (!isLoggedIn &&
-          !(goingToLogin || goingToSignup || goingToSplash || goingToForgot)) {
+          !(goingToLogin ||
+              goingToSignup ||
+              goingToSplash ||
+              goingToForgot ||
+              goingtoWebview)) {
         return '/login';
       }
 
@@ -153,6 +159,12 @@ GoRouter createRouter(AuthProvider authProvider) {
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
+      GoRoute(
+          path: '/webview',
+          builder: (context, state) {
+            final String url = state.extra as String;
+            return WebviewScreen(url: url);
+          }),
 
       // ---------------------ADMIN SIDE--------------------------
 

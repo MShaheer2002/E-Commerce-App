@@ -12,7 +12,8 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="Product Plug"
-        android:theme="@style/NormalTheme">
+        android:theme="@style/NormalTheme"
+        android:usesCleartextTraffic="true">  
 
         <!-- ✅ Put Firebase meta-data inside this single application tag -->
         <meta-data

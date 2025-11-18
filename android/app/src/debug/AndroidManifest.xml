@@ -3,6 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
     
     <application
-        android:label="E-Commerce-App (Debug)"
+        android:label="Product Plug"
         tools:replace="android:label" />
 </manifest>
