@@ -92,8 +92,19 @@ class _CartScreenState extends State<CartScreen> {
 
     return Scaffold(
       body: Background(
-        child: cartItems.isEmpty
-            ? Center(
+        child: Column(
+          children: [
+            SizedBox(height: height * 0.02),
+            SafeArea(
+              child: Center(
+                child: Image.asset(
+                  "assets/images/titles/re_up_cleaned.png",
+                  height: 40,
+                ),
+              ),
+            ),
+            if (cartItems.isEmpty)
+              Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -114,126 +125,113 @@ class _CartScreenState extends State<CartScreen> {
                   ],
                 ),
               )
-            : Column(
-                children: [
-                  SizedBox(height: height * 0.02),
-                  SafeArea(
-                    child: Center(
-                      child: Image.asset(
-                        "assets/images/titles/re_up_cleaned.png",
-                        height: 40,
+            else ...[
+              // Select All Bar
+              Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: width * 0.04,
+                  vertical: height * 0.015,
+                ),
+                padding: EdgeInsets.symmetric(
+                  horizontal: width * 0.04,
+                  vertical: height * 0.015,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () => toggleSelectAll(cartItems),
+                      borderRadius: BorderRadius.circular(6),
+                      child: Container(
+                        padding: EdgeInsets.all(width * 0.005),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color:
+                                selectAll ? KprimaryColor : Colors.grey[400]!,
+                            width: 2,
+                          ),
+                          color: selectAll ? KprimaryColor : Colors.white,
+                        ),
+                        child: Icon(
+                          Icons.check,
+                          size: width * 0.04,
+                          color: selectAll ? Colors.white : Colors.transparent,
+                        ),
                       ),
                     ),
-                  ),
-                  // Select All Bar
-                  Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: width * 0.04,
-                      vertical: height * 0.015,
-                    ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: width * 0.04,
-                      vertical: height * 0.015,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        InkWell(
-                          onTap: () => toggleSelectAll(cartItems),
-                          borderRadius: BorderRadius.circular(6),
-                          child: Container(
-                            padding: EdgeInsets.all(width * 0.005),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: selectAll
-                                    ? KprimaryColor
-                                    : Colors.grey[400]!,
-                                width: 2,
-                              ),
-                              color: selectAll ? KprimaryColor : Colors.white,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              size: width * 0.04,
-                              color:
-                                  selectAll ? Colors.white : Colors.transparent,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: width * 0.03),
-                        Text(
-                          'Select All',
-                          style: TextStyle(
-                            fontSize: width * 0.04,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (selectedItems.isNotEmpty)
-                          Text(
-                            '${selectedItems.length} selected',
-                            style: TextStyle(
-                              fontSize: width * 0.035,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-
-                  // Cart Items List
-                  Expanded(
-                    child: SmartRefresher(
-                      controller: _refreshController,
-                      onRefresh: _refreshCart,
-                      header: const WaterDropHeader(
-                        waterDropColor: KprimaryColor,
-                      ),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
-                        itemCount: cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = cartItems[index];
-                          final isSelected =
-                              selectedItems.contains(item.product.id);
-
-                          return buildCartItem(
-                            context: context,
-                            cartItem: item,
-                            isSelected: isSelected,
-                            onSelectToggle: () =>
-                                toggleItemSelection(item.product.id ?? ''),
-                            onDelete: () => cartService
-                                .removeFromCart(item.product.id ?? ''),
-                            onQuantityChanged: (newQuantity) {
-                              if (newQuantity > item.quantity) {
-                                cartService
-                                    .increaseQuantity(item.product.id ?? '');
-                              } else {
-                                cartService
-                                    .decreaseQuantity(item.product.id ?? '');
-                              }
-                            },
-                          );
-                        },
+                    SizedBox(width: width * 0.03),
+                    Text(
+                      'Select All',
+                      style: TextStyle(
+                        fontSize: width * 0.04,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
                     ),
-                  ),
-                ],
+                    const Spacer(),
+                    if (selectedItems.isNotEmpty)
+                      Text(
+                        '${selectedItems.length} selected',
+                        style: TextStyle(
+                          fontSize: width * 0.035,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
               ),
+
+              // Cart Items List
+              Expanded(
+                child: SmartRefresher(
+                  controller: _refreshController,
+                  onRefresh: _refreshCart,
+                  header: const WaterDropHeader(
+                    waterDropColor: KprimaryColor,
+                  ),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 80),
+                    itemCount: cartItems.length,
+                    itemBuilder: (context, index) {
+                      final item = cartItems[index];
+                      final isSelected =
+                          selectedItems.contains(item.product.id);
+
+                      return buildCartItem(
+                        context: context,
+                        cartItem: item,
+                        isSelected: isSelected,
+                        onSelectToggle: () =>
+                            toggleItemSelection(item.product.id ?? ''),
+                        onDelete: () =>
+                            cartService.removeFromCart(item.product.id ?? ''),
+                        onQuantityChanged: (newQuantity) {
+                          if (newQuantity > item.quantity) {
+                            cartService.increaseQuantity(item.product.id ?? '');
+                          } else {
+                            cartService.decreaseQuantity(item.product.id ?? '');
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: cartItems.isEmpty

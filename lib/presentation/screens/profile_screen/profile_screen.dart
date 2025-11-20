@@ -81,17 +81,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Are you sure you want to logout?'),
-                        content: const Text('This action cannot be undone.'),
+                        backgroundColor: Colors.grey[900],
+                        title: const Text(
+                          'Are you sure you want to logout?',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        content: const Text('This action cannot be undone.',
+                            style: TextStyle(
+                              color: Colors.white,
+                            )),
                         actions: <Widget>[
                           TextButton(
-                            child: const Text('Cancel'),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(color: Colors.white),
+                            ),
                             onPressed: () {
                               Navigator.of(context).pop(false);
                             },
                           ),
                           ElevatedButton(
-                            child: const Text('Yes, Logout'),
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Colors.grey.shade800),
+                            ),
+                            child: const Text(
+                              'Yes, Logout',
+                              style: TextStyle(color: Colors.white),
+                            ),
                             onPressed: () async {
                               await auth.logout(context);
 

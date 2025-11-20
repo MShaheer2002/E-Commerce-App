@@ -54,43 +54,43 @@ class _FavScreenState extends State<FavScreen>
 
               // ✅ SmartRefresher section
               Expanded(
-                child: favService.isloading && products.isEmpty
+                child: favService.isloading
                     ? Center(child: SmallLoader())
-                    : SmartRefresher(
-                        controller: _refreshController,
-                        onRefresh: () async {
-                          await favService.loadFavoriteProducts(
-                              isRefresh: true);
-                          _refreshController.refreshCompleted();
-                        },
-                        header: const WaterDropHeader(
-                          waterDropColor: KprimaryColor,
-                        ),
-                        child: products.isEmpty
-                            ? const Center(
-                                child: CustomEmptyDataWidget(
-                                  title: "No favorite products yet",
-                                ),
-                              )
-                            : ListView.builder(
-                                padding: EdgeInsets.only(bottom: height * 0.05),
-                                itemCount: products.length,
-                                itemBuilder: (context, index) {
-                                  final ProductModel product = products[index];
-                                  return FavProductWidget(
-                                    width: width,
-                                    height: height,
-                                    product: product,
-                                    onTap: () {
-                                      context.push(
-                                        '/single-product',
-                                        extra: product,
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                      ),
+                    : products.isEmpty
+                        ? const Center(
+                            child: CustomEmptyDataWidget(
+                              title: "No favorite products yet",
+                            ),
+                          )
+                        : SmartRefresher(
+                            controller: _refreshController,
+                            onRefresh: () async {
+                              await favService.loadFavoriteProducts(
+                                  isRefresh: true);
+                              _refreshController.refreshCompleted();
+                            },
+                            header: const WaterDropHeader(
+                              waterDropColor: KprimaryColor,
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.only(bottom: height * 0.05),
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                final ProductModel product = products[index];
+                                return FavProductWidget(
+                                  width: width,
+                                  height: height,
+                                  product: product,
+                                  onTap: () {
+                                    context.push(
+                                      '/single-product',
+                                      extra: product,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
               ),
             ],
           ),

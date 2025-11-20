@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
 import 'package:e_commerce_app/core/providers/notification_provider.dart';
@@ -46,20 +47,6 @@ class NotificationScreen extends StatelessWidget {
                       itemCount: notifications.length,
                       itemBuilder: (context, index) {
                         final doc = notifications[index].data();
-                        // return ListTile(
-                        //   title: Text(doc['title'] ?? 'No title'),
-                        //   subtitle: Text(doc['body'] ?? ''),
-                        //   trailing: Text(
-                        //     (doc['timestamp'] as Timestamp?)
-                        //             ?.toDate()
-                        //             .toLocal()
-                        //             .toString()
-                        //             .split('.')[0] ??
-                        //         '',
-                        //     style: const TextStyle(
-                        //         fontSize: 10, color: Colors.grey),
-                        //   ),
-                        // );
                         return buildNotificationItem(
                             username: doc['title'] ?? 'No title',
                             action: "",
@@ -97,7 +84,7 @@ class NotificationScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha:0.3),
+        color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(8),
       ),
       child: InkWell(
@@ -114,10 +101,10 @@ class NotificationScreen extends StatelessWidget {
               ),
               child: ClipOval(
                 child: avatarUrl.isNotEmpty
-                    ? Image.network(
-                        avatarUrl,
+                    ? CachedNetworkImage(
+                        imageUrl: avatarUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
+                        errorWidget: (context, error, stackTrace) {
                           return Container(
                             color: Colors.grey.shade800,
                             child: Icon(
@@ -169,31 +156,20 @@ class NotificationScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    action,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withValues(alpha:0.9),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
                   if (commentText != null && commentText.isNotEmpty) ...[
-                    const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha:0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         commentText,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha:0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           height: 1.3,
                         ),
                         maxLines: 2,
@@ -216,10 +192,10 @@ class NotificationScreen extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.network(
-                    previewImageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: previewImageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
+                    errorWidget: (context, error, stackTrace) {
                       return Container(
                         color: Colors.grey.shade800,
                         child: Icon(
