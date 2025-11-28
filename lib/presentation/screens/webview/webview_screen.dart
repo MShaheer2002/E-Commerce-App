@@ -73,16 +73,15 @@ class _WebviewScreenState extends State<WebviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar(context: context, title: ""),
-      body: Background(
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (isLoading)
-              Center(
-                child: SmallLoader(),
-              ),
-          ],
-        ),
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (isLoading)
+            Center(
+              child: SmallLoader(),
+            ),
+        ],
       ),
     );
   }
