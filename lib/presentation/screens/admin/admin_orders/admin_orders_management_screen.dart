@@ -426,15 +426,15 @@ class _ShippingInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.local_shipping_outlined,
                 size: 18,
                 color: Color(0xFFFD79A8),
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 "Shipping Information",
                 style: TextStyle(
                   fontSize: 13,
@@ -459,9 +459,8 @@ class _ShippingInfoCard extends StatelessWidget {
                       color: const Color(0xFFE8E8E8),
                     ),
                   ),
-                  padding: const EdgeInsets.all(6),
                   child: SvgPicture.asset(
-                    'assets/delivery_partners/${order.deliveryPartner!.name}.svg',
+                    'assets/svgs/${order.deliveryPartner!.name}.svg',
                     fit: BoxFit.contain,
                   ),
                 ),
@@ -720,9 +719,8 @@ class _ShippingDialogState extends State<_ShippingDialog> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isSubmitting
-                          ? null
-                          : () => Navigator.pop(context),
+                      onPressed:
+                          _isSubmitting ? null : () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: const BorderSide(color: Color(0xFFE8E8E8)),

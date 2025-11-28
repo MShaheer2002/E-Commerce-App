@@ -399,9 +399,8 @@ class _ShippingInfoCard extends StatelessWidget {
                       color: const Color(0xFFE8E8E8),
                     ),
                   ),
-                  padding: const EdgeInsets.all(6),
                   child: SvgPicture.asset(
-                    'assets/delivery_partners/${order.deliveryPartner!.name}.svg',
+                    'assets/svgs/${order.deliveryPartner!.name}.svg',
                     fit: BoxFit.contain,
                   ),
                 ),

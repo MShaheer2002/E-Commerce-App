@@ -9,7 +9,12 @@ enum OrderStatus {
   cancelled,
 }
 
-enum DeliveryPartner { a, b, c }
+enum DeliveryPartner {
+  fedex,
+  ups,
+  usps,
+  dhl;
+}
 
 class OrderModel {
   String? orderId;
@@ -76,7 +81,7 @@ class OrderModel {
           ? null
           : DeliveryPartner.values.firstWhere(
               (e) => e.name == deliveryStr,
-              orElse: () => DeliveryPartner.a,
+              orElse: () => DeliveryPartner.fedex,
             ),
       trackingNumber: map['trackingNumber'] ?? '',
       paymentIntentId: map['paymentIntentId'] ?? '',
@@ -135,6 +140,6 @@ DeliveryPartner? deliveryPartnerFromString(String? value) {
 
   return DeliveryPartner.values.firstWhere(
     (e) => e.name == value,
-    orElse: () => DeliveryPartner.a,
+    orElse: () => DeliveryPartner.fedex,
   );
 }
