@@ -28,10 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      emailCtrl.text = "admin@admin.com";
-      passCtrl.text = "abc12345678";
-      // emailCtrl.text = "unknowusers420@gmail.com";
-      // passCtrl.text = "abc123";
+      // emailCtrl.text = "admin@admin.com";
+      // passCtrl.text = "abc12345678";
+      emailCtrl.text = "unknowusers420@gmail.com";
+      passCtrl.text = "abc123";
     }
   }
 
