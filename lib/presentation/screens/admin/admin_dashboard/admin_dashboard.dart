@@ -249,6 +249,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
             /// ---- Analytics Section ----
             sectionTile(
               context,
+              title: "State Sales Tax",
+              subtitle: "Manage Sales taxes of each state",
+              icon: Iconsax.bill,
+              routeName: '/admin/states-sales-tax',
+            ),
+            const SizedBox(height: 16),
+
+            /// ---- Analytics Section ----
+            sectionTile(
+              context,
               title: "Settings",
               subtitle: "App Settings",
               icon: Iconsax.setting4,

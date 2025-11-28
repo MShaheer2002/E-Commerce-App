@@ -30,6 +30,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
   String description = '';
   double price = 0;
   double retailPrice = 0;
+  double shippingCharges = 0;
   String? productLink;
   int stock = 0;
   String? selectedCategoryId;
@@ -323,6 +324,28 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
                             },
                             onSaved: (v) =>
                                 retailPrice = v!.isEmpty ? 0 : double.parse(v),
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Retail Price Section
+                          _buildSectionTitle("Shipping Charge",
+                              "Charges of shipping according to the product"),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            label: 'Shipping Charges',
+                            hint: '0.00',
+                            keyboardType: TextInputType.number,
+                            prefixText: '\$ ',
+                            validator: (v) {
+                              if (v != null && v.isNotEmpty) {
+                                if (double.tryParse(v) == null) {
+                                  return 'Invalid charges';
+                                }
+                              }
+                              return null;
+                            },
+                            onSaved: (v) => shippingCharges =
+                                v!.isEmpty ? 0 : double.parse(v),
                           ),
                           const SizedBox(height: 32),
 
@@ -679,15 +702,15 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
       }
 
       await productProvider.addNewProduct(
-        retailPrice: retailPrice,
-        name: name,
-        description: description,
-        price: price,
-        categoryId: selectedCategoryId!,
-        stock: stock,
-        imageUrls: urls,
-        productLink: productLink,
-      );
+          retailPrice: retailPrice,
+          name: name,
+          description: description,
+          price: price,
+          categoryId: selectedCategoryId!,
+          stock: stock,
+          imageUrls: urls,
+          productLink: productLink,
+          shippingCharges: shippingCharges.toString());
 
       if (mounted) {
         Fluttertoast.showToast(

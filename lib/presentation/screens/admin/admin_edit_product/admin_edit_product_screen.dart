@@ -28,6 +28,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
   late String description;
   late double price;
   late double retailPrice;
+  late double shippingCharges;
   String? productLink;
   late int stock;
   String? selectedCategoryId;
@@ -141,7 +142,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Image Section
+                      // image upload failedSection
                       _buildSectionTitle("Product Images", "Up to 4 images"),
                       const SizedBox(height: 16),
                       _buildImagePicker(),
@@ -241,6 +242,28 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
                         },
                         onSaved: (v) =>
                             retailPrice = v!.isEmpty ? 0 : double.parse(v),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Shipping Charges
+                      _buildSectionTitle("Shipping Charge",
+                          "Charges of shipping according to the product"),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        label: 'Shipping Charges',
+                        hint: '0.00',
+                        keyboardType: TextInputType.number,
+                        prefixText: '\$ ',
+                        validator: (v) {
+                          if (v != null && v.isNotEmpty) {
+                            if (double.tryParse(v) == null) {
+                              return 'Invalid charges';
+                            }
+                          }
+                          return null;
+                        },
+                        onSaved: (v) =>
+                            shippingCharges = v!.isEmpty ? 0 : double.parse(v),
                       ),
                       const SizedBox(height: 32),
 
@@ -629,6 +652,7 @@ class _AdminEditProductScreenState extends State<AdminEditProductScreen> {
           price: price,
           categoryId: selectedCategoryId ?? '',
           imageUrls: allImageUrls,
+          shippingCharges: shippingCharges.toString(),
           stock: stock,
           createdAt: widget.product.createdAt,
           search_name: name.toLowerCase());

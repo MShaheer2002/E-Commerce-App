@@ -86,9 +86,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               if (!mounted) return;
                               Navigator.of(context).pop(); // close loader
                               Fluttertoast.showToast(
-                                  msg:
-                                      "Password reset email sent! Check your inbox.",
-                                  backgroundColor: Colors.green);
+                                msg:
+                                    "Password reset email sent! Check your Inbox or Spam Folder",
+                                backgroundColor: Colors.green,
+                              );
                             } catch (e) {
                               if (!mounted) return;
                               Navigator.of(context).pop();

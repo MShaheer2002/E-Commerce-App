@@ -164,8 +164,7 @@ class SettingsProvider extends ChangeNotifier {
           .orderBy('createdAt', descending: false)
           .get();
 
-      _taxes =
-          snapshot.docs.map((doc) => TaxModel.fromMap(doc.data())).toList();
+      _taxes = snapshot.docs.map((doc) => TaxModel.fromMap(doc.data())).toList();
 
       _isTaxLoaded = true;
     } catch (e, stack) {

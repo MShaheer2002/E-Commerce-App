@@ -7,6 +7,7 @@ import 'package:e_commerce_app/core/providers/admin/global_analytics_provider.da
 import 'package:e_commerce_app/core/providers/admin/order_management_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/settings_provider.dart';
+import 'package:e_commerce_app/core/providers/admin/state_tax_provider.dart';
 import 'package:e_commerce_app/core/providers/admin/userManagement_provider.dart';
 import 'package:e_commerce_app/core/providers/cart_provider.dart';
 import 'package:e_commerce_app/core/providers/category_provider.dart';
@@ -98,5 +99,6 @@ class AppProvider {
         create: (_) => OrderManagementProvider()),
 
     ChangeNotifierProvider<BannerProvider>(create: (_) => BannerProvider()),
+    ChangeNotifierProvider<StateTaxProvider>(create: (_) => StateTaxProvider()),
   ];
 }

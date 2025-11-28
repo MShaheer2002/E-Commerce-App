@@ -1,20 +1,22 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:e_commerce_app/presentation/models/order_model.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class OrderManagementProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<OrderModel> _orders = [];
   List<OrderModel> get orders => _orders;
-
+  bool _isOrdering = false;
   OrderStatus _currentStatus = OrderStatus.placed;
   OrderStatus get currentStatus => _currentStatus;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  bool get isOrdering => _isOrdering;
 
   // Track which tabs need reloading after status updates
   final Set<OrderStatus> _tabsNeedingReload = {};
@@ -55,7 +57,7 @@ class OrderManagementProvider extends ChangeNotifier {
               }))
           .toList();
     } catch (e) {
-      debugPrint("❌ Error fetching orders: $e");
+      log("Error fetching orders: $e");
     }
 
     _isLoading = false;
@@ -79,6 +81,35 @@ class OrderManagementProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint("❌ Error updating order status: $e");
+    }
+  }
+
+  Future<void> addOrderStatus(
+      String id, String deliveryPartner, String trackingNumber) async {
+    try {
+      _isOrdering = true;
+      notifyListeners();
+      await _firestore.collection('orders').doc(id).update({
+        'deliveryPartner': deliveryPartner,
+        'trackingNumber': trackingNumber,
+      });
+      final index = orders.indexWhere((element) {
+        return element.orderId == id;
+      });
+
+      orders[index] = orders[index].copyWith(
+        trackingNumber: trackingNumber,
+        deliveryPartner: deliveryPartnerFromString(deliveryPartner),
+      );
+      Fluttertoast.showToast(msg: "Order mark as shipped!");
+    } catch (e, s) {
+      log("[Order] [addOrderStatus] Error $e");
+      log("[Order] [addOrderStatus] Stack $s");
+
+      Fluttertoast.showToast(msg: "Can not update order");
+    } finally {
+      _isOrdering = false;
+      notifyListeners();
     }
   }
 

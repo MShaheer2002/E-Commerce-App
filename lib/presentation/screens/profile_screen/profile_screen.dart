@@ -142,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 _buildMenuItem(
                   icon: Icons.support_agent_rounded,
-                  title: "Support",
+                  title: "Support Center",
                   onTap: () {
                     log('Support');
                     context.push("/webview",
@@ -158,6 +158,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context.push("/webview",
                         extra:
                             "https://shaheerprojectsflutter.github.io/productplug-legal/terms_and_condition.html");
+                  },
+                ),
+                     _buildMenuItem(
+                  icon: Icons.security_outlined,
+                  title: "Policy Center",
+                  onTap: () {
+                    log('Policy Center tapped');
+                    context.push("/webview",
+                        extra:
+                            "https://shaheerprojectsflutter.github.io/productplug-legal/policy_center.html");
                   },
                 ),
                 SizedBox(height: height * 0.02),

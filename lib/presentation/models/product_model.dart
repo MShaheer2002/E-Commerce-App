@@ -12,6 +12,7 @@ class ProductModel {
   final List<String> imageUrls;
   final int stock;
   final bool isFeatured;
+  final String shippingCharges;
   final Timestamp createdAt;
   final String? promoCode;
   final Timestamp? promoCodeEndTime;
@@ -29,6 +30,7 @@ class ProductModel {
     required this.categoryId,
     required this.imageUrls,
     required this.stock,
+    required this.shippingCharges,
     this.isFeatured = false,
     required this.createdAt,
     this.promoCode,
@@ -47,6 +49,7 @@ class ProductModel {
     bool? isSoldout,
     String? categoryId,
     List<String>? imageUrls,
+    String? shippingCharges,
     int? stock,
     bool? isFeatured,
     String? promoCode,
@@ -70,7 +73,8 @@ class ProductModel {
       productLink: productLink ?? this.productLink,
       promoCode: promoCode ?? this.promoCode,
       promoCodeEndTime: promoCodeEndTime ?? this.promoCodeEndTime,
-      search_name: search_name ?? '',
+      search_name: search_name ?? this.search_name,
+      shippingCharges: shippingCharges ?? this.shippingCharges,
     );
   }
 
@@ -89,6 +93,7 @@ class ProductModel {
       'isFeatured': isFeatured,
       'createdAt': createdAt,
       'promoCode': promoCode,
+      'shippingCharges': shippingCharges,
       'productLink': productLink,
       'promoCodeEndTime': promoCodeEndTime,
       'search_name': search_name,
@@ -106,6 +111,7 @@ class ProductModel {
           ? (map['discountPrice']).toDouble()
           : null,
       isSoldout: map['isSoldout'] ?? false,
+      shippingCharges: map['shippingCharges'] ?? '0',
       categoryId: map['categoryId'] ?? '',
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
       stock: map['stock'] ?? 0,

@@ -540,7 +540,7 @@ class TaxManagementWidget extends StatelessWidget {
             ),
             SizedBox(width: 8),
             Text(
-              'Tax Management',
+              'Global Tax Management',
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -7,7 +8,8 @@ import 'package:http/http.dart' as http;
 
 /// ⚠️ NOTE: This approach exposes your Stripe Secret Key.
 /// In production, always create payment intents on your backend server.
-Future<Map<String, String>> createPaymentIntent(double amount) async {
+Future<Map<String, String>> createPaymentIntent(
+    double amount, String userEmail) async {
   final url = Uri.parse('https://api.stripe.com/v1/payment_intents');
   final secretKey = dotenv.env['STRIPE_SECRET_KEY'];
 
@@ -26,6 +28,8 @@ Future<Map<String, String>> createPaymentIntent(double amount) async {
         'amount': (amount * 100).toInt().toString(), // Convert dollars → cents
         'currency': 'usd',
         'payment_method_types[]': 'card',
+        if (userEmail != null && userEmail.trim().isNotEmpty)
+          'receipt_email': userEmail,
       },
     );
 
@@ -57,12 +61,12 @@ Future<Map<String, String>> createPaymentIntent(double amount) async {
 }
 
 /// 💳 Shows Stripe's Payment Sheet UI
-Future<String> showPaymentSheet(double amount) async {
+Future<String> showPaymentSheet(double amount, String userEmail) async {
   try {
     log('[Checkout] Creating PaymentIntent for \$${amount.toStringAsFixed(2)}');
 
     // 1️⃣ Create the payment intent
-    final intentData = await createPaymentIntent(amount);
+    final intentData = await createPaymentIntent(amount, userEmail);
     final clientSecret = intentData['clientSecret']!;
     final paymentIntentId = intentData['paymentIntentId']!;
     log('[Checkout] PaymentIntent ID: $paymentIntentId');
@@ -73,11 +77,22 @@ Future<String> showPaymentSheet(double amount) async {
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: 'My E-Commerce Store',
         style: ThemeMode.system,
-        appearance: const PaymentSheetAppearance(
+        appearance: PaymentSheetAppearance(
           colors: PaymentSheetAppearanceColors(
-            primary: Color(0xFF6C63FF),
-            background: Color(0xFF1E1E1E),
-            componentBackground: Color(0xFF2D2D2D),
+            primary: const Color(0xFF6C63FF),
+
+            // Light Mode
+            background: Brightness.light ==
+                    WidgetsBinding
+                        .instance.platformDispatcher.platformBrightness
+                ? const Color(0xFFFFFFFF)
+                : const Color(0xFF1E1E1E),
+
+            componentBackground: Brightness.light ==
+                    WidgetsBinding
+                        .instance.platformDispatcher.platformBrightness
+                ? const Color(0xFFF5F5F5)
+                : const Color(0xFF2D2D2D),
           ),
         ),
         allowsDelayedPaymentMethods: true,

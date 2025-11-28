@@ -15,6 +15,7 @@ import 'package:e_commerce_app/presentation/screens/admin/admin_orders/admin_ord
 import 'package:e_commerce_app/presentation/screens/admin/admin_orders/admin_single_order_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_products_mangement/admin_products_mangement_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_settings_screen/admin_setting_screen.dart';
+import 'package:e_commerce_app/presentation/screens/admin/admin_state_sales_tax/admin_state_sales_tax_screen.dart';
 import 'package:e_commerce_app/presentation/screens/admin/admin_user_management/admin_user_management_screen.dart';
 import 'package:e_commerce_app/presentation/screens/category_screen/category_screen.dart';
 import 'package:e_commerce_app/presentation/screens/checkout_screen/checkout_screen.dart';
@@ -229,6 +230,11 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/admin/banner-screen',
         builder: (context, state) => const AdminBannerManagementScreen(),
+      ),
+
+      GoRoute(
+        path: '/admin/states-sales-tax',
+        builder: (context, state) => const AdminStateSalesTaxScreen(),
       ),
     ],
   );

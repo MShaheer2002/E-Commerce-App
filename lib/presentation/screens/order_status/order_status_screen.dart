@@ -4,6 +4,9 @@ import 'package:e_commerce_app/core/themes/constantsColors.dart';
 import 'package:e_commerce_app/presentation/models/order_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -271,7 +274,20 @@ class _UserOrderCard extends StatelessWidget {
               ],
             ),
           ),
-
+          Divider(height: 1, color: Colors.grey[700]),
+          // Shipping Info Section (Only for Shipped Status)
+          if (order.orderStatus == OrderStatus.shipped &&
+              order.trackingNumber != null &&
+              order.trackingNumber!.isNotEmpty)
+            Column(
+              children: [
+                const Divider(height: 1, color: Color(0xFFE8E8E8)),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _ShippingInfoCard(order: order),
+                ),
+              ],
+            ),
           Divider(height: 1, color: Colors.grey[700]),
 
           // Footer Section
@@ -334,6 +350,131 @@ class _UserOrderCard extends StatelessWidget {
   }
 }
 
+class _ShippingInfoCard extends StatelessWidget {
+  final OrderModel order;
+
+  const _ShippingInfoCard({required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(8),
+    
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.local_shipping_outlined,
+                size: 18,
+                color: KprimaryColor,
+              ),
+              SizedBox(width: 8),
+              Text(
+                "Shipping Information",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              // Delivery Partner Icon
+              if (order.deliveryPartner != null)
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: const Color(0xFFE8E8E8),
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  child: SvgPicture.asset(
+                    'assets/delivery_partners/${order.deliveryPartner!.name}.svg',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              const SizedBox(width: 12),
+              // Tracking Number
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Text(
+                    //   order.deliveryPartner != null
+                    //       ? _capitalize(order.deliveryPartner!.name)
+                    //       : "Delivery Partner",
+                    //   style: TextStyle(
+                    //     fontSize: 11,
+                    //     color: Colors.grey[600],
+                    //     fontWeight: FontWeight.w500,
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            order.trackingNumber ?? "N/A",
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Copy Button
+              IconButton(
+                onPressed: () {
+                  if (order.trackingNumber != null &&
+                      order.trackingNumber!.isNotEmpty) {
+                    Clipboard.setData(
+                        ClipboardData(text: order.trackingNumber!));
+                    Fluttertoast.showToast(
+                      msg: "Tracking number copied!",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                    );
+                  }
+                },
+                icon: const Icon(
+                  Icons.copy_outlined,
+                  size: 18,
+                  color: KprimaryColor,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _capitalize(String text) {
+    return text[0].toUpperCase() + text.substring(1);
+  }
+}
+
 class _ProductItemPreview extends StatelessWidget {
   final dynamic item;
 
@@ -387,7 +528,7 @@ class _ProductItemPreview extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2D3436),
+                    color: Colors.white,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -409,7 +550,7 @@ class _ProductItemPreview extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF2D3436),
+              color: Colors.white,
             ),
           ),
         ],

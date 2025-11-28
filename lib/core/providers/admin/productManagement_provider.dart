@@ -163,6 +163,7 @@ class ProductmanagementProvider with ChangeNotifier {
     required int stock,
     required String? productLink,
     required List<String> imageUrls,
+    required String shippingCharges,
   }) async {
     try {
       final docRef = _firestore.collection('products').doc();
@@ -174,6 +175,7 @@ class ProductmanagementProvider with ChangeNotifier {
         retailPrice: retailPrice,
         name: name,
         description: description,
+        shippingCharges: shippingCharges,
         price: price,
         categoryId: categoryId,
         imageUrls: imageUrls,

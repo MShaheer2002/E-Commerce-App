@@ -1,9 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:mime/mime.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 class CloudinaryProvider with ChangeNotifier {
   // Make sure your .env file has CLOUD_NAME (no quotes)
@@ -73,6 +75,9 @@ class CloudinaryProvider with ChangeNotifier {
           urls.add(url);
         }
       }
+      return urls;
+    } catch (e) {
+      log("Error while upload $e");
       return urls;
     } finally {
       _isUploading = false;

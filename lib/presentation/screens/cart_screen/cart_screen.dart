@@ -63,11 +63,9 @@ class _CartScreenState extends State<CartScreen> {
         .where((item) => selectedItems.contains(item.product.id))
         .toList();
 
-    // 🔥 Instead of pushing with extra, save to provider
     final cartProvider = context.read<CartProvider>();
     cartProvider.setSelectedItems(selected);
 
-    // ✅ Now just navigate (no data passing)
     context.push("/checkout-screen");
   }
 

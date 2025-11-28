@@ -1,10 +1,13 @@
 import 'package:e_commerce_app/core/providers/admin/order_management_provider.dart';
 import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:e_commerce_app/presentation/models/order_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:e_commerce_app/presentation/models/order_model.dart';
 
 class AdminOrdersManagementScreen extends StatelessWidget {
   const AdminOrdersManagementScreen({super.key});
@@ -61,7 +64,6 @@ class AdminOrdersManagementScreen extends StatelessWidget {
                 ),
               ),
             ),
-         
           ),
           body: const TabBarView(
             physics: NeverScrollableScrollPhysics(),
@@ -222,27 +224,19 @@ class _OrderCard extends StatelessWidget {
               ),
             ),
 
-            // const Divider(height: 1, color: Color(0xFFE8E8E8)),
-
-            // // Products Section
-            // Padding(
-            //   padding: const EdgeInsets.all(16),
-            //   child: Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       const Text(
-            //         "Ordered Items",
-            //         style: TextStyle(
-            //           fontSize: 14,
-            //           fontWeight: FontWeight.w600,
-            //           color: Color(0xFF2D3436),
-            //         ),
-            //       ),
-            //       const SizedBox(height: 12),
-            //       ...order.cartItems.map((item) => _ProductItem(item: item)),
-            //     ],
-            //   ),
-            // ),
+            // Shipping Info Section (Only for Shipped Status)
+            if (order.orderStatus == OrderStatus.shipped &&
+                order.trackingNumber != null &&
+                order.trackingNumber!.isNotEmpty)
+              Column(
+                children: [
+                  const Divider(height: 1, color: Color(0xFFE8E8E8)),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: _ShippingInfoCard(order: order),
+                  ),
+                ],
+              ),
 
             const Divider(height: 1, color: Color(0xFFE8E8E8)),
 
@@ -326,8 +320,14 @@ class _OrderCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         offset: const Offset(0, 8),
-        onSelected: (newStatus) =>
-            provider.updateOrderStatus(order.orderId!, newStatus),
+        onSelected: (newStatus) {
+          if (newStatus == OrderStatus.shipped) {
+            // Show dialog for shipping details
+            _showShippingDialog(context, provider);
+          } else {
+            provider.updateOrderStatus(order.orderId!, newStatus);
+          }
+        },
         itemBuilder: (context) {
           return availableStatuses
               .map((status) => PopupMenuItem(
@@ -356,6 +356,17 @@ class _OrderCard extends StatelessWidget {
     );
   }
 
+  void _showShippingDialog(
+      BuildContext context, OrderManagementProvider provider) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _ShippingDialog(
+        orderId: order.orderId!,
+        provider: provider,
+      ),
+    );
+  }
+
   List<OrderStatus> _getAvailableStatuses(OrderStatus currentStatus) {
     switch (currentStatus) {
       case OrderStatus.placed:
@@ -371,9 +382,9 @@ class _OrderCard extends StatelessWidget {
           OrderStatus.cancelled,
         ];
       case OrderStatus.delivered:
-        return []; // Cannot change from delivered
+        return [];
       case OrderStatus.cancelled:
-        return []; // Cannot change from cancelled
+        return [];
     }
   }
 
@@ -395,87 +406,416 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-// class _ProductItem extends StatelessWidget {
-//   final dynamic item;
+// Shipping Info Card Widget
+class _ShippingInfoCard extends StatelessWidget {
+  final OrderModel order;
 
-//   const _ProductItem({required this.item});
+  const _ShippingInfoCard({required this.order});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 12),
-//       child: Row(
-//         children: [
-//           // Product Image
-//           Container(
-//             width: 56,
-//             height: 56,
-//             decoration: BoxDecoration(
-//               color: const Color(0xFFF8F9FA),
-//               borderRadius: BorderRadius.circular(8),
-//               border: Border.all(
-//                 color: const Color(0xFFE8E8E8),
-//                 width: 1,
-//               ),
-//             ),
-//             child: ClipRRect(
-//               borderRadius: BorderRadius.circular(8),
-//               child: item.product.imageUrls.isNotEmpty
-//                   ? Image.network(
-//                       item.product.imageUrls[0],
-//                       fit: BoxFit.cover,
-//                       errorBuilder: (_, __, ___) => const Icon(
-//                         Icons.image_not_supported_outlined,
-//                         color: Color(0xFFB2BEC3),
-//                       ),
-//                     )
-//                   : const Icon(
-//                       Icons.shopping_bag_outlined,
-//                       color: Color(0xFFB2BEC3),
-//                     ),
-//             ),
-//           ),
-//           const SizedBox(width: 12),
-//           // Product Details
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   item.product.name,
-//                   style: const TextStyle(
-//                     fontSize: 14,
-//                     fontWeight: FontWeight.w600,
-//                     color: Color(0xFF2D3436),
-//                   ),
-//                   maxLines: 1,
-//                   overflow: TextOverflow.ellipsis,
-//                 ),
-//                 const SizedBox(height: 4),
-//                 Text(
-//                   "Qty: ${item.quantity}",
-//                   style: TextStyle(
-//                     fontSize: 13,
-//                     color: Colors.grey[600],
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           // Price
-//           Text(
-//             "\$${item.priceAtPurchase.toStringAsFixed(2)}",
-//             style: const TextStyle(
-//               fontSize: 15,
-//               fontWeight: FontWeight.w600,
-//               color: Color(0xFF2D3436),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: const Color(0xFFE8E8E8),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.local_shipping_outlined,
+                size: 18,
+                color: Color(0xFFFD79A8),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                "Shipping Information",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2D3436),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              // Delivery Partner Icon
+              if (order.deliveryPartner != null)
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: const Color(0xFFE8E8E8),
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  child: SvgPicture.asset(
+                    'assets/delivery_partners/${order.deliveryPartner!.name}.svg',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              const SizedBox(width: 12),
+              // Tracking Number
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      order.deliveryPartner != null
+                          ? _capitalize(order.deliveryPartner!.name)
+                          : "Delivery Partner",
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            order.trackingNumber ?? "N/A",
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2D3436),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Copy Button
+              IconButton(
+                onPressed: () {
+                  if (order.trackingNumber != null &&
+                      order.trackingNumber!.isNotEmpty) {
+                    Clipboard.setData(
+                        ClipboardData(text: order.trackingNumber!));
+                    Fluttertoast.showToast(
+                      msg: "Tracking number copied!",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                    );
+                  }
+                },
+                icon: const Icon(
+                  Icons.copy_outlined,
+                  size: 18,
+                  color: KprimaryColor,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _capitalize(String text) {
+    return text[0].toUpperCase() + text.substring(1);
+  }
+}
+
+// Shipping Dialog Widget
+class _ShippingDialog extends StatefulWidget {
+  final String orderId;
+  final OrderManagementProvider provider;
+
+  const _ShippingDialog({
+    required this.orderId,
+    required this.provider,
+  });
+
+  @override
+  State<_ShippingDialog> createState() => _ShippingDialogState();
+}
+
+class _ShippingDialogState extends State<_ShippingDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _trackingController = TextEditingController();
+  DeliveryPartner? _selectedPartner;
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _trackingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: KprimaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.local_shipping_outlined,
+                      color: KprimaryColor,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      "Mark as Shipped",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF2D3436),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Delivery Partner Dropdown
+              const Text(
+                "Delivery Partner",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2D3436),
+                ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<DeliveryPartner>(
+                value: _selectedPartner,
+                decoration: InputDecoration(
+                  hintText: "Select delivery partner",
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFE8E8E8)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFE8E8E8)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: KprimaryColor),
+                  ),
+                ),
+                items: DeliveryPartner.values
+                    .map((partner) => DropdownMenuItem(
+                          value: partner,
+                          child: Text(
+                            _capitalize(partner.name),
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedPartner = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return "Please select a delivery partner";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Tracking Number Field
+              const Text(
+                "Tracking Number",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2D3436),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _trackingController,
+                decoration: InputDecoration(
+                  hintText: "Enter tracking number",
+                  hintStyle: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFE8E8E8)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFFE8E8E8)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: KprimaryColor),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter tracking number";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: Color(0xFFE8E8E8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF636E72),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _handleSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: KprimaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              "Confirm",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await widget.provider.addOrderStatus(
+        widget.orderId,
+        _selectedPartner!.name,
+        _trackingController.text.trim(),
+      );
+
+      // Update order status to shipped
+      await widget.provider.updateOrderStatus(
+        widget.orderId,
+        OrderStatus.shipped,
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  String _capitalize(String text) {
+    return text[0].toUpperCase() + text.substring(1);
+  }
+}
 
 class _StatusBadge extends StatelessWidget {
   final OrderStatus status;
