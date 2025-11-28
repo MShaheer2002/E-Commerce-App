@@ -36,6 +36,7 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
   String? selectedCategoryId;
   List<File> imageFiles = [];
   bool _isCompressing = false;
+  bool isLoading = false;
 
   Future<void> _pickImages() async {
     if (imageFiles.length >= 4) {
@@ -645,29 +646,38 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
   }
 
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: KprimaryColor,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        onPressed: _isCompressing ? null : () => _saveProduct(context),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_circle_outline, size: 22),
-            SizedBox(width: 8),
-            Text("Save Product",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ],
-        ),
-      ),
+    return Consumer<ProductmanagementProvider>(
+      builder: (context, value, child) {
+        return SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: KprimaryColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: _isCompressing ? null : () => _saveProduct(context),
+            child: value.isLoading == true || isLoading == true
+                ? Center(
+                    child: SmallLoader(backgroundColor: Colors.white),
+                  )
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check_circle_outline, size: 22),
+                      SizedBox(width: 8),
+                      Text("Save Product",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 
@@ -690,6 +700,8 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
       // Upload compressed images to Cloudinary
       final folderPath = "products/$selectedCategoryId/$name";
 
+      isLoading = true;
+      setState(() {});
       final urls =
           await cloudinary.uploadMultipleImages(imageFiles, folder: folderPath);
 
@@ -725,6 +737,9 @@ class _AddProductScreenState extends State<AdminAddProductScreen> {
           backgroundColor: Colors.red,
           textColor: Colors.white);
       return;
+    } finally {
+      isLoading = false;
+      setState(() {});
     }
   }
 }

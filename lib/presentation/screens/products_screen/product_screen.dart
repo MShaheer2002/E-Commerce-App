@@ -13,7 +13,7 @@ class ProductScreen extends StatelessWidget {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     final productProvider = context.read<ProductProvider>();
-    RefreshController _refresher = RefreshController(initialRefresh: true);
+    RefreshController refresher = RefreshController();
 
     final products = productProvider.products;
 
@@ -22,14 +22,14 @@ class ProductScreen extends StatelessWidget {
       body: Background(
           showBackButton: false,
           child: SmartRefresher(
-            controller: _refresher,
+            controller: refresher,
             header: const WaterDropHeader(waterDropColor: KprimaryColor),
             onRefresh: () {
               productProvider.listenToProducts();
-              _refresher.refreshCompleted();
+              refresher.refreshCompleted();
             },
-            enablePullDown: true,
-            enablePullUp: false,
+            // enablePullDown: true,
+            // enablePullUp: false,
             child: GridView.builder(
               shrinkWrap: true,
               itemCount: products.length,

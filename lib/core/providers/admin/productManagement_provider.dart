@@ -31,7 +31,7 @@ class ProductmanagementProvider with ChangeNotifier {
     fetchProducts(initialLoad: true);
   }
 
-  /// 🔄 Fetch products (with pagination)
+  /// Fetch products (with pagination)
   Future<void> fetchProducts({bool initialLoad = false}) async {
     // --- Reset state on refresh ---
     if (initialLoad) {
@@ -84,7 +84,7 @@ class ProductmanagementProvider with ChangeNotifier {
     }
   }
 
-  // 📦 Fetch all categories
+  // Fetch all categories
   Future<void> fetchCategories() async {
     try {
       final snapshot = await _firestore.collection('categories').get();
@@ -97,13 +97,15 @@ class ProductmanagementProvider with ChangeNotifier {
     }
   }
 
-  // ➕ Add product
+  // Add product
   Future<void> addProduct(ProductModel product) async {
     try {
       final docRef =
           await _firestore.collection('products').add(product.toMap());
+      _isLoading = true;
+      notifyListeners();
 
-      // ✅ Add product ID to Firestore document
+      // Add product ID to Firestore document
       await _firestore
           .collection('products')
           .doc(docRef.id)
@@ -111,11 +113,14 @@ class ProductmanagementProvider with ChangeNotifier {
 
       await fetchProducts(initialLoad: true);
     } catch (e) {
-      debugPrint("Error adding product: $e");
+      log("Error adding product: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  // ✏️ Update product
+  // Update product
   Future<void> updateProduct(String id, ProductModel updatedProduct) async {
     try {
       await _firestore
@@ -124,22 +129,22 @@ class ProductmanagementProvider with ChangeNotifier {
           .update(updatedProduct.toMap());
       await fetchProducts(initialLoad: true);
     } catch (e) {
-      debugPrint("Error updating product: $e");
+      log("Error updating product: $e");
     }
   }
 
-  // ❌ Delete product
+  // Delete product
   Future<void> deleteProduct(String id) async {
     try {
       await _firestore.collection('products').doc(id).delete();
       _products.removeWhere((product) => product.id == id);
       notifyListeners();
     } catch (e) {
-      debugPrint("Error deleting product: $e");
+      log("Error deleting product: $e");
     }
   }
 
-  // 🔍 Get Category name by ID
+  // Get Category name by ID
   String getCategoryName(String categoryId) {
     final category = _categories.firstWhere(
       (cat) => cat.id == categoryId,
@@ -166,6 +171,8 @@ class ProductmanagementProvider with ChangeNotifier {
     required String shippingCharges,
   }) async {
     try {
+      _isLoading = true;
+      notifyListeners();
       final docRef = _firestore.collection('products').doc();
       // Create product with the ID included
       final product = ProductModel(
@@ -192,7 +199,10 @@ class ProductmanagementProvider with ChangeNotifier {
       final productId = docRef.id;
       await _analyticsProvider.createAnalyticsForNewProduct(productId);
     } catch (e) {
-      debugPrint("Error adding new product: $e");
+      log("Error adding new product: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -208,13 +218,13 @@ class ProductmanagementProvider with ChangeNotifier {
 
         if (name != null && name is String) {
           await doc.reference.update({'search_name': name.toLowerCase()});
-          print('Updated: ${doc.id}');
+          log('Updated: ${doc.id}');
         }
       }
 
-      print('✅ All products updated with name_lower');
+      log('✅ All products updated with name_lower');
     } catch (e) {
-      print('❌ Error while updating: $e');
+      log('❌ Error while updating: $e');
     }
   }
 }
