@@ -45,66 +45,88 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       body: Background(
-        child: SingleChildScrollView(
-          child: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: width * 0.06),
-              child: Column(
-                children: [
-                  SizedBox(height: height * 0.02),
-                  Image.asset(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // Background
+              SizedBox(height: height * 0.02),
+
+              Positioned(
+                top: height * 0.02,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Image.asset(
                     "assets/images/titles/exclusive_cleaned.png",
                     height: 40,
                   ),
-                  // 🔍 Search + Favorite row
-                  SizedBox(height: height * 0.02),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            context.push('/search-screen', extra: false);
-                          },
-                          child: Container(
-                            height: 55,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.white.withValues(alpha: 0.7),
-                            ),
-                            child: const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 15),
-                                  child: Icon(
-                                    Icons.search,
-                                    size: 28,
-                                    color: KprimaryColor,
+                ),
+              ),
+
+              Padding(
+                padding: EdgeInsets.only(top: height * 0.07),
+                child: SingleChildScrollView(
+                  child: SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: width * 0.06),
+                      child: Column(
+                        children: [
+                          // 🔍 Search + Favorite row
+                          SizedBox(height: height * 0.02),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    context.push('/search-screen',
+                                        extra: false);
+                                  },
+                                  child: Container(
+                                    height: 55,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.7),
+                                    ),
+                                    child: const Row(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 15),
+                                          child: Icon(
+                                            Icons.search,
+                                            size: 28,
+                                            color: KprimaryColor,
+                                          ),
+                                        ),
+                                        Text(
+                                          "Search...",
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 16,
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                Text(
-                                  "Search...",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                  ),
-                                )
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ),
+
+                          SizedBox(height: height * 0.02),
+
+                          // Firebase Banner Carousel
+                          _buildBannerCarousel(height, width),
+
+                          homeWidget(height, width),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-
-                  SizedBox(height: height * 0.02),
-
-                  // Firebase Banner Carousel
-                  _buildBannerCarousel(height, width),
-
-                  homeWidget(height, width),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -334,8 +356,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemCount: provider.products.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
-                  return ProductWidget(
-                      provider.products[index], height, width, context);
+                  return SizedBox(
+                    width: width * 0.45,
+                    child: ProductWidget(
+                        provider.products[index], height, width, context),
+                  );
                 },
               ),
             ),

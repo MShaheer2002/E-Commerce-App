@@ -55,7 +55,7 @@ Future<Map<String, String>> createPaymentIntent(
       'paymentIntentId': paymentIntentId,
     };
   } catch (e) {
-    log('❌ Error creating payment intent: $e');
+    log('❌ Error creating paym, String currUserEmailent intent: $e');
     rethrow;
   }
 }

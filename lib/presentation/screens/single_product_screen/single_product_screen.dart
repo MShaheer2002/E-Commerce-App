@@ -407,7 +407,7 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
         child: Center(
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'Note to Restaurant (optional)',
+              hintText: 'Note to Product Plug (Optional)',
               hintStyle: TextStyle(color: Colors.grey, fontSize: fontSize),
               border: InputBorder.none,
               isDense: true,

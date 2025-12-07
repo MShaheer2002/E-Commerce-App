@@ -46,7 +46,7 @@ class CheckoutProvider extends ChangeNotifier {
         }
       }
     } catch (e, stack) {
-      log('❌ Error auth: $e');
+      log('Error auth: $e');
       log('$stack');
     }
   }
@@ -92,9 +92,9 @@ class CheckoutProvider extends ChangeNotifier {
         ));
       }
 
-      log('✅ Order placed successfully.');
+      log('Order placed successfully.');
     } catch (e, stack) {
-      log('❌ Error placing order: $e');
+      log('Error placing order: $e');
       log('$stack');
     }
   }
@@ -114,9 +114,9 @@ class UsStatesCitiesData {
       _statesCitiesMap =
           decoded.map((key, value) => MapEntry(key, List<String>.from(value)));
 
-      log('✅ Loaded ${_statesCitiesMap!.length} states with cities');
+      log('Loaded ${_statesCitiesMap!.length} states with cities');
     } catch (e) {
-      log('❌ Error loading states/cities data: $e');
+      log('Error loading states/cities data: $e');
       _statesCitiesMap = {};
     }
   }

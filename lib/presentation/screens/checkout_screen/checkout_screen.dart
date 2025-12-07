@@ -78,15 +78,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
-  void _onStateChanged(String? state) {
-    setState(() {
-      selectedState = state;
-      selectedCity = null;
-      availableCities =
-          state != null ? UsStatesCitiesData.getCitiesForState(state) : [];
-    });
-  }
-
   double calculateSubtotal() {
     return cartItems.fold(
         0.0, (sum, item) => sum + (item.quantity * item.product.price));
@@ -103,9 +94,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> getStateSaleTax(String name) async {
-    final shippingTax = await context
-        .read<StateTaxProvider>()
-        .fetchSelectedStateTax(name ?? '');
+    final shippingTax =
+        await context.read<StateTaxProvider>().fetchSelectedStateTax(name);
     setState(() {
       stateShippingTax = (shippingTax?.taxRate ?? 0.0) * cartItems.length;
     });
@@ -113,7 +103,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   double calculateTaxes() {
     final settingsProvider = context.read<SettingsProvider>();
-    final taxes = settingsProvider.taxes ?? [];
+    final taxes = settingsProvider.taxes;
 
     if (taxes.isEmpty) return 0.0;
 
@@ -792,7 +782,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     double subtotal = calculateSubtotal();
     double shipping = calculateShipping();
     double total = calculateTotal();
-    double shippingtax = calculateTotal();
 
     final settingsProvider = context.watch<SettingsProvider>();
     final taxList =
