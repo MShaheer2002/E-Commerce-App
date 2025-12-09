@@ -2,7 +2,9 @@ name: e_commerce_app
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 1.0.0+1
+version: 1.0.0+4
+
+# android_version:1.0.0+4
 
 environment:
   sdk: ^3.5.3

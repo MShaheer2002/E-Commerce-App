@@ -8,9 +8,17 @@ plugins {
 }
 
 android {
-    namespace = "com.example.e_commerce_app"
+    namespace = "com.productplug.app"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
+
+
+    // Top of file: load keystore properties
+    def keystoreProperties = new Properties()
+    def keystorePropertiesFile = rootProject.file("key.properties")
+    if (keystorePropertiesFile.exists()) {
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -23,20 +31,35 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.e_commerce_app"
+        applicationId = "com.productplug.app"
         minSdk = 24
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled true
     }
-    
+
+    // ✅ Signing configuration
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
-            minifyEnabled false
-            shrinkResources false
+            signingConfig signingConfigs.release 
+                minifyEnabled true
+                  shrinkResources true
+        // Default ProGuard rules
+        proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
+
         }
     }
 
@@ -62,9 +85,7 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 
-    // ✅ Add Firebase dependencies
     implementation platform('com.google.firebase:firebase-bom:33.5.1') 
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging'
-
 }

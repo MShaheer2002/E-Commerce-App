@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA4Ra5gdNeOaYDcwDa3tHnVRVnoD4uFUxY',
-    appId: '1:217641499247:android:5dfce7a6b7e41b55246b9a',
+    appId: '1:217641499247:android:9b8b3b2058f94c62246b9a',
     messagingSenderId: '217641499247',
     projectId: 'ecommerceaapp-5e165',
     storageBucket: 'ecommerceaapp-5e165.firebasestorage.app',
@@ -59,13 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC2SQ96njjjt2VkVx0nRweTWkkfaJOQGF8',
-    appId: '1:217641499247:ios:682acfe540e8f996246b9a',
+    appId: '1:217641499247:ios:eb119ca7123fabea246b9a',
     messagingSenderId: '217641499247',
     projectId: 'ecommerceaapp-5e165',
     storageBucket: 'ecommerceaapp-5e165.firebasestorage.app',
     androidClientId: '217641499247-0oa881mjj7mvh2649hip8513koopn6lf.apps.googleusercontent.com',
-    iosClientId: '217641499247-oe0i5lclithfepe6mbi6tto2mvhbkof3.apps.googleusercontent.com',
-    iosBundleId: 'com.example.eCommerceApp',
+    iosClientId: '217641499247-l368m29eou5460g9684fnemgdrfjcl8s.apps.googleusercontent.com',
+    iosBundleId: 'com.productplug.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
