@@ -7,74 +7,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:217641499247:android:5dfce7a6b7e41b55246b9a",
-        "android_client_info": {
-          "package_name": "com.example.e_commerce_app"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "217641499247-0kgur3tf83nuucece6eh6b8v56nqjhdn.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.e_commerce_app",
-            "certificate_hash": "0820cdd3257181347c476e94af42ca92a7181a34"
-          }
-        },
-        {
-          "client_id": "217641499247-0oa881mjj7mvh2649hip8513koopn6lf.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.e_commerce_app",
-            "certificate_hash": "8c87374d964c3619d756071b79740741c20a7078"
-          }
-        },
-        {
-          "client_id": "217641499247-42tm16ohhpbkltv66qam4i69p5ajr9sm.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.e_commerce_app",
-            "certificate_hash": "7e53eba74db8af6ce9728e5e661c78901ba07494"
-          }
-        },
-        {
-          "client_id": "217641499247-gv19e5171iabqgeb9hl8s75remct0l4o.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.e_commerce_app",
-            "certificate_hash": "88bc46887ca32c6d13ec93a58a7eaa11b5d24215"
-          }
-        },
-        {
-          "client_id": "217641499247-8tjcvpj61c9reuq9tvft543i9ec9dqm8.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyA4Ra5gdNeOaYDcwDa3tHnVRVnoD4uFUxY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "217641499247-8tjcvpj61c9reuq9tvft543i9ec9dqm8.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "217641499247-l368m29eou5460g9684fnemgdrfjcl8s.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.productplug.app"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:217641499247:android:9b8b3b2058f94c62246b9a",
         "android_client_info": {
           "package_name": "com.productplug.app"
@@ -131,10 +63,10 @@
               "client_type": 3
             },
             {
-              "client_id": "217641499247-l368m29eou5460g9684fnemgdrfjcl8s.apps.googleusercontent.com",
+              "client_id": "217641499247-f1p7jphqv5enkjbr8jr7fg5j565hrqum.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.productplug.app"
+                "bundle_id": "com.officialproductplug.app"
               }
             }
           ]

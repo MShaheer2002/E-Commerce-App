@@ -36,17 +36,19 @@ Future<void> main() async {
   // Stripe key
   Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY']!;
 
-  // ✅ Background message handler must be set BEFORE Firebase.initializeApp
+  // Background message handler must be set BEFORE Firebase.initializeApp
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // Initialize Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // ✅ Initialize NotificationProvider (permissions, token, channels, etc.)
+  // Initialize NotificationProvider (permissions, token, channels, etc.)
   final notificationProvider = NotificationProvider();
   await notificationProvider.initNotifications();
 
-  // ✅ Launch the app
+  // Launch the app
   runApp(
     MultiProvider(
       providers: AppProvider.all,

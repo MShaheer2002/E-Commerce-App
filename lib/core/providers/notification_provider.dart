@@ -53,7 +53,25 @@ class NotificationProvider with ChangeNotifier {
     }
 
     // Get FCM token
-    final token = await _firebaseMessaging.getToken();
+    // Get FCM token
+    String? token;
+    if (kIsWeb) {
+      // Handle web if needed, or skip
+    } else if (Platform.isIOS) {
+      final apnsToken = await _firebaseMessaging.getAPNSToken();
+      if (apnsToken != null) {
+        try {
+          token = await _firebaseMessaging.getToken();
+        } catch (e) {
+          log('[NotificationProvider] Error getting FCM token: $e');
+        }
+      } else {
+        log('[NotificationProvider] APNS token not yet available. Skipping FCM token.');
+      }
+    } else {
+      token = await _firebaseMessaging.getToken();
+    }
+
     log('[NotificationProvider] FCM Token: $token');
 
     // Save token to Firestore
