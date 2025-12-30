@@ -1,4 +1,4 @@
-import 'package:e_commerce_app/core/themes/app_theme.dart';
+import 'package:ProductPlug/core/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class ThemeProvider extends ChangeNotifier {

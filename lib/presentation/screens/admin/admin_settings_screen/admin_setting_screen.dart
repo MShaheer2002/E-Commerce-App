@@ -1,8 +1,8 @@
 // admin_setting_screen.dart
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
-import 'package:e_commerce_app/core/providers/admin/settings_provider.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/tax_model.dart';
+import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/providers/admin/settings_provider.dart';
+import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/models/tax_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:iconsax/iconsax.dart';

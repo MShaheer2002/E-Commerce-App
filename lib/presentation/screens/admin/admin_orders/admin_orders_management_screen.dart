@@ -1,6 +1,6 @@
-import 'package:e_commerce_app/core/providers/admin/order_management_provider.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/order_model.dart';
+import 'package:ProductPlug/core/providers/admin/order_management_provider.dart';
+import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/models/order_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';

@@ -1,9 +1,9 @@
 import 'dart:developer';
 
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
-import 'package:e_commerce_app/presentation/providers/profile_setup_provider.dart';
+import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/providers/auth_provider.dart';
+import 'package:ProductPlug/presentation/providers/profile_setup_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -28,10 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      // emailCtrl.text = "admin@admin.com";
-      // passCtrl.text = "abc12345678";
-      emailCtrl.text = "unknowusers420@gmail.com";
-      passCtrl.text = "abc123";
+      emailCtrl.text = "admin@admin.com";
+      passCtrl.text = "abc12345678";
+      // emailCtrl.text = "unknowusers420@gmail.com";
+      // passCtrl.text = "abc123";
     }
   }
 
@@ -145,18 +145,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
                       },
-                      child: auth.isLoading == true
-                          ? Center(
-                              child: SmallLoader(backgroundColor: Colors.white),
-                            )
-                          : const Text(
-                              "Continue",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                      child: const Text(
+                        "Continue",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(height: height * 0.02),

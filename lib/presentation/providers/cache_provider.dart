@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:e_commerce_app/core/cache.dart';
+import 'package:ProductPlug/core/cache.dart';
 
 class CacheProvider extends ChangeNotifier {
   final CacheService _cache = CacheService();

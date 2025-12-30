@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/presentation/models/product_analytics_model.dart';
-import 'package:e_commerce_app/presentation/models/sale_entry_model.dart';
+import 'package:ProductPlug/presentation/models/product_analytics_model.dart';
+import 'package:ProductPlug/presentation/models/sale_entry_model.dart';
 import 'package:flutter/foundation.dart';
 
 class ProductAnalyticsProvider with ChangeNotifier {

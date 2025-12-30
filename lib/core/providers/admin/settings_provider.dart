@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/presentation/models/global_settings.dart';
-import 'package:e_commerce_app/presentation/models/promo_model.dart';
-import 'package:e_commerce_app/presentation/models/tax_model.dart';
+import 'package:ProductPlug/presentation/models/global_settings.dart';
+import 'package:ProductPlug/presentation/models/promo_model.dart';
+import 'package:ProductPlug/presentation/models/tax_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 

@@ -1,5 +1,5 @@
-import 'package:e_commerce_app/core/common_widgets.dart/bottom_nav_bar.dart';
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/common_widgets.dart/bottom_nav_bar.dart';
+import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:flutter/material.dart';
 
 class HomeTab extends StatelessWidget {

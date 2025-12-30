@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:e_commerce_app/core/providers/notification_provider.dart';
-import 'package:e_commerce_app/core/providers/provider_setup.dart';
-import 'package:e_commerce_app/firebase_options.dart';
-import 'package:e_commerce_app/presentation/providers/auth_provider.dart';
-import 'package:e_commerce_app/presentation/providers/theme_provider.dart';
-import 'package:e_commerce_app/routes/GoRoute_routing.dart';
+import 'package:ProductPlug/core/providers/notification_provider.dart';
+import 'package:ProductPlug/core/providers/provider_setup.dart';
+import 'package:ProductPlug/firebase_options.dart';
+import 'package:ProductPlug/presentation/providers/auth_provider.dart';
+import 'package:ProductPlug/presentation/providers/theme_provider.dart';
+import 'package:ProductPlug/routes/GoRoute_routing.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';

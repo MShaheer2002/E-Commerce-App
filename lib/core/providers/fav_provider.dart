@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/core/providers/handle_unautharized_access_provider.dart';
-import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
-import 'package:e_commerce_app/presentation/models/product_model.dart';
+import 'package:ProductPlug/core/providers/handle_unautharized_access_provider.dart';
+import 'package:ProductPlug/core/providers/product_analytics_provider.dart';
+import 'package:ProductPlug/presentation/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 

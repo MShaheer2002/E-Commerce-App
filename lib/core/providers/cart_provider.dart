@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/core/providers/product_analytics_provider.dart';
-import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
+import 'package:ProductPlug/core/providers/product_analytics_provider.dart';
+import 'package:ProductPlug/presentation/models/cartItem_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

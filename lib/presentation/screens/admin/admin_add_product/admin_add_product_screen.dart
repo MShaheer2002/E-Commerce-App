@@ -2,11 +2,11 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
-import 'package:e_commerce_app/core/providers/admin/cloudinary_provider.dart';
-import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/category_model.dart';
+import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/providers/admin/cloudinary_provider.dart';
+import 'package:ProductPlug/core/providers/admin/productManagement_provider.dart';
+import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/models/category_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';

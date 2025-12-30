@@ -1,9 +1,9 @@
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
-import 'package:e_commerce_app/core/providers/admin/analytics_provider.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/models/product_analytics_model.dart';
-import 'package:e_commerce_app/presentation/models/sale_entry_model.dart';
-import 'package:e_commerce_app/presentation/screens/admin/admin_product_sales_history/admin_product_sales_history_screen.dart';
+import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/providers/admin/analytics_provider.dart';
+import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/models/product_analytics_model.dart';
+import 'package:ProductPlug/presentation/models/sale_entry_model.dart';
+import 'package:ProductPlug/presentation/screens/admin/admin_product_sales_history/admin_product_sales_history_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

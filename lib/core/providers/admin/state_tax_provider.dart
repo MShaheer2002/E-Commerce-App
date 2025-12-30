@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/presentation/models/state_tax_model.dart';
+import 'package:ProductPlug/presentation/models/state_tax_model.dart';
 import 'package:flutter/material.dart';
 
 class StateTaxProvider extends ChangeNotifier {

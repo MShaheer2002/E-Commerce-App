@@ -1,4 +1,4 @@
-import 'package:e_commerce_app/presentation/models/promo_model.dart';
+import 'package:ProductPlug/presentation/models/promo_model.dart';
 
 class GlobalSettings {
   final List<PromoCode>? promoCodes;

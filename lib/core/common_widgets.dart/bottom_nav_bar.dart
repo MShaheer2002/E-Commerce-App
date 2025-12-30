@@ -2,14 +2,14 @@
 
 import 'dart:developer';
 
-import 'package:e_commerce_app/core/cache.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
-import 'package:e_commerce_app/presentation/providers/cache_provider.dart';
-import 'package:e_commerce_app/presentation/screens/cart_screen/cart_screen.dart';
-import 'package:e_commerce_app/presentation/screens/fav_screen/fav_screen.dart';
-import 'package:e_commerce_app/presentation/screens/home_screen/home_screen.dart';
-import 'package:e_commerce_app/presentation/screens/notification_screen/notification_screen.dart';
-import 'package:e_commerce_app/presentation/screens/profile_screen/profile_screen.dart';
+import 'package:ProductPlug/core/cache.dart';
+import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/providers/cache_provider.dart';
+import 'package:ProductPlug/presentation/screens/cart_screen/cart_screen.dart';
+import 'package:ProductPlug/presentation/screens/fav_screen/fav_screen.dart';
+import 'package:ProductPlug/presentation/screens/home_screen/home_screen.dart';
+import 'package:ProductPlug/presentation/screens/notification_screen/notification_screen.dart';
+import 'package:ProductPlug/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

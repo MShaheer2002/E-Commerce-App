@@ -1,9 +1,9 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:e_commerce_app/core/common_widgets.dart/common_widgets.dart';
-import 'package:e_commerce_app/core/providers/admin/productManagement_provider.dart';
-import 'package:e_commerce_app/core/providers/search_provider.dart';
-import 'package:e_commerce_app/core/themes/constantsColors.dart';
+import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/providers/admin/productManagement_provider.dart';
+import 'package:ProductPlug/core/providers/search_provider.dart';
+import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';

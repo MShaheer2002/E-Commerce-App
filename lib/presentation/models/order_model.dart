@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/presentation/models/address_model.dart';
-import 'package:e_commerce_app/presentation/models/cartItem_model.dart';
+import 'package:ProductPlug/presentation/models/address_model.dart';
+import 'package:ProductPlug/presentation/models/cartItem_model.dart';
 
 enum OrderStatus {
   placed,

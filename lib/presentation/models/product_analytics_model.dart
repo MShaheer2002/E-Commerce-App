@@ -1,4 +1,4 @@
-import 'package:e_commerce_app/presentation/models/sale_entry_model.dart';
+import 'package:ProductPlug/presentation/models/sale_entry_model.dart';
 
 class ProductAnalytics {
   final String productId;

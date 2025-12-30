@@ -15,13 +15,25 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>e_commerce_app</string>
+	<string>ProductPlug</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<!-- Camera access -->
+	<key>NSCameraUsageDescription</key>
+	<string>Product Plug uses the camera to allow users to capture photos for product listings, profile images, and verification purposes.</string>
+
+	<!-- Photo library read -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Product Plug allows users to select photos from their library to upload product images and profile pictures.</string>
+
+	<!-- Photo library write -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Product Plug saves images to your photo library when you choose to download or export content.</string>
+
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>

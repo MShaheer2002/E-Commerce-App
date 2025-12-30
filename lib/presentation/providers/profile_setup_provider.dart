@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_commerce_app/core/cache.dart';
-import 'package:e_commerce_app/core/providers/admin/cloudinary_provider.dart';
+import 'package:ProductPlug/core/cache.dart';
+import 'package:ProductPlug/core/providers/admin/cloudinary_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';

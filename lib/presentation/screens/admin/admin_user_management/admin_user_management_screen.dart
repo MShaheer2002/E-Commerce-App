@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:e_commerce_app/core/providers/admin/userManagement_provider.dart';
-import 'package:e_commerce_app/presentation/models/user_model.dart';
+import 'package:ProductPlug/core/providers/admin/userManagement_provider.dart';
+import 'package:ProductPlug/presentation/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
