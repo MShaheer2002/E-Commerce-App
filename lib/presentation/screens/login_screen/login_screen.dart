@@ -44,6 +44,17 @@ class _LoginScreenState extends State<LoginScreen> {
     final profile = context.read<ProfileSetupProvider>();
 
     return Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: context.canPop()
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  onPressed: () => context.pop(),
+                )
+              : null,
+        ),
         resizeToAvoidBottomInset: false,
         body: Background(
           child: SafeArea(
