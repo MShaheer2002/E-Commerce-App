@@ -1,8 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/common_widgets.dart/custom_empty_data_widget.dart';
 import 'package:ProductPlug/core/providers/notification_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -34,14 +35,21 @@ class NotificationScreen extends StatelessWidget {
                 child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: provider.notificationStream,
                   builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: SmallLoader());
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                        child: CustomEmptyDataWidget(
+                          title: "No notifications yet",
+                          imageType:
+                              9, // Maps to assets/empty_data_icons/NoNotification.svg
+                        ),
+                      );
                     }
 
                     final notifications = snapshot.data!.docs;
-                    if (notifications.isEmpty) {
-                      return const Center(child: Text('No notifications yet.'));
-                    }
 
                     return ListView.builder(
                       itemCount: notifications.length,

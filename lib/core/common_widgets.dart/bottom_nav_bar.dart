@@ -3,7 +3,9 @@
 import 'dart:developer';
 
 import 'package:ProductPlug/core/cache.dart';
+import 'package:ProductPlug/core/helpers/auth_gate_helper.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/providers/auth_provider.dart';
 import 'package:ProductPlug/presentation/providers/cache_provider.dart';
 import 'package:ProductPlug/presentation/screens/cart_screen/cart_screen.dart';
 import 'package:ProductPlug/presentation/screens/fav_screen/fav_screen.dart';
@@ -48,7 +50,48 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
-    setState(() => _selectedIndex = index);
+
+    // ✅ Check authentication for restricted tabs
+    // Index 0 = Home (public)
+    // Index 1 = Favorites (requires auth)
+    // Index 2 = Cart (requires auth)
+    // Index 3 = Notifications (requires auth)
+    // Index 4 = Profile (requires auth)
+
+    if (index > 0) {
+      // Check if user is authenticated
+      final isAuthenticated = AuthGateHelper.checkAuthAndPrompt(
+        context,
+        actionMessage: _getAuthMessageForTab(index),
+        onLoginSuccess: () {
+          // Navigate to the tab after successful login
+          setState(() => _selectedIndex = index);
+        },
+      );
+
+      // If already authenticated, navigate immediately
+      if (isAuthenticated) {
+        setState(() => _selectedIndex = index);
+      }
+    } else {
+      // Home tab is always accessible
+      setState(() => _selectedIndex = index);
+    }
+  }
+
+  String _getAuthMessageForTab(int index) {
+    switch (index) {
+      case 1:
+        return 'Please sign in to view your favorites.\n\nCreate an account to save products you love.';
+      case 2:
+        return 'Please sign in to view your cart.\n\nCreate an account to save items and checkout.';
+      case 3:
+        return 'Please sign in to view notifications.\n\nCreate an account to stay updated.';
+      case 4:
+        return 'Please sign in to access your profile.\n\nCreate an account to manage your orders and settings.';
+      default:
+        return 'Please sign in to continue.';
+    }
   }
 
   BottomNavigationBarItem _buildNavItem(dynamic iconData, int index) {
@@ -78,6 +121,21 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     final cache = context.watch<CacheProvider>();
+    final auth = context.watch<AuthProvider>();
+
+    // ✅ Auto-reset to Home (Index 0) if logged out
+    int displayedIndex = _selectedIndex;
+    if (!auth.isLoggedIn && _selectedIndex != 0) {
+      displayedIndex = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        }
+      });
+    }
+
     final profileImageUrl = cache.imageUrl;
     log('[Profile Setup Provider] from nav bar ${profileData?['imageUrl']}');
     final List<dynamic> icons = [
@@ -113,7 +171,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     ];
 
     return Scaffold(
-      body: _screens[_selectedIndex](),
+      body: _screens[displayedIndex](),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -143,7 +201,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   icons.length,
                   (index) => _buildNavItem(icons[index], index),
                 ),
-                currentIndex: _selectedIndex,
+                currentIndex: displayedIndex,
                 onTap: _onItemTapped,
                 selectedFontSize: 0,
                 unselectedFontSize: 0,

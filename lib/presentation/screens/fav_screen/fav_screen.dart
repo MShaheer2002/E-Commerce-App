@@ -3,6 +3,7 @@ import 'package:ProductPlug/core/common_widgets.dart/custom_empty_data_widget.da
 import 'package:ProductPlug/core/providers/fav_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:ProductPlug/presentation/models/product_model.dart';
+import 'package:ProductPlug/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +28,10 @@ class _FavScreenState extends State<FavScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<FavoriteService>().loadFavoriteProducts();
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.isLoggedIn) {
+        context.read<FavoriteService>().loadFavoriteProducts();
+      }
     });
   }
 
@@ -65,8 +69,11 @@ class _FavScreenState extends State<FavScreen>
                         : SmartRefresher(
                             controller: _refreshController,
                             onRefresh: () async {
-                              await favService.loadFavoriteProducts(
-                                  isRefresh: true);
+                              final authProvider = context.read<AuthProvider>();
+                              if (authProvider.isLoggedIn) {
+                                await favService.loadFavoriteProducts(
+                                    isRefresh: true);
+                              }
                               _refreshController.refreshCompleted();
                             },
                             header: const WaterDropHeader(

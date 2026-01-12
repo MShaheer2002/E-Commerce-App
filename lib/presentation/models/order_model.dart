@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/presentation/models/address_model.dart';
 import 'package:ProductPlug/presentation/models/cartItem_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum OrderStatus {
   placed,
@@ -51,7 +51,7 @@ class OrderModel {
       'totalAmount': totalAmount,
       'orderDate': orderDate,
       'trackingNumber': trackingNumber,
-      'deliveryPartner': deliveryPartner,
+      'deliveryPartner': deliveryPartner?.name,
       'paymentIntentId': paymentIntentId,
       'paymentMethod': paymentMethod,
       'address': address.toMap(), // ✅ FIXED HERE

@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/presentation/models/product_analytics_model.dart';
 import 'package:ProductPlug/presentation/models/sale_entry_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 class ProductAnalyticsProvider with ChangeNotifier {
@@ -41,18 +41,26 @@ class ProductAnalyticsProvider with ChangeNotifier {
 
   /// Increment Total Add to Favorite
   Future<void> incrementAddToFav(String productId) async {
-    await _initializeProduct(productId);
-    await _analyticsRef.doc(productId).update({
-      'totalAddToFav': FieldValue.increment(1),
-    });
+    try {
+      await _initializeProduct(productId);
+      await _analyticsRef.doc(productId).update({
+        'totalAddToFav': FieldValue.increment(1),
+      });
+    } catch (e) {
+      debugPrint("⚠️ Failed to increment fav analytics: $e");
+    }
   }
 
   /// Increment Total Add to Cart
   Future<void> incrementAddToCart(String productId) async {
-    await _initializeProduct(productId);
-    await _analyticsRef.doc(productId).update({
-      'totalAddToCart': FieldValue.increment(1),
-    });
+    try {
+      await _initializeProduct(productId);
+      await _analyticsRef.doc(productId).update({
+        'totalAddToCart': FieldValue.increment(1),
+      });
+    } catch (e) {
+      debugPrint("⚠️ Failed to increment cart analytics: $e");
+    }
   }
 
   ///  Record a Sale (On Successful Purchase)

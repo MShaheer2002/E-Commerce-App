@@ -47,36 +47,71 @@ GoRouter createRouter(AuthProvider authProvider) {
       // Wait until Firebase auth is initialized
       if (!auth.isInitialized) return '/splash';
 
+      // 0️⃣ Force navigation if requested (e.g. after account delete)
+      if (auth.shouldNavigateToHome) return '/';
+
       final isLoggedIn = auth.isLoggedIn;
       final isAdmin = auth.currentRole == "admin";
+      final currentLocation = state.matchedLocation;
 
-      final goingToLogin = state.matchedLocation == '/login';
-      final goingToSignup = state.matchedLocation == '/signup';
-      final goingToSplash = state.matchedLocation == '/splash';
-      final goingToForgot = state.matchedLocation == '/forgot-password';
-      final goingtoWebview = state.matchedLocation == '/webview';
+      // Public routes accessible without login
+      const publicRoutes = [
+        '/',
+        '/home',
+        '/products',
+        '/single-product',
+        '/category-screen',
+        '/product-by-category',
+        '/search-screen',
+        '/login',
+        '/signup',
+        '/forgot-password',
+        '/webview',
+        '/splash',
+      ];
 
-      // 1️⃣ If user is NOT logged in — only allow splash, login, signup
-      if (!isLoggedIn &&
-          !(goingToLogin ||
-              goingToSignup ||
-              goingToSplash ||
-              goingToForgot ||
-              goingtoWebview)) {
-        return '/login';
-      }
+      // Routes that require authentication
+      const authRequiredRoutes = [
+        '/checkout-screen',
+        '/order-status',
+        '/favorite-screen',
+        '/profile-setup',
+      ];
+
+      final isPublicRoute =
+          publicRoutes.any((r) => currentLocation.startsWith(r));
+      final requiresAuth =
+          authRequiredRoutes.any((r) => currentLocation.startsWith(r));
+
+      // 1️⃣ Allow splash screen always
+      if (currentLocation == '/splash') return null;
 
       // 2️⃣ If user IS logged in — block login/signup/splash
-      if (isLoggedIn && (goingToLogin || goingToSignup || goingToSplash)) {
+      if (isLoggedIn &&
+          (currentLocation == '/login' ||
+              currentLocation == '/signup' ||
+              currentLocation == '/splash')) {
         if (isAdmin) return '/adminDashboard';
-
         return '/';
       }
 
-      // 3️⃣ Protect adminDashboard — only admins can access it
-      if (state.matchedLocation == '/adminDashboard' && !isAdmin) {
+      // 3️⃣ Protect routes that require authentication
+      if (!isLoggedIn && requiresAuth) {
+        return '/login';
+      }
+
+      // 4️⃣ Protect adminDashboard — only admins can access it
+      if (currentLocation.startsWith('/admin') && !isAdmin) {
         return '/'; // redirect non-admin users to home
       }
+
+      // Force Admin to Dashboard if at root
+      if (isAdmin && currentLocation == '/') {
+        return '/adminDashboard';
+      }
+
+      // 5️⃣ Allow public routes for everyone (guest browsing)
+      if (isPublicRoute) return null;
 
       return null; // allow navigation
     },
@@ -221,7 +256,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         path: "/admin/single-order-screen",
         builder: (context, state) {
           final order = state.extra as OrderModel;
-          log(" [Single Order Screen] provider ${order}");
+          log(" [Single Order Screen] provider $order");
 
           return AdminSingleOrderScreen(order: order);
         },

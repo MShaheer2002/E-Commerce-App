@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/presentation/models/global_settings.dart';
 import 'package:ProductPlug/presentation/models/promo_model.dart';
 import 'package:ProductPlug/presentation/models/tax_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -49,7 +49,9 @@ class SettingsProvider extends ChangeNotifier {
     } catch (e, stack) {
       debugPrint('🔥 Error fetching global promo: $e');
       debugPrint('$stack');
-      Fluttertoast.showToast(msg: "Failed to load global promo data");
+      if (!e.toString().contains('permission-denied')) {
+        Fluttertoast.showToast(msg: "Failed to load global promo data");
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -164,13 +166,16 @@ class SettingsProvider extends ChangeNotifier {
           .orderBy('createdAt', descending: false)
           .get();
 
-      _taxes = snapshot.docs.map((doc) => TaxModel.fromMap(doc.data())).toList();
+      _taxes =
+          snapshot.docs.map((doc) => TaxModel.fromMap(doc.data())).toList();
 
       _isTaxLoaded = true;
     } catch (e, stack) {
       debugPrint('🔥 Error fetching taxes: $e');
       debugPrint('$stack');
-      Fluttertoast.showToast(msg: "Failed to load taxes");
+      if (!e.toString().contains('permission-denied')) {
+        Fluttertoast.showToast(msg: "Failed to load taxes");
+      }
     } finally {
       _isTaxLoading = false;
       notifyListeners();

@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ProductPlug/core/providers/admin/userManagement_provider.dart';
 import 'package:ProductPlug/presentation/models/user_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -179,11 +179,16 @@ class _UserCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: (user.imageUrl != null || user.imageUrl == "")
+                    child: (user.imageUrl != null && user.imageUrl!.isNotEmpty)
                         ? ClipRRect(
-                            borderRadius: BorderRadiusGeometry.circular(12),
+                            borderRadius: BorderRadius.circular(12),
                             child: CachedNetworkImage(
-                                imageUrl: user.imageUrl ?? ""))
+                              imageUrl: user.imageUrl!,
+                              fit: BoxFit.cover,
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.person),
+                            ),
+                          )
                         : Text(
                             user.name.isNotEmpty
                                 ? user.name[0].toUpperCase()

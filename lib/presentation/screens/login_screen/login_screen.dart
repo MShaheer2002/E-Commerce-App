@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
@@ -212,16 +213,36 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: height * 0.02),
                   CustomButton(
                     onPressed: () async {
+                      if (auth.isLoading == true) {
+                        return;
+                      }
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => Center(
+                            child: SmallLoader(backgroundColor: Colors.white)),
+                      );
+
                       try {
-                        if (auth.isLoading == true) {
-                          return;
-                        }
                         await auth.signInWithGoogle(profile);
+
+                        if (!context.mounted) return;
+                        Navigator.of(context).pop(); // Close loader
+
+                        final role = await auth.getUserRole();
+                        if (role == 'admin') {
+                          context.go('/adminDashboard');
+                        } else {
+                          context.go('/');
+                        }
                       } on firebase.FirebaseAuthException catch (e) {
+                        if (context.mounted) Navigator.of(context).pop();
                         Fluttertoast.showToast(
                             msg: e.message ?? "Something went wrong");
                         return;
                       } catch (e) {
+                        if (context.mounted) Navigator.of(context).pop();
                         log("[Google Sign in Errror] $e");
                         Fluttertoast.showToast(msg: "Something went wrong");
                         return;
@@ -244,44 +265,66 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: height * 0.02),
-                  // CustomButton(
-                  //   onPressed: () async {
-                  //     try {
-                  //       if (Platform.isAndroid) {
-                  //         Fluttertoast.showToast(
-                  //             msg: "This is not avaible for Android",
-                  //             backgroundColor: Colors.black,
-                  //             textColor: Colors.white);
-                  //       } else {
-                  //         await auth.signInWithApple();
-                  //       }
-                  //     } on firebase.FirebaseAuthException catch (e) {
-                  //       Fluttertoast.showToast(
-                  //           msg: e.message ?? "Something went wrong");
-                  //       return;
-                  //     } catch (e) {
-                  //       log("[Google Sign in Errror] $e");
-                  //       Fluttertoast.showToast(msg: "Something went wrong");
-                  //       return;
-                  //     }
-                  //   },
-                  //   backgroundColor: Colors.white,
-                  //   child: Row(
-                  //     mainAxisAlignment: MainAxisAlignment.center,
-                  //     children: [
-                  //       SvgPicture.asset(
-                  //         "assets/svgs/apple.svg",
-                  //         height: 30,
-                  //       ),
-                  //       SizedBox(width: width * 0.02),
-                  //       const Text(
-                  //         "Continue with Apple",
-                  //         style: TextStyle(color: Colors.black),
-                  //       )
-                  //     ],
-                  //   ),
-                  // ),
-                  // SizedBox(height: height * 0.02),
+
+                  // ✅ Apple Sign-In Button (iOS only)
+                  if (Platform.isIOS)
+                    CustomButton(
+                      onPressed: () async {
+                        if (auth.isLoading == true) {
+                          return;
+                        }
+
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => Center(
+                              child:
+                                  SmallLoader(backgroundColor: Colors.white)),
+                        );
+
+                        try {
+                          await auth.signInWithApple(profile);
+
+                          if (!context.mounted) return;
+                          Navigator.of(context).pop(); // Close loader
+
+                          final role = await auth.getUserRole();
+                          if (role == 'admin') {
+                            context.go('/adminDashboard');
+                          } else {
+                            context.go('/');
+                          }
+                        } on firebase.FirebaseAuthException catch (e) {
+                          if (context.mounted) Navigator.of(context).pop();
+                          Fluttertoast.showToast(
+                              msg: e.message ?? "Something went wrong");
+                          return;
+                        } catch (e) {
+                          if (context.mounted) Navigator.of(context).pop();
+                          log("[Apple Sign in Error] $e");
+                          Fluttertoast.showToast(msg: "Something went wrong");
+                          return;
+                        }
+                      },
+                      backgroundColor: Colors.white,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            "assets/svgs/apple.svg",
+                            height: 30,
+                          ),
+                          SizedBox(width: width * 0.02),
+                          const Text(
+                            "Continue with Apple",
+                            style: TextStyle(color: Colors.black),
+                          )
+                        ],
+                      ),
+                    ),
+
+                  if (Platform.isIOS) SizedBox(height: height * 0.02),
+
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(

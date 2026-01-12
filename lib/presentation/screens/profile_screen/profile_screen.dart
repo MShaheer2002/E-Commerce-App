@@ -5,7 +5,10 @@ import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:ProductPlug/presentation/providers/auth_provider.dart';
 import 'package:ProductPlug/presentation/providers/cache_provider.dart';
+import 'package:ProductPlug/presentation/screens/profile_screen/widgets/delete_account_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -74,11 +77,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context.push('/order-status');
                   },
                 ),
+                SizedBox(height: height * 0.01),
+
+                SizedBox(height: height * 0.01),
                 _buildMenuItem(
                   icon: Icons.login,
                   title: "Logout",
                   onTap: () async {
-                    await showDialog<bool>(
+                    final shouldLogout = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
                         backgroundColor: Colors.grey[900],
@@ -102,24 +108,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           ElevatedButton(
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Colors.grey.shade800),
+                              backgroundColor:
+                                  WidgetStateProperty.all(Colors.grey.shade800),
                             ),
                             child: const Text(
                               'Yes, Logout',
                               style: TextStyle(color: Colors.white),
                             ),
-                            onPressed: () async {
-                              await auth.logout(context);
-
-                              // Optionally clear cache on logout
-                              final cache = CacheService();
-                              await cache.clearCache();
+                            onPressed: () {
+                              Navigator.of(context).pop(true);
                             },
                           ),
                         ],
                       ),
                     );
+
+                    if (shouldLogout == true && context.mounted) {
+                      await auth.logout(context);
+
+                      // Optionally clear cache on logout
+                      final cache = CacheService();
+                      await cache.clearCache();
+
+                      Fluttertoast.showToast(
+                        msg: "Logged out successfully",
+                        backgroundColor: Colors.green,
+                        textColor: Colors.white,
+                      );
+                    }
                   },
                 ),
 
@@ -160,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             "https://shaheerprojectsflutter.github.io/productplug-legal/terms_and_condition.html");
                   },
                 ),
-                     _buildMenuItem(
+                _buildMenuItem(
                   icon: Icons.security_outlined,
                   title: "Policy Center",
                   onTap: () {
@@ -171,6 +187,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                 ),
                 SizedBox(height: height * 0.02),
+
+                Center(
+                  child: TextButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (context) => DeleteAccountDialog(
+                          onConfirm: () async {
+                            try {
+                              Fluttertoast.showToast(
+                                msg: "Deleting account...",
+                                backgroundColor: Colors.orange,
+                                textColor: Colors.white,
+                              );
+
+                              // Delete account (Navigation happens automatically via provider)
+                              await auth.deleteAccount();
+
+                              // Show success message
+                              Fluttertoast.showToast(
+                                msg: "Account deleted successfully",
+                                backgroundColor: Colors.green,
+                                textColor: Colors.white,
+                              );
+                            } on firebase.FirebaseAuthException catch (e) {
+                              Fluttertoast.showToast(
+                                msg: e.message ?? "Failed to delete account",
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                              );
+                            } catch (e) {
+                              Fluttertoast.showToast(
+                                msg: "An error occurred. Please try again.",
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                              );
+                            }
+                          },
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "Delete Account",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -234,6 +301,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    Color? titleColor,
+    Color? iconColor,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -241,26 +310,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onTap: onTap,
         leading: Container(
           decoration: BoxDecoration(
-            color: KprimaryColor.withValues(alpha: 0.1),
+            color: (iconColor ?? KprimaryColor).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            color: KprimaryColor,
+            color: iconColor ?? KprimaryColor,
             size: 24,
           ),
         ),
         title: Text(
           title,
-          style: const TextStyle(
-            color: KprimaryColor,
+          style: TextStyle(
+            color: titleColor ?? KprimaryColor,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
         ),
-        trailing: const Icon(
+        trailing: Icon(
           Icons.arrow_forward_ios,
-          color: KprimaryColor,
+          color: titleColor ?? KprimaryColor,
           size: 16,
         ),
       ),

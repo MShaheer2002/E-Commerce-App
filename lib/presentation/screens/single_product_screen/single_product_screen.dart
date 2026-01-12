@@ -1,14 +1,16 @@
 import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/helpers/auth_gate_helper.dart';
 import 'package:ProductPlug/core/providers/cart_provider.dart';
 import 'package:ProductPlug/core/providers/fav_provider.dart';
 import 'package:ProductPlug/core/providers/single_product_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:ProductPlug/presentation/models/cartItem_model.dart';
 import 'package:ProductPlug/presentation/models/product_model.dart';
+import 'package:ProductPlug/presentation/providers/auth_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -31,13 +33,44 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
   @override
   void initState() {
     final favoriteService = context.read<FavoriteService>();
+    final authProvider = context.read<AuthProvider>();
 
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      favoriteService.loadFavoritesForUser();
+      // ✅ Reset image slider index
+      context.read<SingleProductProvider>().setImageIndex(0);
+
+      // ✅ Only load favorites if user is logged in
+      if (authProvider.isLoggedIn) {
+        favoriteService.loadFavoritesForUser();
+      }
     });
 
     isFav = favoriteService.isFavorite(widget.productModel.id ?? "0");
+  }
+
+  /// Helper method to add item to cart
+  void _addToCart(BuildContext context, SingleProductProvider provider) {
+    log("[cart] ${provider.quantity}");
+    final cartService = context.read<CartProvider>();
+    cartService.setUser();
+
+    final cartItem = CartItemModel(
+      userId: provider.userId,
+      addedAt: Timestamp.now(),
+      priceAtPurchase: widget.productModel.price,
+      product: widget.productModel,
+      quantity: provider.quantity,
+    );
+
+    cartService.addToCart(cartItem);
+
+    context.pop();
+    Fluttertoast.showToast(
+      msg: "Added to Cart",
+      textColor: Colors.white,
+      backgroundColor: Colors.green,
+    );
   }
 
   @override
@@ -141,8 +174,24 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
                           size: 30,
                         ),
                         onPressed: () {
-                          favoriteService
-                              .toggleFavorite(widget.productModel.id ?? "");
+                          // ✅ Check if user is logged in before toggling favorite
+                          final isAuthenticated =
+                              AuthGateHelper.checkAuthAndPrompt(
+                            context,
+                            actionMessage:
+                                'Please sign in to save favorites.\n\nCreate an account to save products you love.',
+                            onLoginSuccess: () {
+                              // Toggle favorite after successful login
+                              favoriteService
+                                  .toggleFavorite(widget.productModel.id ?? "");
+                            },
+                          );
+
+                          // If already authenticated, toggle immediately
+                          if (isAuthenticated) {
+                            favoriteService
+                                .toggleFavorite(widget.productModel.id ?? "");
+                          }
                         },
                       );
                     },
@@ -244,24 +293,21 @@ class _SingleProductScreenState extends State<SingleProductScreen> {
               height,
               'Add to Cart - \$${(widget.productModel.price * provider.quantity).toStringAsFixed(2)}',
               () {
-                log("[cart] ${provider.quantity}");
-                final cartService = context.read<CartProvider>();
-                cartService.setUser();
+                // ✅ Check if user is logged in before adding to cart
+                final isAuthenticated = AuthGateHelper.checkAuthAndPrompt(
+                  context,
+                  actionMessage:
+                      'Please sign in to add items to your cart.\n\nCreate an account to save your cart and checkout.',
+                  onLoginSuccess: () {
+                    // Add to cart after successful login
+                    _addToCart(context, provider);
+                  },
+                );
 
-                final cartItem = CartItemModel(
-                    userId: provider.userId,
-                    addedAt: Timestamp.now(),
-                    priceAtPurchase: widget.productModel.price,
-                    product: widget.productModel,
-                    quantity: provider.quantity);
-
-                cartService.addToCart(cartItem);
-
-                context.pop();
-                Fluttertoast.showToast(
-                    msg: "Added to Cart",
-                    textColor: Colors.white,
-                    backgroundColor: Colors.green);
+                // If already authenticated, add to cart immediately
+                if (isAuthenticated) {
+                  _addToCart(context, provider);
+                }
               },
             ),
           ),
@@ -489,21 +535,55 @@ class _ProductImageSlider extends StatelessWidget {
 
     return SizedBox(
       height: height,
-      child: PageView.builder(
-        controller: pageController,
-        itemCount: imageUrls.length,
-        onPageChanged: provider.setImageIndex,
-        itemBuilder: (context, index) {
-          return CachedNetworkImage(
-            imageUrl: imageUrls[index],
-            fit: BoxFit.cover,
-            errorWidget: (context, error, stackTrace) => const Icon(
-              Icons.image_not_supported,
-              size: 80,
-              color: Colors.grey,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          PageView.builder(
+            controller: pageController,
+            itemCount: imageUrls.length,
+            onPageChanged: provider.setImageIndex,
+            itemBuilder: (context, index) {
+              return CachedNetworkImage(
+                imageUrl: imageUrls[index],
+                fit: BoxFit.cover,
+                errorWidget: (context, error, stackTrace) => const Icon(
+                  Icons.image_not_supported,
+                  size: 80,
+                  color: Colors.grey,
+                ),
+              );
+            },
+          ),
+          if (imageUrls.length > 1)
+            Positioned(
+              bottom: 20,
+              child: Consumer<SingleProductProvider>(
+                builder: (context, value, _) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      imageUrls.length,
+                      (index) {
+                        final isActive = index == value.currentImageIndex;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: isActive ? 12 : 8,
+                          height: isActive ? 12 : 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isActive
+                                ? KprimaryColor
+                                : Colors.grey.withValues(alpha: 0.5),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          );
-        },
+        ],
       ),
     );
   }

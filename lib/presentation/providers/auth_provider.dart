@@ -1,7 +1,7 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/presentation/providers/profile_setup_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -153,8 +153,10 @@ class AuthProvider with ChangeNotifier {
   }
 
   // ✅ APPLE SIGN-IN
-  Future<void> signInWithApple() async {
+  Future<void> signInWithApple(ProfileSetupProvider profileProvider) async {
     try {
+      setLoading(true);
+
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -168,9 +170,17 @@ class AuthProvider with ChangeNotifier {
       );
 
       await _auth.signInWithCredential(oauthCredential);
+
+      if (firebaseUser != null) {
+        // ✅ Create Firestore profile if not exists
+        await profileProvider.saveUserFromAuth(firebaseUser!);
+        await profileProvider.loadUserProfile();
+      }
     } catch (e) {
       debugPrint("Apple Sign-In error: $e");
       rethrow;
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -188,7 +198,7 @@ class AuthProvider with ChangeNotifier {
 
       _rawUser = null;
       // ignore: use_build_context_synchronously
-      context.go("/login");
+      context.go("/");
       notifyListeners();
     } catch (e) {
       debugPrint('Logout failed: $e');
@@ -243,6 +253,106 @@ class AuthProvider with ChangeNotifier {
       log("[Auth] Forgot password error: $e");
       log("[Auth] Stack: $s");
       rethrow;
+    }
+  }
+
+  /// ✅ DELETE ACCOUNT (Permanent)
+  /// Deletes user from Firebase Authentication and all related Firestore data
+  bool _shouldNavigateToHome = false;
+  bool get shouldNavigateToHome {
+    if (_shouldNavigateToHome) {
+      _shouldNavigateToHome = false; // Reset on read (consume)
+      return true;
+    }
+    return false;
+  }
+
+  /// ✅ DELETE ACCOUNT (Permanent)
+  /// Deletes user from Firebase Authentication and all related Firestore data
+  Future<void> deleteAccount() async {
+    try {
+      setLoading(true);
+
+      // ✅ Force navigation immediately to Home Screen
+      _shouldNavigateToHome = true;
+      notifyListeners();
+
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'no-user',
+          message: 'No user is currently logged in.',
+        );
+      }
+
+      final uid = user.uid;
+
+      // 1️⃣ Delete user data from Firestore
+      final firestore = FirebaseFirestore.instance;
+
+      // Delete user profile
+      await firestore.collection('users').doc(uid).delete();
+      log("[Auth] Deleted user profile for $uid");
+
+      // Delete cart
+      await firestore.collection('carts').doc(uid).delete();
+      log("[Auth] Deleted cart for $uid");
+
+      // Delete favorites
+      final favoritesSnapshot = await firestore
+          .collection('favorites')
+          .where('userId', isEqualTo: uid)
+          .get();
+      for (var doc in favoritesSnapshot.docs) {
+        await doc.reference.delete();
+      }
+      log("[Auth] Deleted ${favoritesSnapshot.docs.length} favorites for $uid");
+
+      // Delete orders (or mark as deleted)
+      final ordersSnapshot = await firestore
+          .collection('orders')
+          .where('userId', isEqualTo: uid)
+          .get();
+      for (var doc in ordersSnapshot.docs) {
+        await doc.reference.delete();
+      }
+      log("[Auth] Deleted ${ordersSnapshot.docs.length} orders for $uid");
+
+      // 2️⃣ Delete user from Firebase Authentication
+      await user.delete();
+      log("[Auth] Deleted Firebase Auth user $uid");
+
+      // 3️⃣ Sign out Google if signed in
+      final googleSignIn = GoogleSignIn();
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.signOut();
+      }
+
+      // 4️⃣ Clear local state
+      _rawUser = null;
+      _cachedRole = null;
+      _shouldNavigateToHome = true;
+
+      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      log("[Auth] Delete account error: ${e.code} - ${e.message}");
+
+      // Handle re-authentication requirement
+      if (e.code == 'requires-recent-login') {
+        throw FirebaseAuthException(
+          code: 'requires-recent-login',
+          message:
+              'Please log out and log back in before deleting your account.',
+        );
+      }
+
+      rethrow;
+    } catch (e, s) {
+      log("[Auth] Delete account error: $e");
+      log("[Auth] Stack: $s");
+      rethrow;
+    } finally {
+      setLoading(false);
     }
   }
 }
