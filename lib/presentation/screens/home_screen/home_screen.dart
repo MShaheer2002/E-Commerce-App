@@ -1,9 +1,9 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:ProductPlug/core/providers/admin/banner_provider.dart';
 import 'package:ProductPlug/core/providers/product_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:ProductPlug/presentation/models/category_model.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -333,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
             }),
             SizedBox(height: height * 0.02),
             SizedBox(
-              height: height * 0.14,
+              height: height * 0.15,
               child: categories.isEmpty
                   ? Center(
                       child: SmallLoader(

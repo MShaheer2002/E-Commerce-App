@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:ProductPlug/presentation/providers/auth_provider.dart';
+import 'package:ProductPlug/presentation/providers/cache_provider.dart';
 import 'package:ProductPlug/presentation/providers/profile_setup_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter/foundation.dart';
@@ -29,10 +30,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      emailCtrl.text = "admin@admin.com";
-      passCtrl.text = "abc12345678";
-      // emailCtrl.text = "unknowusers420@gmail.com";
-      // passCtrl.text = "abc123";
+      // emailCtrl.text = "admin@admin.com";
+      // passCtrl.text = "abc12345678";
+      emailCtrl.text = "shaheerprojectsflutter@gmail.com";
+      passCtrl.text = "12345678";
     }
   }
 
@@ -42,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
     double width = MediaQuery.of(context).size.width;
     final auth = context.read<AuthProvider>();
     final profile = context.read<ProfileSetupProvider>();
+    final cache = context.read<CacheProvider>();
 
     return Scaffold(
         extendBodyBehindAppBar: true,
@@ -123,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             emailCtrl.text.trim(),
                             passCtrl.text.trim(),
                             profile,
+                            cache,
                           );
                           final role = await auth.getUserRole();
 
@@ -149,6 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         } catch (e) {
                           if (!mounted) return;
+                          log("[LoginScreen][Error] $e");
                           // ignore: use_build_context_synchronously
                           Navigator.of(context).pop();
                           Fluttertoast.showToast(
@@ -236,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
 
                       try {
-                        await auth.signInWithGoogle(profile);
+                        await auth.signInWithGoogle(profile, cache);
 
                         if (!context.mounted) return;
                         Navigator.of(context).pop(); // Close loader
@@ -294,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
 
                         try {
-                          await auth.signInWithApple(profile);
+                          await auth.signInWithApple(profile, cache);
 
                           if (!context.mounted) return;
                           Navigator.of(context).pop(); // Close loader

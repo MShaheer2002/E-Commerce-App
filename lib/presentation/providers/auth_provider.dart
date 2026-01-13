@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:ProductPlug/presentation/providers/cache_provider.dart';
 import 'package:ProductPlug/presentation/providers/profile_setup_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -79,7 +80,7 @@ class AuthProvider with ChangeNotifier {
   // ✅ EMAIL & PASSWORD LOGIN
   // LOGIN: signIn + require verification. If not verified, sign out and throw.
   Future<void> loginWithEmail(String email, String password,
-      ProfileSetupProvider profileProvider) async {
+      ProfileSetupProvider profileProvider, CacheProvider cacheProvider) async {
     setLoading(true);
     try {
       final cred = await _auth.signInWithEmailAndPassword(
@@ -88,7 +89,7 @@ class AuthProvider with ChangeNotifier {
       if (user == null) {
         throw FirebaseAuthException(code: 'no-user', message: 'Login failed.');
       }
-      await profileProvider.loadUserProfile();
+      await profileProvider.loadUserProfile(cacheProvider);
       // Ensure latest data
       await user.reload();
 
@@ -119,7 +120,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   // ✅ GOOGLE SIGN-IN
-  Future<void> signInWithGoogle(ProfileSetupProvider profileProvider,
+  Future<void> signInWithGoogle(
+      ProfileSetupProvider profileProvider, CacheProvider cacheProvider,
       {bool silent = false}) async {
     try {
       final googleSignIn = GoogleSignIn();
@@ -142,7 +144,7 @@ class AuthProvider with ChangeNotifier {
       if (firebaseUser != null) {
         // ✅ Create Firestore profile if not exists
         await profileProvider.saveUserFromAuth(firebaseUser!);
-        await profileProvider.loadUserProfile(); // ✅ add this line
+        await profileProvider.loadUserProfile(cacheProvider); // ✅ add this line
       }
     } catch (e) {
       debugPrint("Google Sign-In error: $e");
@@ -153,7 +155,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   // ✅ APPLE SIGN-IN
-  Future<void> signInWithApple(ProfileSetupProvider profileProvider) async {
+  Future<void> signInWithApple(
+      ProfileSetupProvider profileProvider, CacheProvider cacheProvider) async {
     try {
       setLoading(true);
 
@@ -174,7 +177,7 @@ class AuthProvider with ChangeNotifier {
       if (firebaseUser != null) {
         // ✅ Create Firestore profile if not exists
         await profileProvider.saveUserFromAuth(firebaseUser!);
-        await profileProvider.loadUserProfile();
+        await profileProvider.loadUserProfile(cacheProvider);
       }
     } catch (e) {
       debugPrint("Apple Sign-In error: $e");

@@ -16,6 +16,18 @@ class NotificationProvider with ChangeNotifier {
 
   bool _initialized = false;
 
+  NotificationProvider() {
+    // Listen for auth state changes to automatically register token on login
+    _auth.authStateChanges().listen((user) {
+      if (user != null) {
+        log("[Notification Provider] User logged in: ${user.uid}. Initializing notifications...");
+        // Reset initialization flag to allow fresh setup for the new user
+        _initialized = false;
+        initNotifications();
+      }
+    });
+  }
+
   // Public getter for notifications stream (used in NotificationScreen)
   Stream<QuerySnapshot<Map<String, dynamic>>> get notificationStream {
     final user = _auth.currentUser;
@@ -77,10 +89,9 @@ class NotificationProvider with ChangeNotifier {
     // Save token to Firestore
     final user = _auth.currentUser;
     if (user != null && token != null) {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .update({'fcmToken': token});
+      await _firestore.collection('users').doc(user.uid).set({
+        'fcmToken': token,
+      }, SetOptions(merge: true));
     }
 
     // Initialize local notifications
@@ -199,6 +210,28 @@ class NotificationProvider with ChangeNotifier {
         'timestamp': FieldValue.serverTimestamp(),
         'read': false,
       });
+    }
+  }
+
+  Future<void> clearNotifications() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        // 1. Remove from Firestore so server stops sending to this UID
+        await _firestore.collection('users').doc(user.uid).update({
+          'fcmToken': FieldValue.delete(),
+        });
+        log("[Notification Provider] fcmToken removed from Firestore");
+      }
+
+      // 2. Delete the token from the device itself
+      // This ensures the device won't receive messages even if sent to the old token
+      await _firebaseMessaging.deleteToken();
+      log("[Notification Provider] Device token deleted");
+
+      _initialized = false;
+    } catch (e) {
+      log("[Notification Provider] Error clearing FCM data: $e");
     }
   }
 }

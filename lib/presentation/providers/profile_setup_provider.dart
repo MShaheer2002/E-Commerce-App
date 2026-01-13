@@ -1,8 +1,9 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ProductPlug/core/cache.dart';
+
 import 'package:ProductPlug/core/providers/admin/cloudinary_provider.dart';
+import 'package:ProductPlug/presentation/providers/cache_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,7 +15,6 @@ class ProfileSetupProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ImagePicker _picker = ImagePicker();
-  final cache = CacheService();
 
   // Add Cloudinary Provider
   final CloudinaryProvider _cloudinaryProvider = CloudinaryProvider();
@@ -47,16 +47,22 @@ class ProfileSetupProvider extends ChangeNotifier {
     final userRef = _firestore.collection('users').doc(firebaseUser.uid);
     final doc = await userRef.get();
 
-    if (!doc.exists) {
+    final data = doc.data();
+    final bool hasRole = data != null && data.containsKey('role');
+
+    if (!doc.exists || !hasRole) {
+      // If doc doesn't exist OR it exists but has no role (e.g. created by FCM logic),
+      // merge the basic role and auth data.
       await userRef.set({
         'uid': firebaseUser.uid,
         'email': firebaseUser.email,
         'name': firebaseUser.displayName ?? '',
         'role': 'user',
         'photoUrl': firebaseUser.photoURL ?? '',
-        'createdAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),
-      });
+        if (!doc.exists) 'createdAt': Timestamp.now(),
+      }, SetOptions(merge: true));
+      log("[Profile Setup] Ensured user document and role for ${firebaseUser.uid}");
     }
   }
 
@@ -138,7 +144,7 @@ class ProfileSetupProvider extends ChangeNotifier {
   }
 
   /// Load profile from Firestore
-  Future<void> loadUserProfile() async {
+  Future<void> loadUserProfile(CacheProvider cacheProvider) async {
     log("[Profile Setup Provider] in load Profile");
     final user = _auth.currentUser;
     if (user == null) {
@@ -173,7 +179,7 @@ class ProfileSetupProvider extends ChangeNotifier {
         log("[Profile Setup Provider] profile loaded");
         log("[Profile Setup Provider] $_imageUrl");
 
-        await cache.cacheProfile(
+        await cacheProvider.updateProfile(
           name: data['name'] ?? '',
           imageUrl: data['imageUrl'] ?? '',
           email: data['email'] ?? user.email ?? '',
@@ -193,7 +199,7 @@ class ProfileSetupProvider extends ChangeNotifier {
   }
 
   /// Save updated profile to Firestore using Cloudinary for image upload
-  Future<void> saveUserProfile() async {
+  Future<void> saveUserProfile(CacheProvider cacheProvider) async {
     final user = _auth.currentUser;
     if (user == null) {
       Fluttertoast.showToast(msg: "No user logged in");
@@ -254,9 +260,9 @@ class ProfileSetupProvider extends ChangeNotifier {
 
       // Prepare profile data
       final profileData = {
-        'id': user.uid,
+        // 'id': user.uid,
         'name': nameController.text.trim(),
-        'email': emailController.text.trim(),
+        // 'email': emailController.text.trim(),
         'dob': dobController.text.trim(),
         'gender': _selectedGender,
         'phone': phoneController.text.trim(),
@@ -266,13 +272,12 @@ class ProfileSetupProvider extends ChangeNotifier {
       };
 
       // Save to Firestore
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(profileData, SetOptions(merge: true));
+      await _firestore.collection('users').doc(user.uid).update(
+            profileData,
+          );
 
-      // Update local cache
-      await cache.cacheProfile(
+      // Update local cache and notify listeners
+      await cacheProvider.updateProfile(
         name: nameController.text.trim(),
         imageUrl: downloadUrl ?? '',
         email: emailController.text.trim(),
@@ -286,7 +291,7 @@ class ProfileSetupProvider extends ChangeNotifier {
       // Reset upload progress
       _setUploadProgress(0.0);
     } catch (e, stack) {
-      debugPrint("🔥 Error saving profile: $e");
+      log("[Profile Update] Error saving profile: $e");
       debugPrint(stack.toString());
       Fluttertoast.showToast(
         msg: "Failed to update profile",
@@ -300,6 +305,21 @@ class ProfileSetupProvider extends ChangeNotifier {
   // -----------------------------
   // Clean up
   // -----------------------------
+  void clearData() {
+    nameController.clear();
+    emailController.clear();
+    dobController.clear();
+    phoneController.clear();
+    addressController.clear();
+    _profileImage = null;
+    _selectedGender = '';
+    _dateOfBirth = null;
+    _imageUrl = null;
+    _uploadProgress = 0.0;
+    _isLoading = false;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     nameController.dispose();

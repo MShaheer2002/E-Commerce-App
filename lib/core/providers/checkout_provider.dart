@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/core/providers/handle_unautharized_access_provider.dart';
 import 'package:ProductPlug/core/providers/product_analytics_provider.dart';
 import 'package:ProductPlug/presentation/models/address_model.dart';
 import 'package:ProductPlug/presentation/models/order_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,8 +32,7 @@ class CheckoutProvider extends ChangeNotifier {
     _userId = _auth.currentUser?.uid;
   }
 
-
-  String getCurrUserEmail(){
+  String getCurrUserEmail() {
     return _auth.currentUser?.email ?? '';
   }
 
@@ -97,6 +96,13 @@ class CheckoutProvider extends ChangeNotifier {
       log('Error placing order: $e');
       log('$stack');
     }
+  }
+
+  void clearCheckoutData() {
+    _addressModel = null;
+    orderConfirmed = false;
+    _userId = null;
+    notifyListeners();
   }
 }
 

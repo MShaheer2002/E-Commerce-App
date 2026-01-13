@@ -1,9 +1,10 @@
 import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:ProductPlug/presentation/providers/cache_provider.dart';
 import 'package:ProductPlug/presentation/providers/profile_setup_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +25,8 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
     super.initState();
     Future.microtask(() {
       final provider = context.read<ProfileSetupProvider>();
-      provider.loadUserProfile();
+      final cache = context.read<CacheProvider>();
+      provider.loadUserProfile(cache);
     });
   }
 
@@ -80,7 +82,10 @@ class _ProfileSetupViewState extends State<ProfileSetupView> {
                                     ? () {}
                                     : () {
                                         if (provider.validateForm()) {
-                                          provider.saveUserProfile().then((_) {
+                                          provider
+                                              .saveUserProfile(
+                                                  context.read<CacheProvider>())
+                                              .then((_) {
                                             if (context.mounted) {
                                               context.pop();
                                             }
@@ -309,14 +314,14 @@ class ProfileForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        CustomTextField(
-          controller: provider.emailController,
-          hintText: 'Email',
-          keyboardType: TextInputType.emailAddress,
-          icon: Icons.email_outlined,
-          readOnly: true,
-        ),
-        const SizedBox(height: 16),
+        // CustomTextField(
+        //   controller: provider.emailController,
+        //   hintText: 'Email',
+        //   keyboardType: TextInputType.emailAddress,
+        //   icon: Icons.email_outlined,
+        //   readOnly: true,
+        // ),
+        // const SizedBox(height: 16),
 
         GestureDetector(
           onTap: () => _selectDate(context, provider),
@@ -340,7 +345,8 @@ class ProfileForm extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: DropdownButtonFormField<String>(
-                value: prov.selectedGender.isEmpty ? null : prov.selectedGender,
+                initialValue:
+                    prov.selectedGender.isEmpty ? null : prov.selectedGender,
                 decoration: const InputDecoration(
                   hintText: 'Gender',
                   border: InputBorder.none,

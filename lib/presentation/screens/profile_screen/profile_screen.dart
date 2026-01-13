@@ -1,10 +1,15 @@
+import 'dart:async';
 import 'dart:developer';
 
-import 'package:ProductPlug/core/cache.dart';
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
+import 'package:ProductPlug/core/providers/cart_provider.dart';
+import 'package:ProductPlug/core/providers/checkout_provider.dart';
+import 'package:ProductPlug/core/providers/fav_provider.dart';
+import 'package:ProductPlug/core/providers/notification_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:ProductPlug/presentation/providers/auth_provider.dart';
 import 'package:ProductPlug/presentation/providers/cache_provider.dart';
+import 'package:ProductPlug/presentation/providers/profile_setup_provider.dart';
 import 'package:ProductPlug/presentation/screens/profile_screen/widgets/delete_account_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:flutter/material.dart';
@@ -124,17 +129,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     );
 
                     if (shouldLogout == true && context.mounted) {
-                      await auth.logout(context);
+                      // 1. Clear State Providers while context is available
+                      context.read<CacheProvider>().clearProfile();
+                      context.read<CartProvider>().clearLocalData();
+                      context.read<FavoriteService>().clearFavorites();
+                      context.read<CheckoutProvider>().clearCheckoutData();
+                      context.read<ProfileSetupProvider>().clearData();
 
-                      // Optionally clear cache on logout
-                      final cache = CacheService();
-                      await cache.clearCache();
+                      // Handle notification cleanup asynchronously
+                      unawaited(context
+                          .read<NotificationProvider>()
+                          .clearNotifications());
 
+                      // 2. Show success message
                       Fluttertoast.showToast(
                         msg: "Logged out successfully",
                         backgroundColor: Colors.green,
                         textColor: Colors.white,
                       );
+
+                      // 3. Perform Auth Logout (Navigates away)
+                      await auth.logout(context);
                     }
                   },
                 ),
@@ -201,6 +216,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 backgroundColor: Colors.orange,
                                 textColor: Colors.white,
                               );
+
+                              // Clear all local states before/during deletion
+                              if (context.mounted) {
+                                context.read<CacheProvider>().clearProfile();
+                                context.read<CartProvider>().clearLocalData();
+                                context
+                                    .read<FavoriteService>()
+                                    .clearFavorites();
+                                context
+                                    .read<CheckoutProvider>()
+                                    .clearCheckoutData();
+                                context
+                                    .read<ProfileSetupProvider>()
+                                    .clearData();
+                                unawaited(context
+                                    .read<NotificationProvider>()
+                                    .clearNotifications());
+                              }
 
                               // Delete account (Navigation happens automatically via provider)
                               await auth.deleteAccount();

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/core/providers/product_analytics_provider.dart';
 import 'package:ProductPlug/presentation/models/cartItem_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -152,7 +152,17 @@ class CartProvider extends ChangeNotifier {
 
   void clearCart() {
     _items.clear();
-    if (_userId != null) _saveCart();
+    if (_userId != null) {
+      _saveCart();
+    }
+    notifyListeners();
+  }
+
+  /// ✅ Clear for Logout (No Firestore sync)
+  void clearLocalData() {
+    _items.clear();
+    _userId = null;
+    _selectedItems.clear();
     notifyListeners();
   }
 
@@ -175,7 +185,4 @@ class CartProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-
-
 }
