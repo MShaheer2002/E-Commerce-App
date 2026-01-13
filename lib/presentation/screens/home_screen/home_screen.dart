@@ -3,6 +3,7 @@ import 'package:ProductPlug/core/providers/admin/banner_provider.dart';
 import 'package:ProductPlug/core/providers/product_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:ProductPlug/presentation/models/category_model.dart';
+import 'package:ProductPlug/presentation/providers/cache_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -36,6 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Provider.of<BannerProvider>(context, listen: false);
       bannerProvider.userFetchBanner();
     });
+
+    context.read<CacheProvider>().loadCachedProfile();
   }
 
   @override
@@ -49,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Stack(
             children: [
               // Background
-              SizedBox(height: height * 0.02),
+              SizedBox(height: height * 0.02),  
 
               Positioned(
                 top: height * 0.02,

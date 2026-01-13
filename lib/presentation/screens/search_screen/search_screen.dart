@@ -1,9 +1,10 @@
 import 'dart:developer';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:ProductPlug/core/providers/admin/productManagement_provider.dart';
 import 'package:ProductPlug/core/providers/search_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -58,49 +59,64 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Padding(
             padding:
                 EdgeInsets.symmetric(horizontal: width * 0.06, vertical: 8),
-            child: Container(
-              height: 55,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white.withValues(alpha: 0.7),
-                  border: Border.all(
-                      color: widget.isAdmin == true
-                          ? Colors.grey.withValues(alpha: 0.7)
-                          : Colors.white)),
-              child: TextField(
-                controller: searchController,
-                focusNode: _focusNode,
-                autofocus: true,
-                textAlignVertical:
-                    TextAlignVertical.center, // 👈 centers vertically
-                onChanged: (value) {
-                  log("[Search] $value");
-                  searchProvider.searchProducts(value);
-                },
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 16,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: widget.isAdmin == true ? Colors.black : Colors.white,
+                    size: 26,
+                  ),
+                  onPressed: () {
+                    context.pop();
+                  },
                 ),
-                decoration: const InputDecoration(
-                  prefixIcon: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    child: Icon(
-                      Icons.search,
-                      size: 28,
-                      color: KprimaryColor,
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white.withValues(alpha: 0.7),
+                      border: Border.all(
+                        color: widget.isAdmin == true
+                            ? Colors.grey.withValues(alpha: 0.7)
+                            : Colors.white,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: searchController,
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      textAlignVertical: TextAlignVertical.center,
+                      onChanged: (value) {
+                        log("[Search] $value");
+                        searchProvider.searchProducts(value);
+                      },
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 16,
+                      ),
+                      decoration: const InputDecoration(
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          child: Icon(
+                            Icons.search,
+                            size: 28,
+                            color: KprimaryColor,
+                          ),
+                        ),
+                        hintText: "Search...",
+                        hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 16,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
                   ),
-                  hintText: "Search...",
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 16,
-                  ),
-                  border: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  contentPadding: EdgeInsets.only(top: 0, bottom: 0),
                 ),
-              ),
+              ],
             ),
           ),
         ),

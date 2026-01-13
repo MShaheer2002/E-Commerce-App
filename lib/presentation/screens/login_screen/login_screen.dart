@@ -30,10 +30,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      // emailCtrl.text = "admin@admin.com";
-      // passCtrl.text = "abc12345678";
-      emailCtrl.text = "shaheerprojectsflutter@gmail.com";
-      passCtrl.text = "12345678";
+      emailCtrl.text = "admin@admin.com";
+      passCtrl.text = "abc12345678";
+      // emailCtrl.text = "shaheerprojectsflutter@gmail.com";
+      // passCtrl.text = "12345678";
     }
   }
 
