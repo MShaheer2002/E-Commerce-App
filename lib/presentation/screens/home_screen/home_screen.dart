@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Stack(
             children: [
               // Background
-              SizedBox(height: height * 0.02),  
+              SizedBox(height: height * 0.02),
 
               Positioned(
                 top: height * 0.02,
@@ -69,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Padding(
                 padding: EdgeInsets.only(top: height * 0.07),
                 child: SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
                   child: SafeArea(
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: width * 0.06),
@@ -342,6 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: SmallLoader(
                           backgroundColor: KprimaryColor, strokeWidth: 2))
                   : ListView.builder(
+                      physics: const ClampingScrollPhysics(),
                       itemCount: categories.length,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
@@ -356,6 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(
               height: height * 0.3,
               child: ListView.builder(
+                physics: const ClampingScrollPhysics(),
                 itemCount: provider.products.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {

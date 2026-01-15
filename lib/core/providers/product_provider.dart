@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/presentation/models/category_model.dart';
 import 'package:ProductPlug/presentation/models/product_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 class ProductProvider with ChangeNotifier {
@@ -13,11 +13,17 @@ class ProductProvider with ChangeNotifier {
   List<ProductModel> _products = [];
   List<CategoryModel> _categories = [];
   bool _isLoading = false;
+  bool _isMoreLoading = false;
+  bool _hasMore = true;
+  DocumentSnapshot? _lastDocument;
+  static const int _limit = 10;
   String? _errorMessage;
 
   List<ProductModel> get products => _products;
   List<CategoryModel> get categories => _categories;
   bool get isLoading => _isLoading;
+  bool get isMoreLoading => _isMoreLoading;
+  bool get hasMore => _hasMore;
   String? get errorMessage => _errorMessage;
 
   bool _initialized = false;
@@ -43,6 +49,67 @@ class ProductProvider with ChangeNotifier {
       _errorMessage = error.toString();
       notifyListeners();
     });
+  }
+
+  /// 🔄 Fetch products (one-time paginated fetch)
+  Future<void> fetchProducts({bool initialLoad = false}) async {
+    if (_isMoreLoading || (initialLoad && _isLoading)) return;
+
+    if (initialLoad) {
+      _isLoading = true;
+      _products.clear();
+      _lastDocument = null;
+      _hasMore = true;
+      notifyListeners();
+    } else {
+      if (!_hasMore) return;
+      _isMoreLoading = true;
+      notifyListeners();
+    }
+
+    try {
+      Query query = _db
+          .collection('products')
+          .orderBy('createdAt', descending: true)
+          .limit(_limit);
+
+      if (_lastDocument != null) {
+        query = query.startAfterDocument(_lastDocument!);
+      }
+
+      final snapshot = await query.get();
+
+      if (snapshot.docs.isNotEmpty) {
+        _lastDocument = snapshot.docs.last;
+
+        final newProducts = snapshot.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return ProductModel.fromMap(data);
+        }).toList();
+
+        if (initialLoad) {
+          _products = newProducts;
+        } else {
+          // Avoid duplicates
+          for (var newProd in newProducts) {
+            if (!_products.any((p) => p.id == newProd.id)) {
+              _products.add(newProd);
+            }
+          }
+        }
+      }
+
+      if (snapshot.docs.length < _limit) {
+        _hasMore = false;
+      }
+    } catch (e) {
+      log("[ProductProvider] Error fetching products: $e");
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      _isMoreLoading = false;
+      notifyListeners();
+    }
   }
 
   /// 🔄 Fetch categories (real-time stream)

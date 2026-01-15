@@ -1,9 +1,9 @@
 import 'dart:developer';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ProductPlug/core/providers/product_analytics_provider.dart';
 import 'package:ProductPlug/presentation/models/category_model.dart';
 import 'package:ProductPlug/presentation/models/product_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ProductmanagementProvider with ChangeNotifier {
@@ -33,20 +33,24 @@ class ProductmanagementProvider with ChangeNotifier {
 
   /// Fetch products (with pagination)
   Future<void> fetchProducts({bool initialLoad = false}) async {
-    // --- Reset state on refresh ---
+    // Prevent simultaneous loads
+    if (_isMoreLoading || (initialLoad && _isLoading)) return;
+
     if (initialLoad) {
       _isLoading = true;
       _products.clear();
       _lastDocument = null;
       _hasMore = true;
+      // We notify listeners to show the full-screen loader
       notifyListeners();
     } else {
-      if (!_hasMore || _isMoreLoading) return;
+      if (!_hasMore) return;
       _isMoreLoading = true;
       notifyListeners();
     }
 
     try {
+      log("[ProductProvider] Fetching products (initialLoad: $initialLoad)...");
       Query query = _firestore
           .collection('products')
           .orderBy('createdAt', descending: true)
@@ -57,6 +61,7 @@ class ProductmanagementProvider with ChangeNotifier {
       }
 
       final snapshot = await query.get();
+      log("[ProductProvider] Fetched ${snapshot.docs.length} products.");
 
       if (snapshot.docs.isNotEmpty) {
         _lastDocument = snapshot.docs.last;
@@ -69,14 +74,22 @@ class ProductmanagementProvider with ChangeNotifier {
         if (initialLoad) {
           _products = newProducts;
         } else {
-          _products.addAll(newProducts);
+          // Avoid duplicates if any
+          for (var newProd in newProducts) {
+            if (!_products.any((p) => p.id == newProd.id)) {
+              _products.add(newProd);
+            }
+          }
         }
       }
 
       // If fewer items than limit → no more data
-      if (snapshot.docs.length < _limit) _hasMore = false;
+      if (snapshot.docs.length < _limit) {
+        _hasMore = false;
+        log("[ProductProvider] No more products to fetch.");
+      }
     } catch (e) {
-      log("Error fetching products: $e");
+      log("[ProductProvider] Error fetching products: $e");
     } finally {
       _isLoading = false;
       _isMoreLoading = false;

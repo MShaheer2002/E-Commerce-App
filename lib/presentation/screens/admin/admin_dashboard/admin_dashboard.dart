@@ -85,9 +85,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       final cache = CacheService();
                                       await cache.clearCache();
 
-                                      if (context.mounted) {
-                                        context.pop();
-                                      }
+                                      // if (context.mounted) {
+                                      //   context.pop();
+                                      // }
                                     } catch (e) {
                                       log('Logout error: $e');
                                       // if (context.mounted) {

@@ -31,8 +31,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     if (kDebugMode) {
       emailCtrl.text = "admin@admin.com";
-      passCtrl.text = "abc12345678";
+      passCtrl.text = "Qualityforthelow97*";
       // emailCtrl.text = "shaheerprojectsflutter@gmail.com";
+      // emailCtrl.text = "unkownusershaheer0@gmail.com";
       // passCtrl.text = "12345678";
     }
   }
@@ -134,13 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.of(context).pop(); // close loader safely
                           if (role == 'admin') {
                             Fluttertoast.showToast(msg: "Welcome, Admin!");
-                            Future.microtask(
-                                // ignore: use_build_context_synchronously
-                                () => context.go('/adminDashboard'));
+                            if (mounted) context.go('/adminDashboard');
                           } else {
                             Fluttertoast.showToast(msg: "Welcome back!");
-                            // ignore: use_build_context_synchronously
-                            context.go('/');
+                            if (mounted) context.go('/');
                           } // go to home
                         } on firebase.FirebaseAuthException catch (e) {
                           if (!mounted) return; // ✅ safe again

@@ -33,6 +33,7 @@ import 'package:ProductPlug/presentation/screens/signup_screen/signup_screen.dar
 import 'package:ProductPlug/presentation/screens/single_product_screen/single_product_screen.dart';
 import 'package:ProductPlug/presentation/screens/splash_screen/splash_screen.dart';
 import 'package:ProductPlug/presentation/screens/webview/webview_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -143,6 +144,11 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/single-product',
         builder: (context, state) {
+          if (state.extra is! ProductModel) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
           final product = state.extra as ProductModel;
           return SingleProductScreen(productModel: product);
         },
@@ -160,6 +166,11 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/product-by-category',
         builder: (context, state) {
+          if (state.extra is! CategoryModel) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
           final category = state.extra as CategoryModel;
           return ProductByCategoryScreen(categoryModel: category);
         },
@@ -171,7 +182,8 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: '/search-screen',
         builder: (context, state) {
-          final bool isAdmin = state.extra as bool;
+          final bool isAdmin =
+              (state.extra is bool) ? state.extra as bool : false;
           return SearchScreen(
             isAdmin: isAdmin,
           );
@@ -198,7 +210,8 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
           path: '/webview',
           builder: (context, state) {
-            final String url = state.extra as String;
+            final String url =
+                (state.extra is String) ? state.extra as String : "";
             return WebviewScreen(url: url);
           }),
 
@@ -220,6 +233,11 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
           path: "/admin/edit-product",
           builder: (context, state) {
+            if (state.extra is! ProductModel) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
             final product = state.extra as ProductModel;
             return AdminEditProductScreen(product: product);
           }),
@@ -232,7 +250,8 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
           path: "/admin/analytics",
           builder: (context, state) {
-            final String productId = state.extra as String;
+            final String productId =
+                (state.extra is String) ? state.extra as String : "";
             return AdminProductAnalyticsScreen(productId: productId);
           }),
 
@@ -255,6 +274,11 @@ GoRouter createRouter(AuthProvider authProvider) {
       GoRoute(
         path: "/admin/single-order-screen",
         builder: (context, state) {
+          if (state.extra is! OrderModel) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
           final order = state.extra as OrderModel;
           log(" [Single Order Screen] provider $order");
 

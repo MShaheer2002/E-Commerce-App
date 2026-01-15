@@ -79,41 +79,57 @@ class AuthProvider with ChangeNotifier {
 
   // ✅ EMAIL & PASSWORD LOGIN
   // LOGIN: signIn + require verification. If not verified, sign out and throw.
-  Future<void> loginWithEmail(String email, String password,
-      ProfileSetupProvider profileProvider, CacheProvider cacheProvider) async {
+  Future<void> loginWithEmail(
+    String email,
+    String password,
+    ProfileSetupProvider profileProvider,
+    CacheProvider cacheProvider,
+  ) async {
     setLoading(true);
     try {
       final cred = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+        email: email,
+        password: password,
+      );
+
       final user = cred.user;
       if (user == null) {
-        throw FirebaseAuthException(code: 'no-user', message: 'Login failed.');
+        throw FirebaseAuthException(
+          code: 'no-user',
+          message: 'Login failed.',
+        );
       }
-      await profileProvider.loadUserProfile(cacheProvider);
-      // Ensure latest data
-      await user.reload();
 
-      final freshUser = _auth.currentUser;
+      // 🔄 Refresh user
+      await user.reload();
+      final freshUser = _auth.currentUser!;
+
+      // 🔐 Get role FIRST (must be allowed in rules)
       final role = await getUserRole();
 
-      if (role != "admin" && (freshUser == null || !freshUser.emailVerified)) {
+      // 🚫 Enforce verification ONLY for non-admins
+      if (role != "admin" && !freshUser.emailVerified) {
         await _auth.signOut();
-
         throw FirebaseAuthException(
           code: 'email-not-verified',
           message: 'Please verify your email before logging in.',
         );
       }
-      if (role != "admin") {
-        await profileProvider.saveUserFromAuth(freshUser!);
-      } else if (role == "admin") {
+
+      // ✅ Admin path (NO verification, NO Firestore dependency)
+      if (role == "admin") {
         _rawUser = freshUser;
         _cachedRole = role;
         notifyListeners();
+        log("Admin logged in");
+        return;
       }
-      // If verified, _auth.authStateChanges will update _rawUser and route will allow home.
 
-      log("Login In!!");
+      // ✅ Normal user path (verified only)
+      await profileProvider.loadUserProfile(cacheProvider);
+      await profileProvider.saveUserFromAuth(freshUser);
+
+      log("User logged in");
     } finally {
       setLoading(false);
     }

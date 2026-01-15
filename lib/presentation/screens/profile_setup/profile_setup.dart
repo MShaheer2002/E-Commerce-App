@@ -381,7 +381,7 @@ class ProfileForm extends StatelessWidget {
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
-            initialCountryCode: 'PK',
+            initialCountryCode: 'US',
             onChanged: (phone) {
               // provider.phoneController.text = phone.completeNumber;
             },

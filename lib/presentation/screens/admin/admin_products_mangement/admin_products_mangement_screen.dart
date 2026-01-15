@@ -2,8 +2,8 @@ import 'package:ProductPlug/core/common_widgets.dart/common_widgets.dart';
 import 'package:ProductPlug/core/providers/admin/productManagement_provider.dart';
 import 'package:ProductPlug/core/themes/constantsColors.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class AdminProductsMangementScreen extends StatefulWidget {
@@ -65,6 +65,8 @@ class _AdminProductsMangementScreenState
               onRefresh: () async {
                 await provider.fetchProducts(initialLoad: true);
                 _refreshController.refreshCompleted();
+                _refreshController
+                    .resetNoData(); // Reset to allow loadmore again
               },
               onLoading: () async {
                 await provider.fetchProducts();
@@ -75,62 +77,72 @@ class _AdminProductsMangementScreenState
                 }
               },
               child: provider.products.isEmpty
-                  ? _buildEmptyState()
-                  : Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            context.push('/search-screen', extra: true);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.all(8),
-                            height: 55,
-                            decoration: BoxDecoration(
+                  ? SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height * 0.7,
+                        alignment: Alignment.center,
+                        child: _buildEmptyState(),
+                      ),
+                    )
+                  : ListView.builder(
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      itemCount: provider.products.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          // Search Box as a Header item
+                          return GestureDetector(
+                            onTap: () {
+                              context.push('/search-screen', extra: true);
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              height: 55,
+                              decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
                                 color: Colors.white.withValues(alpha: 0.7),
-                                border:
-                                    Border.all(color: Colors.grey.shade300)),
-                            child: const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 15),
-                                  child: Icon(
-                                    Icons.search,
-                                    size: 28,
-                                    color: Colors.black,
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 15),
+                                    child: Icon(
+                                      Icons.search,
+                                      size: 28,
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  "Search...",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                  ),
-                                )
-                              ],
+                                  Text(
+                                    "Search...",
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 16,
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            itemCount: provider.products.length,
-                            itemBuilder: (context, index) {
-                              final product = provider.products[index];
-                              return buildProductCard(
-                                context,
-                                product,
-                                provider,
-                                () {
-                                  context.push("/admin/analytics",
-                                      extra: product.id);
-                                },
-                              );
+                          );
+                        }
+
+                        final product = provider.products[index - 1];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: buildProductCard(
+                            context,
+                            product,
+                            provider,
+                            () {
+                              context.push("/admin/analytics",
+                                  extra: product.id);
                             },
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
             ),
     );
