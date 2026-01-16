@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 // Import your CloudinaryProvider
 
 class ProfileSetupProvider extends ChangeNotifier {
@@ -76,7 +77,8 @@ class ProfileSetupProvider extends ChangeNotifier {
 
   void setDateOfBirth(DateTime date) {
     _dateOfBirth = date;
-    dobController.text = '${date.day}/${date.month}/${date.year}';
+    // dobController.text = '${date.day}/${date.month}/${date.year}';
+    dobController.text = DateFormat("MM/dd/yyyy").format(date);
     notifyListeners();
   }
 

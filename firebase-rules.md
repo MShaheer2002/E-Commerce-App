@@ -14,11 +14,15 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Defensive isAdmin check
+    // Modernized isAdmin check with hardcoded fallback for dev/admin seed
     function isAdmin() {
-      return isSignedIn() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'user') == 'admin';
+      return isSignedIn() && (
+        request.auth.token.email == "admin@admin.com" ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+        )
+      );
     }
 
     /* ============================
@@ -71,14 +75,16 @@ service cloud.firestore {
 
       allow read: if isOwner(userId) || isAdmin();
 
-      allow update: if isOwner(userId) && (
-        // Prevent changing 'role' if it already exists and is different
-        // If 'role' is missing in one or both, we allow the update for other fields
-        (!('role' in request.resource.data) && !('role' in resource.data)) ||
-        (!('role' in request.resource.data) && ('role' in resource.data)) ||
-        (('role' in request.resource.data) && !('role' in resource.data) && request.resource.data.role == 'user') ||
-        (request.resource.data.get('role', '') == resource.data.get('role', ''))
-      );
+      allow update: if
+        // ✅ Admin can update any user
+        isAdmin() ||
+        // ✅ User can update own data (no role escalation)
+        (
+          isOwner(userId) && (
+            (!('role' in request.resource.data)) ||
+            (request.resource.data.role == resource.data.role)
+          )
+        );
 
       allow delete: if isAdmin();
 
@@ -120,13 +126,13 @@ service cloud.firestore {
     ============================ */
 
     match /global_analytics/{document=**} {
-      allow write: if isSignedIn();
-      allow read: if isAdmin();
+      // Users need to read/write to update aggregate stats during transactions
+      allow read, write: if isSignedIn();
     }
 
     match /product_analytics/{documentId} {
-      allow write: if isSignedIn();
-      allow read: if isAdmin();
+      // Users need to read (to check existence in transaction) and write
+      allow read, write: if isSignedIn();
     }
 
     match /sales_logs/{logId} {
@@ -135,8 +141,9 @@ service cloud.firestore {
     }
 
     match /counters/{counterId} {
-      allow update: if isSignedIn();
-      allow read, create, delete: if isAdmin();
+      // Users need to read the current count to increment it in a transaction
+      allow read, update: if isSignedIn();
+      allow create, delete: if isAdmin();
     }
 
     /* ============================

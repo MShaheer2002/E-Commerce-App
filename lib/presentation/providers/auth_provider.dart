@@ -5,7 +5,6 @@ import 'package:ProductPlug/presentation/providers/profile_setup_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -120,12 +119,14 @@ class AuthProvider with ChangeNotifier {
       if (role == "admin") {
         _rawUser = freshUser;
         _cachedRole = role;
-        notifyListeners();
         log("Admin logged in");
         return;
       }
 
       // ✅ Normal user path (verified only)
+      _rawUser = freshUser;
+      _cachedRole = role;
+
       await profileProvider.loadUserProfile(cacheProvider);
       await profileProvider.saveUserFromAuth(freshUser);
 
@@ -157,10 +158,13 @@ class AuthProvider with ChangeNotifier {
 
       await _auth.signInWithCredential(credential);
 
-      if (firebaseUser != null) {
+      if (_auth.currentUser != null) {
+        _rawUser = _auth.currentUser;
+        await getUserRole(); // update _cachedRole
+
         // ✅ Create Firestore profile if not exists
-        await profileProvider.saveUserFromAuth(firebaseUser!);
-        await profileProvider.loadUserProfile(cacheProvider); // ✅ add this line
+        await profileProvider.saveUserFromAuth(_rawUser!);
+        await profileProvider.loadUserProfile(cacheProvider);
       }
     } catch (e) {
       debugPrint("Google Sign-In error: $e");
@@ -190,9 +194,12 @@ class AuthProvider with ChangeNotifier {
 
       await _auth.signInWithCredential(oauthCredential);
 
-      if (firebaseUser != null) {
+      if (_auth.currentUser != null) {
+        _rawUser = _auth.currentUser;
+        await getUserRole(); // update _cachedRole
+
         // ✅ Create Firestore profile if not exists
-        await profileProvider.saveUserFromAuth(firebaseUser!);
+        await profileProvider.saveUserFromAuth(_rawUser!);
         await profileProvider.loadUserProfile(cacheProvider);
       }
     } catch (e) {
@@ -216,9 +223,6 @@ class AuthProvider with ChangeNotifier {
       await _auth.signOut();
 
       _rawUser = null;
-      // ignore: use_build_context_synchronously
-      context.go("/");
-      notifyListeners();
     } catch (e) {
       debugPrint('Logout failed: $e');
       rethrow;

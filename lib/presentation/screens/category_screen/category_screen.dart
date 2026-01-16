@@ -12,7 +12,7 @@ class CategoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    RefreshController _refreshController =
+    RefreshController refreshController =
         RefreshController(initialRefresh: false);
     // Using MediaQuery for responsive sizing
     final width = MediaQuery.of(context).size.width;
@@ -41,11 +41,11 @@ class CategoryScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: SmartRefresher(
-                  controller: _refreshController,
+                  controller: refreshController,
                   header: const WaterDropHeader(waterDropColor: KprimaryColor),
                   onRefresh: () {
                     productProvider.listenToCategory();
-                    _refreshController.refreshCompleted();
+                    refreshController.refreshCompleted();
                   },
                   child: GridView.builder(
                     padding: EdgeInsets.symmetric(horizontal: width * 0.04),
@@ -53,9 +53,10 @@ class CategoryScreen extends StatelessWidget {
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 16.0,
-                      mainAxisSpacing: 16.0,
-                      childAspectRatio: 0.8,
+                      crossAxisSpacing: 12.0,
+                      mainAxisSpacing:
+                          12.0, // Increased spacing for better look
+                      childAspectRatio: 0.9, // Give more vertical space
                     ),
                     itemBuilder: (context, index) {
                       return GestureDetector(
@@ -89,18 +90,17 @@ class CategoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center, // Center text
       children: [
         Container(
-          height: itemSize * 0.8,
+          height: itemSize * 0.7,
           width: itemSize,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                // ignore: deprecated_member_use
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 5,
                 offset: const Offset(0, 3),
@@ -123,6 +123,8 @@ class CategoryItem extends StatelessWidget {
             fontSize: 16,
           ),
           textAlign: TextAlign.center,
+          maxLines: 1, // Prevent multiline overflow
+          overflow: TextOverflow.ellipsis, // Add dots if too long
         ),
       ],
     );

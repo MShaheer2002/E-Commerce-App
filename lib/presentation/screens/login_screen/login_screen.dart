@@ -30,11 +30,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      emailCtrl.text = "admin@admin.com";
-      passCtrl.text = "Qualityforthelow97*";
-      // emailCtrl.text = "shaheerprojectsflutter@gmail.com";
+      // emailCtrl.text = "admin@admin.com";
+      // passCtrl.text = "Qualityforthelow97*";
+      emailCtrl.text = "shaheerprojectsflutter@gmail.com";
       // emailCtrl.text = "unkownusershaheer0@gmail.com";
-      // passCtrl.text = "12345678";
+      passCtrl.text = "12345678";
     }
   }
 
@@ -109,18 +109,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   Consumer<AuthProvider>(
                     builder: (context, value, child) => CustomButton(
                       horizontalPadding: width * 0.06,
+                      isDisabled: auth.isLoading,
                       onPressed: () async {
                         final auth = context.read<AuthProvider>();
                         if (auth.isLoading) return;
 
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) => Center(
-                              child: Center(
-                                  child: SmallLoader(
-                                      backgroundColor: Colors.white))),
-                        );
                         try {
                           await auth.loginWithEmail(
                             emailCtrl.text.trim(),
@@ -130,43 +123,36 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                           final role = await auth.getUserRole();
 
-                          if (!mounted) return; // ✅ check before using context
-                          // ignore: use_build_context_synchronously
-                          Navigator.of(context).pop(); // close loader safely
                           if (role == 'admin') {
                             Fluttertoast.showToast(msg: "Welcome, Admin!");
                             if (mounted) context.go('/adminDashboard');
                           } else {
                             Fluttertoast.showToast(msg: "Welcome back!");
                             if (mounted) context.go('/');
-                          } // go to home
+                          }
                         } on firebase.FirebaseAuthException catch (e) {
-                          if (!mounted) return; // ✅ safe again
-                          // ignore: use_build_context_synchronously
-                          Navigator.of(context).pop(); // close loader
                           Fluttertoast.showToast(
                             msg: e.message ?? 'Login failed',
                             backgroundColor: Colors.red,
                           );
                         } catch (e) {
-                          if (!mounted) return;
                           log("[LoginScreen][Error] $e");
-                          // ignore: use_build_context_synchronously
-                          Navigator.of(context).pop();
                           Fluttertoast.showToast(
                             msg: 'Unexpected error occurred',
                             backgroundColor: Colors.red,
                           );
                         }
                       },
-                      child: const Text(
-                        "Continue",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child: auth.isLoading
+                          ? SmallLoader(backgroundColor: Colors.white)
+                          : const Text(
+                              "Continue",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                   SizedBox(height: height * 0.02),
@@ -225,115 +211,92 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: height * 0.02),
                   CustomButton(
+                    isDisabled: auth.isLoading,
                     onPressed: () async {
-                      if (auth.isLoading == true) {
-                        return;
-                      }
-
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) => Center(
-                            child: SmallLoader(backgroundColor: Colors.white)),
-                      );
+                      if (auth.isLoading == true) return;
 
                       try {
                         await auth.signInWithGoogle(profile, cache);
 
-                        if (!context.mounted) return;
-                        Navigator.of(context).pop(); // Close loader
-
                         final role = await auth.getUserRole();
                         if (role == 'admin') {
-                          context.go('/adminDashboard');
+                          Fluttertoast.showToast(msg: "Welcome, Admin!");
+                          if (mounted) context.go('/adminDashboard');
                         } else {
-                          context.go('/');
+                          Fluttertoast.showToast(msg: "Welcome!");
+                          if (mounted) context.go('/');
                         }
                       } on firebase.FirebaseAuthException catch (e) {
-                        if (context.mounted) Navigator.of(context).pop();
                         Fluttertoast.showToast(
                             msg: e.message ?? "Something went wrong");
-                        return;
                       } catch (e) {
-                        if (context.mounted) Navigator.of(context).pop();
                         log("[Google Sign in Errror] $e");
                         Fluttertoast.showToast(msg: "Something went wrong");
-                        return;
                       }
                     },
                     backgroundColor: Colors.white,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          "assets/svgs/google.svg",
-                          height: 25,
-                        ),
-                        SizedBox(width: width * 0.02),
-                        const Text(
-                          "Continue with Google",
-                          style: TextStyle(color: Colors.black),
-                        )
-                      ],
-                    ),
+                    child: auth.isLoading
+                        ? SmallLoader(backgroundColor: KprimaryColor)
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset(
+                                "assets/svgs/google.svg",
+                                height: 25,
+                              ),
+                              SizedBox(width: width * 0.02),
+                              const Text(
+                                "Continue with Google",
+                                style: TextStyle(color: Colors.black),
+                              )
+                            ],
+                          ),
                   ),
                   SizedBox(height: height * 0.02),
 
                   // ✅ Apple Sign-In Button (iOS only)
                   if (Platform.isIOS)
                     CustomButton(
+                      isDisabled: auth.isLoading,
                       onPressed: () async {
-                        if (auth.isLoading == true) {
-                          return;
-                        }
-
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (_) => Center(
-                              child:
-                                  SmallLoader(backgroundColor: Colors.white)),
-                        );
+                        if (auth.isLoading == true) return;
 
                         try {
                           await auth.signInWithApple(profile, cache);
 
-                          if (!context.mounted) return;
-                          Navigator.of(context).pop(); // Close loader
-
                           final role = await auth.getUserRole();
                           if (role == 'admin') {
-                            context.go('/adminDashboard');
+                            Fluttertoast.showToast(msg: "Welcome, Admin!");
+                            if (mounted) context.go('/adminDashboard');
                           } else {
-                            context.go('/');
+                            Fluttertoast.showToast(msg: "Welcome!");
+                            if (mounted) context.go('/');
                           }
                         } on firebase.FirebaseAuthException catch (e) {
-                          if (context.mounted) Navigator.of(context).pop();
                           Fluttertoast.showToast(
                               msg: e.message ?? "Something went wrong");
-                          return;
                         } catch (e) {
-                          if (context.mounted) Navigator.of(context).pop();
                           log("[Apple Sign in Error] $e");
                           Fluttertoast.showToast(msg: "Something went wrong");
-                          return;
                         }
                       },
                       backgroundColor: Colors.white,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            "assets/svgs/apple.svg",
-                            height: 30,
-                          ),
-                          SizedBox(width: width * 0.02),
-                          const Text(
-                            "Continue with Apple",
-                            style: TextStyle(color: Colors.black),
-                          )
-                        ],
-                      ),
+                      child: auth.isLoading
+                          ? SmallLoader(backgroundColor: KprimaryColor)
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  "assets/svgs/apple.svg",
+                                  height: 30,
+                                ),
+                                SizedBox(width: width * 0.02),
+                                const Text(
+                                  "Continue with Apple",
+                                  style: TextStyle(color: Colors.black),
+                                )
+                              ],
+                            ),
                     ),
 
                   if (Platform.isIOS) SizedBox(height: height * 0.02),
