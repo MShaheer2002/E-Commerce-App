@@ -24,7 +24,8 @@ class _AdminGlobalAnalyticsScreenState
 
     // Safe to fetch here — outside build phase
     Future.microtask(() {
-      Provider.of<GlobalAnalyticsProvider>(context, listen: false).fetchGlobalAnalytics();
+      Provider.of<GlobalAnalyticsProvider>(context, listen: false)
+          .fetchGlobalAnalytics();
     });
   }
 
@@ -659,7 +660,7 @@ class _AdminGlobalAnalyticsScreenState
 
     for (var sale in sales) {
       final date = sale.boughtAt.toDate();
-      final key = DateFormat('yyyy-MM-dd').format(date);
+      final key = DateFormat('MMM-dd-YYYY').format(date);
 
       if (!grouped.containsKey(key)) {
         grouped[key] = {
