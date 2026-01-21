@@ -2,10 +2,10 @@ name: ProductPlug
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 1.0.0+3
+version: 1.0.0+4
 
 # android_version:1.0.0+5
-# ios_version:1.0.0+3
+# ios_version:1.0.0+4
 
 environment:
   sdk: ^3.5.3
