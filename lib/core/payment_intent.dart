@@ -6,7 +6,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 
-/// ⚠️ NOTE: This approach exposes your Stripe Secret Key.
 /// In production, always create payment intents on your backend server.
 Future<Map<String, String>> createPaymentIntent(
     double amount, String userEmail) async {
@@ -55,7 +54,7 @@ Future<Map<String, String>> createPaymentIntent(
       'paymentIntentId': paymentIntentId,
     };
   } catch (e) {
-    log('❌ Error creating paym, String currUserEmailent intent: $e');
+    log('Error creating paym, String currUserEmailent intent: $e');
     rethrow;
   }
 }
@@ -65,13 +64,13 @@ Future<String> showPaymentSheet(double amount, String userEmail) async {
   try {
     log('[Checkout] Creating PaymentIntent for \$${amount.toStringAsFixed(2)}');
 
-    // 1️⃣ Create the payment intent
+    // Create the payment intent
     final intentData = await createPaymentIntent(amount, userEmail);
     final clientSecret = intentData['clientSecret']!;
     final paymentIntentId = intentData['paymentIntentId']!;
     log('[Checkout] PaymentIntent ID: $paymentIntentId');
 
-    // 2️⃣ Initialize the payment sheet
+    // Initialize the payment sheet
     await Stripe.instance.initPaymentSheet(
       paymentSheetParameters: SetupPaymentSheetParameters(
         paymentIntentClientSecret: clientSecret,
@@ -101,7 +100,7 @@ Future<String> showPaymentSheet(double amount, String userEmail) async {
 
     log('[Checkout] Payment sheet initialized');
 
-    // 3️⃣ Show the payment sheet
+    // Show the payment sheet
     await Stripe.instance.presentPaymentSheet();
     log('[Checkout] ✅ Payment successful for intent: $paymentIntentId');
 
@@ -112,13 +111,13 @@ Future<String> showPaymentSheet(double amount, String userEmail) async {
 
     return paymentIntentId;
   } on StripeException catch (e) {
-    log('⚠️ Stripe error: ${e.error.message}');
+    log('Stripe error: ${e.error.message}');
     if (e.error.code == FailureCode.Canceled) {
       throw Exception('Payment cancelled by user');
     }
     throw Exception(e.error.message ?? 'Payment failed');
   } catch (e) {
-    log('❌ Payment error: $e');
+    log('Payment error: $e');
     rethrow;
   }
 }

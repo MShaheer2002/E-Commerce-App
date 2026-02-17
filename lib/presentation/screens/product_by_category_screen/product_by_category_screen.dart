@@ -73,7 +73,8 @@ class _ProductByCategoryScreenState extends State<ProductByCategoryScreen> {
                       }
                     },
                     child: GridView.builder(
-                      padding: const EdgeInsets.all(16),
+                       padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 10),
                       physics: const BouncingScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(

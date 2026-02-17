@@ -76,7 +76,7 @@ class _ProductScreenState extends State<ProductScreen> {
                     : GridView.builder(
                         physics: const ClampingScrollPhysics(),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 10),
+                            horizontal: 8, vertical: 10),
                         itemCount: provider.products.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(

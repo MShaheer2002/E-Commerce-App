@@ -14,7 +14,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Product Plug"
         android:theme="@style/NormalTheme"
-        android:usesCleartextTraffic="true">  
+        android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"  >  
 
         <!-- ✅ Put Firebase meta-data inside this single application tag -->
         <meta-data
