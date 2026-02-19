@@ -119,85 +119,133 @@ GoRouter createRouter(AuthProvider authProvider) {
     routes: [
       GoRoute(
         path: '/splash',
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const SplashScreen(),
+        ),
       ),
       GoRoute(
         path: '/',
-        builder: (context, state) => const HomeTab(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const HomeTab(),
+        ),
       ),
       GoRoute(
         path: '/login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: '/signup',
-        builder: (context, state) => const SignupScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const SignupScreen(),
+        ),
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const HomeScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const HomeScreen(),
+        ),
       ),
       GoRoute(
         path: '/products',
-        builder: (context, state) => const ProductScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const ProductScreen(),
+        ),
       ),
       GoRoute(
         path: '/single-product',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           if (state.extra is! ProductModel) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+            return transitionPage(
+              state: state,
+              child: const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
             );
           }
           final product = state.extra as ProductModel;
-          return SingleProductScreen(productModel: product);
+          return transitionPage(
+            state: state,
+            child: SingleProductScreen(productModel: product),
+          );
         },
       ),
       GoRoute(
         path: '/category-screen',
-        builder: (context, state) => const CategoryScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const CategoryScreen(),
+        ),
       ),
 
       GoRoute(
         path: '/order-status',
-        builder: (context, state) => const OrderStatusScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const OrderStatusScreen(),
+        ),
       ),
 
       GoRoute(
         path: '/product-by-category',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           if (state.extra is! CategoryModel) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+            return transitionPage(
+              state: state,
+              child: const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
             );
           }
           final category = state.extra as CategoryModel;
-          return ProductByCategoryScreen(categoryModel: category);
+          return transitionPage(
+            state: state,
+            child: ProductByCategoryScreen(categoryModel: category),
+          );
         },
       ),
       GoRoute(
         path: '/favorite-screen',
-        builder: (context, state) => const FavScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const FavScreen(),
+        ),
       ),
       GoRoute(
         path: '/search-screen',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final bool isAdmin =
               (state.extra is bool) ? state.extra as bool : false;
-          return SearchScreen(
-            isAdmin: isAdmin,
+          return transitionPage(
+            state: state,
+            child: SearchScreen(
+              isAdmin: isAdmin,
+            ),
           );
         },
       ),
       GoRoute(
         path: '/checkout-screen',
-        builder: (context, state) {
-          return const CheckoutScreen();
+        pageBuilder: (context, state) {
+          return transitionPage(
+            state: state,
+            child: const CheckoutScreen(),
+          );
         },
       ),
       GoRoute(
         path: '/profile-setup',
-        builder: (context, state) => const ProfileSetupView(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const ProfileSetupView(),
+        ),
       ),
       GoRoute(
         path: '/adminDashboard',
@@ -205,15 +253,22 @@ GoRouter createRouter(AuthProvider authProvider) {
       ),
       GoRoute(
         path: '/forgot-password',
-        builder: (context, state) => const ForgotPasswordScreen(),
+        pageBuilder: (context, state) => transitionPage(
+          state: state,
+          child: const ForgotPasswordScreen(),
+        ),
       ),
       GoRoute(
-          path: '/webview',
-          builder: (context, state) {
-            final String url =
-                (state.extra is String) ? state.extra as String : "";
-            return WebviewScreen(url: url);
-          }),
+        path: '/webview',
+        pageBuilder: (context, state) {
+          final String url =
+              (state.extra is String) ? state.extra as String : "";
+          return transitionPage(
+            state: state,
+            child: WebviewScreen(url: url),
+          );
+        },
+      ),
 
       // ---------------------ADMIN SIDE--------------------------
 
@@ -296,5 +351,22 @@ GoRouter createRouter(AuthProvider authProvider) {
         builder: (context, state) => const AdminStateSalesTaxScreen(),
       ),
     ],
+  );
+}
+
+CustomTransitionPage transitionPage({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage(
+    key: state.pageKey,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurveTween(curve: Curves.easeInOut).animate(animation),
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 300),
   );
 }

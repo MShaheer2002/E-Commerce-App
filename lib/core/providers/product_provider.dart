@@ -39,7 +39,7 @@ class ProductProvider with ChangeNotifier {
   void listenToProducts() {
     _db
         .collection('products')
-        .orderBy('createdAt', descending: true)
+        .orderBy('createdAt', descending: true).limit(10)
         .snapshots()
         .listen((snapshot) {
       _products =

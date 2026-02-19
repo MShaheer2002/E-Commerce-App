@@ -1,2 +1,7 @@
 {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "dart.imports.sort_on_save": true
 }
